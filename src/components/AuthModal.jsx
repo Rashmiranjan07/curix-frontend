@@ -49,7 +49,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
 
     try {
       if (activeRole === 'PATIENT' && isRegisterMode) {
-        // 1. Submit Registration to POST /api/v1/auth/register
+        // Registration flow for patient
         await registerPatient({
           email: formData.email.trim(),
           password: formData.password,
@@ -62,30 +62,28 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
           emergencyContact: formData.emergencyContact.trim(),
         });
 
-        // 2. Automatically log in with the new credentials
+        // Attempt automatic login enforcing PATIENT role
         try {
-          await login(formData.email.trim(), formData.password);
+          await login(formData.email.trim(), formData.password, 'PATIENT');
           onClose();
         } catch {
-          // Fallback: prompt manual sign-in if auto-login is blocked
-          setSuccessMsg('Account registered successfully in database! Please sign in below.');
+          setSuccessMsg('Account registered successfully! Please sign in below.');
           setIsRegisterMode(false);
         }
       } else {
-        // Direct Sign In to POST /api/v1/auth/login
-        await login(formData.email.trim(), formData.password);
+        // Direct Sign In with activeRole enforcement
+        await login(formData.email.trim(), formData.password, activeRole);
         onClose();
       }
     } catch (err) {
       console.error("Auth action failed:", err);
-      const serverMessage = err.response?.data?.message || err.response?.data?.error || err.message || '';
+      const serverMessage = 
+        err.message || 
+        err.response?.data?.message || 
+        err.response?.data?.error || 
+        'Authentication failed. Please verify your credentials.';
 
-      if (serverMessage.toLowerCase().includes('already') || serverMessage.toLowerCase().includes('exists')) {
-        setError('This email is already registered. Switched to Sign In mode.');
-        setIsRegisterMode(false);
-      } else {
-        setError(serverMessage || 'Authentication failed. Please verify your email and password.');
-      }
+      setError(serverMessage);
     } finally {
       setLoading(false);
     }
@@ -114,16 +112,16 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
         {/* Header */}
         <div className="mb-7 text-center">
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-[#1e3a5f]">
-            {isRegisterMode && activeRole === 'PATIENT' ? 'Create Patient Account' : 'Sign In to Curix'}
+            {isRegisterMode && activeRole === 'PATIENT' ? 'Create Patient Account' : `Sign In as ${activeRole.charAt(0) + activeRole.slice(1).toLowerCase()}`}
           </h2>
           <p className="text-xs text-slate-500 font-medium mt-1.5">
             {isRegisterMode
               ? 'Fill in your details to create an account'
-              : `Access your ${activeRole.toLowerCase()} workspace`}
+              : `Access your verified ${activeRole.toLowerCase()} workspace`}
           </p>
         </div>
 
-        {/* Role Selector */}
+        {/* Role Selector Tabs */}
         <div className="flex p-1 bg-slate-100 rounded-full border border-slate-200 mb-6">
           {roles.map((r) => {
             const Icon = r.icon;
@@ -156,9 +154,9 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
 
         {/* Error Alert */}
         {error && (
-          <div className="flex items-center gap-2.5 p-3.5 mb-5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium">
-            <AlertCircle size={15} className="shrink-0 text-rose-600" />
-            <span>{error}</span>
+          <div className="flex items-start gap-2.5 p-3.5 mb-5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium">
+            <AlertCircle size={16} className="shrink-0 text-rose-600 mt-0.5" />
+            <span className="leading-relaxed">{error}</span>
           </div>
         )}
 
@@ -177,7 +175,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                     placeholder="kiran"
                     value={formData.firstName}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-[#1e3a5f] placeholder:text-slate-400 focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/10 focus:outline-none transition-all"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-[#1e3a5f] placeholder:text-slate-400 focus:border-[#0ea5e9] focus:outline-none transition-all"
                   />
                 </div>
                 <div>
@@ -189,7 +187,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                     placeholder="Sahu"
                     value={formData.lastName}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-[#1e3a5f] placeholder:text-slate-400 focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/10 focus:outline-none transition-all"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-[#1e3a5f] placeholder:text-slate-400 focus:border-[#0ea5e9] focus:outline-none transition-all"
                   />
                 </div>
               </div>
@@ -205,7 +203,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                     placeholder="kiran@gmail.com"
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-[#1e3a5f] placeholder:text-slate-400 focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/10 focus:outline-none transition-all"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-[#1e3a5f] placeholder:text-slate-400 focus:border-[#0ea5e9] focus:outline-none transition-all"
                   />
                 </div>
                 <div>
@@ -219,7 +217,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                       placeholder="Password123"
                       value={formData.password}
                       onChange={handleChange}
-                      className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-[#1e3a5f] placeholder:text-slate-400 focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/10 focus:outline-none transition-all"
+                      className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-[#1e3a5f] placeholder:text-slate-400 focus:border-[#0ea5e9] focus:outline-none transition-all"
                     />
                     <button
                       type="button"
@@ -305,15 +303,17 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
             <>
               {/* Sign In Mode */}
               <div>
-                <label className="block text-xs font-semibold text-[#1e3a5f] mb-1">Email</label>
+                <label className="block text-xs font-semibold text-[#1e3a5f] mb-1">
+                  {activeRole} Email
+                </label>
                 <input
                   type="email"
                   name="email"
                   required
-                  placeholder="name@curix.com"
+                  placeholder={`name@curix-${activeRole.toLowerCase()}.com`}
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 text-sm text-[#1e3a5f] placeholder:text-slate-400 focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/10 focus:outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 text-sm text-[#1e3a5f] placeholder:text-slate-400 focus:border-[#0ea5e9] focus:outline-none transition-all"
                 />
               </div>
 
@@ -327,7 +327,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                     placeholder="••••••••"
                     value={formData.password}
                     onChange={handleChange}
-                    className="w-full pl-4 pr-11 py-3 rounded-xl bg-white border border-slate-200 text-sm text-[#1e3a5f] placeholder:text-slate-400 focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/10 focus:outline-none transition-all"
+                    className="w-full pl-4 pr-11 py-3 rounded-xl bg-white border border-slate-200 text-sm text-[#1e3a5f] placeholder:text-slate-400 focus:border-[#0ea5e9] focus:outline-none transition-all"
                   />
                   <button
                     type="button"
@@ -350,12 +350,12 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
             {loading ? (
               <>
                 <Loader2 size={16} className="animate-spin text-white" />
-                <span>Processing...</span>
+                <span>Validating {activeRole.toLowerCase()} credentials...</span>
               </>
             ) : (
               <>
                 <span>
-                  {isRegisterMode && activeRole === 'PATIENT' ? 'Register Patient Account' : 'Sign In'}
+                  {isRegisterMode && activeRole === 'PATIENT' ? 'Register Patient Account' : `Sign In as ${activeRole}`}
                 </span>
                 <ArrowRight size={16} />
               </>
@@ -363,7 +363,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
           </button>
         </form>
 
-        {/* Footer Toggle Link */}
+        {/* Footer Toggle */}
         {activeRole === 'PATIENT' ? (
           <div className="mt-6 pt-5 border-t border-slate-100 text-center text-xs text-slate-500">
             {isRegisterMode ? (
@@ -392,7 +392,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
           </div>
         ) : (
           <p className="mt-5 text-center text-[11px] text-slate-400">
-            Staff & administrative accounts are provisioned by hospital registry.
+            {activeRole} accounts must match the active portal tab to access the dashboard.
           </p>
         )}
 
