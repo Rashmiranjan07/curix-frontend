@@ -78,6 +78,8 @@ export const adminApi = {
   // Doctor Provisioning
   provisionDoctor: (payload) => 
     api.post('/admin/doctors', payload),
+  updateDoctor: (id, payload) => 
+    api.put(`/admin/doctors/${id}`, payload),
   getAllDoctors: () => 
     api.get('/doctors'),
 

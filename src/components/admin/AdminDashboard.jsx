@@ -4,7 +4,7 @@ import { adminApi } from '../../services/api';
 import { 
   Building2, Users, Stethoscope, DollarSign, Activity, 
   FileText, Shield, Plus, RefreshCw, AlertCircle, CheckCircle2, 
-  Loader2, X, Search, Calendar, ChevronRight, Hash, Clock
+  Loader2, X, Search, Calendar, ChevronRight, Hash, Clock, Edit3, Save
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -39,6 +39,22 @@ export default function AdminDashboard() {
     qualification: '',
     experienceYears: 3,
     consultationFee: 50.00,
+  });
+
+  // Doctor Edit Modal State
+  const [editingDoctor, setEditingDoctor] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editDoctorSaving, setEditDoctorSaving] = useState(false);
+  const [editDoctorForm, setEditDoctorForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    departmentId: '',
+    specialty: '',
+    qualification: '',
+    experienceYears: 0,
+    consultationFee: 50.00,
+    licenseNumber: ''
   });
 
   // 4. Audit Logs Data
@@ -117,6 +133,34 @@ export default function AdminDashboard() {
     }
   };
 
+  // Robust doctor name resolver
+  const getDoctorDisplayName = (doc) => {
+    if (!doc) return 'Attending Physician';
+    if (doc.firstName && doc.lastName) {
+      return `Dr. ${doc.firstName} ${doc.lastName}`;
+    }
+    if (doc.fullName) {
+      return doc.fullName.startsWith('Dr.') ? doc.fullName : `Dr. ${doc.fullName}`;
+    }
+    if (doc.doctorName) {
+      return doc.doctorName.startsWith('Dr.') ? doc.doctorName : `Dr. ${doc.doctorName}`;
+    }
+    if (doc.name) {
+      return doc.name.startsWith('Dr.') ? doc.name : `Dr. ${doc.name}`;
+    }
+    if (doc.user) {
+      if (doc.user.firstName && doc.user.lastName) {
+        return `Dr. ${doc.user.firstName} ${doc.user.lastName}`;
+      }
+      if (doc.user.name) {
+        return doc.user.name.startsWith('Dr.') ? doc.user.name : `Dr. ${doc.user.name}`;
+      }
+    }
+    if (doc.firstName) return `Dr. ${doc.firstName}`;
+    if (doc.email) return doc.email.split('@')[0];
+    return `Doctor #${doc.id}`;
+  };
+
   // Create Department (POST /api/v1/departments)
   const handleCreateDepartment = async (e) => {
     e.preventDefault();
@@ -188,6 +232,62 @@ export default function AdminDashboard() {
       setErrorNotice(err.response?.data?.message || err.response?.data?.error || 'Failed to provision doctor account.');
     } finally {
       setDoctorSaving(false);
+    }
+  };
+
+  // Open Edit Doctor Modal
+  const handleOpenEditDoctor = (doc) => {
+    setEditingDoctor(doc);
+    setEditDoctorForm({
+      firstName: doc.firstName || doc.user?.firstName || '',
+      lastName: doc.lastName || doc.user?.lastName || '',
+      email: doc.email || doc.user?.email || '',
+      departmentId: doc.departmentId || doc.department?.id || '',
+      specialty: doc.specialty || doc.specialization || '',
+      qualification: doc.qualification || '',
+      experienceYears: doc.experienceYears || 0,
+      consultationFee: doc.consultationFee !== undefined ? doc.consultationFee : 50.00,
+      licenseNumber: doc.licenseNumber || ''
+    });
+    setIsEditModalOpen(true);
+  };
+
+  // Save Doctor Edit (PUT /api/v1/admin/doctors/{id})
+  const handleSaveDoctorEdit = async (e) => {
+    e.preventDefault();
+    if (!editingDoctor) return;
+
+    setEditDoctorSaving(true);
+    setErrorNotice('');
+    setSuccessNotice('');
+
+    try {
+      const payload = {
+        firstName: editDoctorForm.firstName.trim(),
+        lastName: editDoctorForm.lastName.trim(),
+        email: editDoctorForm.email.trim(),
+        departmentId: Number(editDoctorForm.departmentId),
+        specialty: editDoctorForm.specialty.trim(),
+        qualification: editDoctorForm.qualification.trim(),
+        experienceYears: Number(editDoctorForm.experienceYears),
+        consultationFee: parseFloat(editDoctorForm.consultationFee),
+        licenseNumber: editDoctorForm.licenseNumber.trim(),
+      };
+
+      await adminApi.updateDoctor(editingDoctor.id, payload);
+      setSuccessNotice(`Doctor profile for Dr. ${payload.firstName} ${payload.lastName} updated successfully!`);
+      setIsEditModalOpen(false);
+      setEditingDoctor(null);
+      await fetchDoctors();
+    } catch (err) {
+      console.error("Doctor edit failed:", err);
+      setErrorNotice(
+        err.response?.data?.message || 
+        err.response?.data?.error || 
+        'Could not update doctor profile. Please ensure the update endpoint is active on the backend.'
+      );
+    } finally {
+      setEditDoctorSaving(false);
     }
   };
 
@@ -283,7 +383,6 @@ export default function AdminDashboard() {
         {/* TAB 1: ANALYTICS & METRICS */}
         {activeTab === 'analytics' && (
           <div className="space-y-6">
-            {/* Top KPI Metrics Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="p-5 rounded-3xl bg-white border border-sky-100 shadow-xs flex items-center justify-between">
                 <div>
@@ -334,9 +433,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Consultation Distribution & Volume Breakdowns */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* Status Counts */}
               <div className="p-6 rounded-3xl bg-white border border-sky-100 shadow-xs">
                 <h3 className="text-sm font-bold text-[#1e3a5f] uppercase tracking-wider mb-4 flex items-center gap-2">
                   <Activity size={16} className="text-[#0ea5e9]" />
@@ -374,7 +471,6 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* Department Workload Summary */}
               <div className="p-6 rounded-3xl bg-white border border-sky-100 shadow-xs">
                 <h3 className="text-sm font-bold text-[#1e3a5f] uppercase tracking-wider mb-4 flex items-center gap-2">
                   <Building2 size={16} className="text-[#0ea5e9]" />
@@ -459,7 +555,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* TAB 3: MEDICAL STAFF ONBOARDING */}
+        {/* TAB 3: MEDICAL STAFF ONBOARDING & EDITING */}
         {activeTab === 'doctors' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-2">
@@ -476,7 +572,7 @@ export default function AdminDashboard() {
             {doctors.length > 0 ? (
               <div className="divide-y divide-slate-100 bg-white rounded-3xl border border-sky-100 shadow-xs overflow-hidden">
                 {doctors.map((doc) => {
-                  const docDisplayName = doc.fullName || doc.doctorName || doc.name || (doc.user ? `Dr. ${doc.user.firstName} ${doc.user.lastName}` : `Doctor #${doc.id}`);
+                  const docDisplayName = getDoctorDisplayName(doc);
                   return (
                     <div key={doc.id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/50 transition">
                       <div className="flex items-start gap-4">
@@ -496,11 +592,22 @@ export default function AdminDashboard() {
                         </div>
                       </div>
 
-                      <div className="sm:text-right">
-                        <span className="text-[10px] text-slate-400 block font-medium">Consultation Fee</span>
-                        <span className="text-sm font-black text-[#1e3a5f]">
-                          ${doc.consultationFee !== undefined ? doc.consultationFee : '50.00'}
-                        </span>
+                      <div className="flex items-center gap-4 sm:text-right">
+                        <div>
+                          <span className="text-[10px] text-slate-400 block font-medium">Consultation Fee</span>
+                          <span className="text-sm font-black text-[#1e3a5f]">
+                            ${doc.consultationFee !== undefined ? doc.consultationFee : '50.00'}
+                          </span>
+                        </div>
+
+                        {/* Edit Doctor Profile Button */}
+                        <button
+                          onClick={() => handleOpenEditDoctor(doc)}
+                          className="flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-[#1e3a5f] hover:text-white text-slate-700 text-xs font-bold transition shadow-xs"
+                        >
+                          <Edit3 size={12} />
+                          <span>Edit</span>
+                        </button>
                       </div>
                     </div>
                   );
@@ -638,7 +745,7 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* MODAL 2: PROVISION DOCTOR (CreateDoctorRequest) */}
+      {/* MODAL 2: PROVISION DOCTOR */}
       {isDoctorModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1e3a5f]/40 backdrop-blur-sm">
           <div className="relative w-full max-w-2xl bg-white border border-sky-100 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
@@ -799,6 +906,140 @@ export default function AdminDashboard() {
                 >
                   {doctorSaving ? <Loader2 size={13} className="animate-spin" /> : <Plus size={14} />}
                   <span>Provision Physician Account</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: EDIT DOCTOR PROFILE */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1e3a5f]/40 backdrop-blur-sm">
+          <div className="relative w-full max-w-xl bg-white border border-sky-100 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
+            <button
+              onClick={() => setIsEditModalOpen(false)}
+              className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-100"
+            >
+              <X size={18} />
+            </button>
+
+            <h3 className="text-xl font-black text-[#1e3a5f] mb-1">Edit Physician Profile</h3>
+            <p className="text-xs text-slate-400 mb-5">Update clinical qualifications, department, and consultation fees.</p>
+
+            <form onSubmit={handleSaveDoctorEdit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">First Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editDoctorForm.firstName}
+                    onChange={(e) => setEditDoctorForm({ ...editDoctorForm, firstName: e.target.value })}
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-[#1e3a5f]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Last Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editDoctorForm.lastName}
+                    onChange={(e) => setEditDoctorForm({ ...editDoctorForm, lastName: e.target.value })}
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-[#1e3a5f]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Department *</label>
+                  <select
+                    required
+                    value={editDoctorForm.departmentId}
+                    onChange={(e) => setEditDoctorForm({ ...editDoctorForm, departmentId: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-[#1e3a5f]"
+                  >
+                    <option value="">-- Choose Department --</option>
+                    {departments.map((d) => (
+                      <option key={d.id} value={d.id}>{d.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Specialty *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editDoctorForm.specialty}
+                    onChange={(e) => setEditDoctorForm({ ...editDoctorForm, specialty: e.target.value })}
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-[#1e3a5f]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Qualification *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editDoctorForm.qualification}
+                    onChange={(e) => setEditDoctorForm({ ...editDoctorForm, qualification: e.target.value })}
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-[#1e3a5f]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">License Number</label>
+                  <input
+                    type="text"
+                    value={editDoctorForm.licenseNumber}
+                    onChange={(e) => setEditDoctorForm({ ...editDoctorForm, licenseNumber: e.target.value })}
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-[#1e3a5f]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Experience (Years)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={editDoctorForm.experienceYears}
+                    onChange={(e) => setEditDoctorForm({ ...editDoctorForm, experienceYears: e.target.value })}
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-[#1e3a5f]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Consultation Fee ($) *</label>
+                  <input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    required
+                    value={editDoctorForm.consultationFee}
+                    onChange={(e) => setEditDoctorForm({ ...editDoctorForm, consultationFee: e.target.value })}
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-[#1e3a5f]"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-3 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="px-4 py-2 rounded-full border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={editDoctorSaving}
+                  className="px-6 py-2.5 rounded-full bg-[#1e3a5f] hover:bg-[#284d7a] text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  {editDoctorSaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={14} />}
+                  <span>Save Changes</span>
                 </button>
               </div>
             </form>
