@@ -7,13 +7,13 @@ import PrescriptionModal from './PrescriptionModal';
 import { 
   Calendar, Stethoscope, Search, Clock, FileText, 
   XCircle, CheckCircle2, AlertCircle, Loader2, Filter, 
-  RefreshCw, User, Award, DollarSign
+  RefreshCw, User, Edit3, Save, X
 } from 'lucide-react';
 
 export default function PatientDashboard() {
   const { user } = useAuth();
 
-  const [activeTab, setActiveTab] = useState('browse'); // 'browse' | 'appointments' | 'prescriptions'
+  const [activeTab, setActiveTab] = useState('browse'); // 'browse' | 'appointments' | 'prescriptions' | 'profile'
   const [searchQuery, setSearchQuery] = useState('');
   const [departments, setDepartments] = useState([]);
   const [selectedDeptId, setSelectedDeptId] = useState('ALL');
@@ -23,9 +23,23 @@ export default function PatientDashboard() {
   const [appointments, setAppointments] = useState([]);
   const [prescriptions, setPrescriptions] = useState([]);
 
+  // Profile states
+  const [profile, setProfile] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileSuccess, setProfileSuccess] = useState('');
+  const [profileError, setProfileError] = useState('');
+  const [profileForm, setProfileForm] = useState({
+    firstName: '',
+    lastName: '',
+    phone: '',
+    bloodGroup: 'O+',
+    emergencyContact: '',
+  });
+
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
-  const [errorNotice, setErrorNotice] = useState('');
 
   // Modals
   const [bookingDoctor, setBookingDoctor] = useState(null);
@@ -33,11 +47,11 @@ export default function PatientDashboard() {
 
   useEffect(() => {
     loadAllPatientData();
+    fetchPatientProfile();
   }, []);
 
   const loadAllPatientData = async () => {
     setLoading(true);
-    setErrorNotice('');
     try {
       await Promise.all([
         fetchDepartmentsFromDb(),
@@ -45,62 +59,111 @@ export default function PatientDashboard() {
         fetchAppointmentsFromDb(),
         fetchPrescriptionsFromDb(),
       ]);
-    } catch (err) {
-      console.error("Dashboard initial load failed:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  // 1. Fetch clinical departments from MySQL
   const fetchDepartmentsFromDb = async () => {
     try {
       const res = await api.get('/departments');
       const list = res.data?.data || res.data;
       setDepartments(Array.isArray(list) ? list : []);
-    } catch (err) {
-      console.warn("Departments endpoint not loaded or empty:", err);
+    } catch {
       setDepartments([]);
     }
   };
 
-  // 2. Fetch doctors directly from GET /api/v1/doctors
   const fetchDoctorsFromDb = async () => {
     try {
       const res = await patientApi.getDoctors();
       const list = res.data?.data || res.data;
       setDoctors(Array.isArray(list) ? list : []);
-    } catch (err) {
-      console.error("Failed to load doctors from backend:", err);
+    } catch {
       setDoctors([]);
     }
   };
 
-  // 3. Fetch patient appointments from GET /api/v1/appointments/my-appointments
   const fetchAppointmentsFromDb = async () => {
     try {
       const res = await patientApi.getMyAppointments();
       const list = res.data?.data || res.data;
       setAppointments(Array.isArray(list) ? list : []);
-    } catch (err) {
-      console.error("Failed to load appointments:", err);
+    } catch {
       setAppointments([]);
     }
   };
 
-  // 4. Fetch patient prescriptions from GET /api/v1/prescriptions/my-prescriptions
   const fetchPrescriptionsFromDb = async () => {
     try {
       const res = await patientApi.getMyPrescriptions();
       const list = res.data?.data || res.data;
       setPrescriptions(Array.isArray(list) ? list : []);
-    } catch (err) {
-      console.error("Failed to load prescriptions:", err);
+    } catch {
       setPrescriptions([]);
     }
   };
 
-  // Cancel appointment via PUT /api/v1/appointments/{id}/cancel
+  // GET /api/v1/patient/profile
+  const fetchPatientProfile = async () => {
+    setProfileLoading(true);
+    try {
+      const res = await patientApi.getMyProfile();
+      const data = res.data?.data || res.data;
+      if (data) {
+        setProfile(data);
+        setProfileForm({
+          firstName: data.firstName || '',
+          lastName: data.lastName || '',
+          phone: data.phone || data.user?.phone || '',
+          bloodGroup: data.bloodGroup || 'O+',
+          emergencyContact: data.emergencyContact || '',
+        });
+      }
+    } catch (err) {
+      console.warn("Could not load patient profile:", err);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  // PUT /api/v1/patient/profile (Mapped to UpdatePatientProfileRequest)
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setProfileSaving(true);
+    setProfileSuccess('');
+    setProfileError('');
+
+    try {
+      const payload = {
+        firstName: profileForm.firstName.trim(),
+        lastName: profileForm.lastName.trim(),
+        phone: profileForm.phone.trim(),
+        bloodGroup: profileForm.bloodGroup,
+        emergencyContact: profileForm.emergencyContact ? profileForm.emergencyContact.trim() : '',
+      };
+
+      const res = await patientApi.updateMyProfile(payload);
+      const updated = res.data?.data || res.data;
+      if (updated) {
+        setProfile(updated);
+      }
+      setProfileSuccess('Profile updated successfully in hospital records!');
+      setIsEditingProfile(false);
+      fetchPatientProfile();
+    } catch (err) {
+      console.error("Profile update failed:", err);
+      setProfileError(
+        err.response?.data?.message || 
+        err.response?.data?.error || 
+        'Failed to update profile. Please verify your phone number format.'
+      );
+    } finally {
+      setProfileSaving(false);
+    }
+  };
+
+  // PUT /api/v1/appointments/{id}/cancel
   const handleCancelAppointment = async (id) => {
     const reason = window.prompt(
       'Please state a reason for cancelling this appointment (optional):', 
@@ -119,48 +182,42 @@ export default function PatientDashboard() {
     }
   };
 
-  // Robust doctor name resolver that checks all backend response patterns
+  // GET /api/v1/prescriptions/appointment/{appointmentId}
+  const handleViewPrescriptionForAppointment = async (appointmentId) => {
+    try {
+      const res = await patientApi.getPrescriptionByAppointment(appointmentId);
+      const rxData = res.data?.data || res.data;
+      if (rxData) {
+        setSelectedPrescription(rxData);
+      } else {
+        alert("No prescription record found for this appointment.");
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || "Could not retrieve prescription for this appointment.");
+    }
+  };
+
   const getDoctorDisplayName = (doc) => {
     if (!doc) return 'Attending Physician';
-    if (doc.fullName) {
-      return doc.fullName.startsWith('Dr.') ? doc.fullName : `Dr. ${doc.fullName}`;
-    }
-    if (doc.doctorName) {
-      return doc.doctorName.startsWith('Dr.') ? doc.doctorName : `Dr. ${doc.doctorName}`;
-    }
-    if (doc.firstName && doc.lastName) {
-      return `Dr. ${doc.firstName} ${doc.lastName}`;
-    }
-    if (doc.name) {
-      return doc.name.startsWith('Dr.') ? doc.name : `Dr. ${doc.name}`;
-    }
+    if (doc.fullName) return doc.fullName.startsWith('Dr.') ? doc.fullName : `Dr. ${doc.fullName}`;
+    if (doc.doctorName) return doc.doctorName.startsWith('Dr.') ? doc.doctorName : `Dr. ${doc.doctorName}`;
+    if (doc.firstName && doc.lastName) return `Dr. ${doc.firstName} ${doc.lastName}`;
+    if (doc.name) return doc.name.startsWith('Dr.') ? doc.name : `Dr. ${doc.name}`;
     if (doc.user) {
-      if (doc.user.firstName && doc.user.lastName) {
-        return `Dr. ${doc.user.firstName} ${doc.user.lastName}`;
-      }
-      if (doc.user.name) {
-        return doc.user.name.startsWith('Dr.') ? doc.user.name : `Dr. ${doc.user.name}`;
-      }
+      if (doc.user.firstName && doc.user.lastName) return `Dr. ${doc.user.firstName} ${doc.user.lastName}`;
+      if (doc.user.name) return doc.user.name.startsWith('Dr.') ? doc.user.name : `Dr. ${doc.user.name}`;
     }
     return `Doctor #${doc.id || doc.doctorId || ''}`;
   };
 
-  // Doctor name resolver for appointments list
   const getAppointmentDoctorName = (apt) => {
     if (!apt) return 'Attending Physician';
-    if (apt.doctorName) {
-      return apt.doctorName.startsWith('Dr.') ? apt.doctorName : `Dr. ${apt.doctorName}`;
-    }
-    if (apt.doctorFullName) {
-      return apt.doctorFullName.startsWith('Dr.') ? apt.doctorFullName : `Dr. ${apt.doctorFullName}`;
-    }
-    if (apt.doctor) {
-      return getDoctorDisplayName(apt.doctor);
-    }
+    if (apt.doctorName) return apt.doctorName.startsWith('Dr.') ? apt.doctorName : `Dr. ${apt.doctorName}`;
+    if (apt.doctorFullName) return apt.doctorFullName.startsWith('Dr.') ? apt.doctorFullName : `Dr. ${apt.doctorFullName}`;
+    if (apt.doctor) return getDoctorDisplayName(apt.doctor);
     return `Doctor #${apt.doctorId || ''}`;
   };
 
-  // Filter real doctors based on search & department
   const filteredDoctors = doctors.filter((doc) => {
     const name = getDoctorDisplayName(doc).toLowerCase();
     const specialty = (doc.specialty || doc.specialization || '').toLowerCase();
@@ -193,14 +250,13 @@ export default function PatientDashboard() {
               </span>
             </div>
             <h1 className="text-3xl font-black text-[#1e3a5f]">
-              Welcome back, {user?.name || user?.email}
+              Welcome back, {profile?.firstName ? `${profile.firstName} ${profile.lastName}` : (user?.name || user?.email)}
             </h1>
             <p className="text-slate-500 text-xs sm:text-sm mt-0.5">
-              Live consultation scheduling, electronic prescription archives, and appointment tracking.
+              Live consultation scheduling, electronic prescription archives, and personal health records.
             </p>
           </div>
 
-          {/* Quick Metrics from MySQL */}
           <div className="flex items-center gap-3">
             <div className="px-5 py-2.5 rounded-2xl bg-white border border-sky-100 shadow-xs text-center">
               <span className="text-[10px] text-slate-400 block font-bold uppercase tracking-wider">Appointments</span>
@@ -214,44 +270,47 @@ export default function PatientDashboard() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-2 p-1 bg-white/80 backdrop-blur-md rounded-full border border-sky-100 mb-8 max-w-md shadow-xs">
+        <div className="flex items-center gap-2 p-1 bg-white/80 backdrop-blur-md rounded-full border border-sky-100 mb-8 max-w-xl shadow-xs overflow-x-auto">
           <button
             onClick={() => setActiveTab('browse')}
-            className={`flex-1 py-2 px-4 rounded-full text-xs font-bold transition-all ${
-              activeTab === 'browse'
-                ? 'bg-[#1e3a5f] text-white shadow-xs'
-                : 'text-slate-600 hover:text-[#1e3a5f]'
+            className={`flex-1 py-2 px-4 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
+              activeTab === 'browse' ? 'bg-[#1e3a5f] text-white shadow-xs' : 'text-slate-600 hover:text-[#1e3a5f]'
             }`}
           >
             Find & Book Doctor
           </button>
           <button
             onClick={() => setActiveTab('appointments')}
-            className={`flex-1 py-2 px-4 rounded-full text-xs font-bold transition-all ${
-              activeTab === 'appointments'
-                ? 'bg-[#1e3a5f] text-white shadow-xs'
-                : 'text-slate-600 hover:text-[#1e3a5f]'
+            className={`flex-1 py-2 px-4 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
+              activeTab === 'appointments' ? 'bg-[#1e3a5f] text-white shadow-xs' : 'text-slate-600 hover:text-[#1e3a5f]'
             }`}
           >
             My Appointments
           </button>
           <button
             onClick={() => setActiveTab('prescriptions')}
-            className={`flex-1 py-2 px-4 rounded-full text-xs font-bold transition-all ${
-              activeTab === 'prescriptions'
-                ? 'bg-[#1e3a5f] text-white shadow-xs'
-                : 'text-slate-600 hover:text-[#1e3a5f]'
+            className={`flex-1 py-2 px-4 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
+              activeTab === 'prescriptions' ? 'bg-[#1e3a5f] text-white shadow-xs' : 'text-slate-600 hover:text-[#1e3a5f]'
             }`}
           >
             Prescriptions
           </button>
+          <button
+            onClick={() => {
+              setActiveTab('profile');
+              fetchPatientProfile();
+            }}
+            className={`flex-1 py-2 px-4 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
+              activeTab === 'profile' ? 'bg-[#1e3a5f] text-white shadow-xs' : 'text-slate-600 hover:text-[#1e3a5f]'
+            }`}
+          >
+            My Profile
+          </button>
         </div>
 
-        {/* TAB 1: BROWSE REAL DOCTORS & SCHEDULE */}
+        {/* TAB 1: BROWSE REAL DOCTORS */}
         {activeTab === 'browse' && (
           <div className="space-y-6">
-            
-            {/* Search & Department Filters */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center bg-white p-4 rounded-3xl border border-sky-100 shadow-xs">
               <div className="md:col-span-7 relative">
                 <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -281,7 +340,6 @@ export default function PatientDashboard() {
               </div>
             </div>
 
-            {/* Doctors Grid from MySQL */}
             {loading ? (
               <div className="p-16 text-center bg-white rounded-3xl border border-sky-100 shadow-xs">
                 <Loader2 size={24} className="animate-spin text-[#0ea5e9] mx-auto mb-3" />
@@ -422,8 +480,18 @@ export default function PatientDashboard() {
                         </div>
                       </div>
 
-                      {/* Cancel Action */}
-                      <div>
+                      {/* Action Buttons: Cancel and Direct View Rx */}
+                      <div className="flex items-center gap-2">
+                        {isCompleted && (
+                          <button
+                            onClick={() => handleViewPrescriptionForAppointment(apt.id)}
+                            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-sky-50 hover:bg-sky-100 text-[#0ea5e9] border border-sky-200 text-xs font-bold transition shadow-xs"
+                          >
+                            <FileText size={13} />
+                            <span>View Rx</span>
+                          </button>
+                        )}
+
                         {!isCancelled && !isCompleted && (
                           <button
                             onClick={() => handleCancelAppointment(apt.id)}
@@ -511,6 +579,208 @@ export default function PatientDashboard() {
                 <FileText size={36} className="mx-auto text-slate-300 mb-2" />
                 <p className="text-sm font-bold text-[#1e3a5f]">No electronic prescriptions on record</p>
                 <p className="text-xs text-slate-400 mt-1">Prescriptions issued by your physician during consultations will appear here automatically.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 4: MY MEDICAL PROFILE (GET & PUT /api/v1/patient/profile) */}
+        {activeTab === 'profile' && (
+          <div className="max-w-3xl space-y-6">
+            {profileSuccess && (
+              <div className="flex items-center gap-2.5 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
+                <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+                <span>{profileSuccess}</span>
+              </div>
+            )}
+
+            {profileError && (
+              <div className="flex items-center gap-2.5 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold">
+                <AlertCircle size={16} className="text-rose-600 shrink-0" />
+                <span>{profileError}</span>
+              </div>
+            )}
+
+            {profileLoading ? (
+              <div className="p-16 text-center bg-white rounded-3xl border border-sky-100 shadow-xs">
+                <Loader2 size={24} className="animate-spin text-[#0ea5e9] mx-auto mb-3" />
+                <p className="text-xs font-bold text-slate-400">Loading your health profile from database...</p>
+              </div>
+            ) : isEditingProfile ? (
+              /* PROFILE EDIT MODE (Submits UpdatePatientProfileRequest) */
+              <div className="bg-white rounded-3xl border border-sky-100 p-6 sm:p-8 shadow-xs">
+                <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+                  <div>
+                    <h3 className="text-lg font-bold text-[#1e3a5f]">Edit Patient Medical Profile</h3>
+                    <p className="text-xs text-slate-400">Update your personal and emergency contact details</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingProfile(false)}
+                    className="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+
+                <form onSubmit={handleUpdateProfile} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-[#1e3a5f] mb-1">First Name *</label>
+                      <input
+                        type="text"
+                        required
+                        value={profileForm.firstName}
+                        onChange={(e) => setProfileForm({ ...profileForm, firstName: e.target.value })}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs text-[#1e3a5f] font-semibold focus:border-[#0ea5e9] focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Last Name *</label>
+                      <input
+                        type="text"
+                        required
+                        value={profileForm.lastName}
+                        onChange={(e) => setProfileForm({ ...profileForm, lastName: e.target.value })}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs text-[#1e3a5f] font-semibold focus:border-[#0ea5e9] focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Phone Number *</label>
+                      <input
+                        type="tel"
+                        required
+                        placeholder="+91 9876543210"
+                        value={profileForm.phone}
+                        onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs text-[#1e3a5f] font-semibold focus:border-[#0ea5e9] focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Blood Group</label>
+                      <select
+                        value={profileForm.bloodGroup}
+                        onChange={(e) => setProfileForm({ ...profileForm, bloodGroup: e.target.value })}
+                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-[#1e3a5f] focus:border-[#0ea5e9] focus:outline-none"
+                      >
+                        {['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'].map(bg => (
+                          <option key={bg} value={bg}>{bg}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Emergency Contact Number</label>
+                    <input
+                      type="tel"
+                      placeholder="+91 9123456789"
+                      value={profileForm.emergencyContact}
+                      onChange={(e) => setProfileForm({ ...profileForm, emergencyContact: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs text-[#1e3a5f] font-semibold focus:border-[#0ea5e9] focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="pt-3 flex items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingProfile(false)}
+                      className="px-4 py-2 rounded-full border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={profileSaving}
+                      className="px-6 py-2.5 rounded-full bg-[#1e3a5f] hover:bg-[#284d7a] text-white text-xs font-bold shadow-md transition-all flex items-center gap-1.5 disabled:opacity-50"
+                    >
+                      {profileSaving ? (
+                        <>
+                          <Loader2 size={13} className="animate-spin" />
+                          <span>Saving Changes...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Save size={13} />
+                          <span>Save Changes</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            ) : (
+              /* PROFILE VIEW MODE */
+              <div className="bg-white rounded-3xl border border-sky-100 p-6 sm:p-8 shadow-xs">
+                <div className="flex items-center justify-between pb-6 border-b border-slate-100">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center text-[#1e3a5f] font-bold">
+                      <User size={28} className="text-[#0ea5e9]" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-black text-[#1e3a5f]">
+                        {profile?.firstName ? `${profile.firstName} ${profile.lastName}` : (user?.name || user?.email)}
+                      </h3>
+                      <p className="text-xs text-slate-400 font-medium">
+                        Patient ID: <span className="font-mono text-[#0ea5e9]">#{profile?.id || user?.id}</span>
+                        {profile?.patientNumber && ` · Reg: ${profile.patientNumber}`}
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setIsEditingProfile(true);
+                      setProfileSuccess('');
+                      setProfileError('');
+                    }}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#1e3a5f] hover:bg-[#284d7a] text-white text-xs font-bold shadow-xs transition"
+                  >
+                    <Edit3 size={13} />
+                    <span>Edit Profile</span>
+                  </button>
+                </div>
+
+                {/* Profile Grid Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+                  <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-100">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Email Address</span>
+                    <span className="text-xs font-bold text-[#1e3a5f] mt-1 block truncate">
+                      {profile?.email || profile?.user?.email || user?.email}
+                    </span>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-100">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Primary Phone</span>
+                    <span className="text-xs font-bold text-[#1e3a5f] mt-1 block">
+                      {profile?.phone || profile?.user?.phone || 'Not recorded'}
+                    </span>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-rose-50/60 border border-rose-100">
+                    <span className="text-[10px] font-bold text-rose-600 uppercase tracking-wider block">Blood Group</span>
+                    <span className="text-sm font-black text-rose-900 mt-1 block">
+                      🩸 {profile?.bloodGroup || 'O+'}
+                    </span>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-100">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Gender & DOB</span>
+                    <span className="text-xs font-bold text-[#1e3a5f] mt-1 block">
+                      {profile?.gender || 'N/A'} · {profile?.dateOfBirth || 'Recorded on registration'}
+                    </span>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-sky-50/60 border border-sky-100 sm:col-span-2">
+                    <span className="text-[10px] font-bold text-[#0ea5e9] uppercase tracking-wider block">Emergency Contact</span>
+                    <span className="text-xs font-extrabold text-[#1e3a5f] mt-1 block">
+                      {profile?.emergencyContact || 'Not recorded'}
+                    </span>
+                  </div>
+                </div>
               </div>
             )}
           </div>

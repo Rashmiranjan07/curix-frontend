@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { doctorApi } from '../../services/api';
 import api from '../../services/api';
+import PrescriptionModal from '../patient/PrescriptionModal';
 import { 
   Stethoscope, Calendar, Clock, CheckCircle2, 
   XCircle, FileText, User, RefreshCw, AlertCircle, 
-  Loader2, Pill, Plus, Trash2, HeartPulse, AlertTriangle
+  Loader2, Pill, Plus, Trash2, HeartPulse, AlertTriangle, 
+  Search, History, Printer
 } from 'lucide-react';
 
 export default function DoctorDashboard() {
@@ -13,16 +15,21 @@ export default function DoctorDashboard() {
 
   const [profile, setProfile] = useState(null);
   const [schedule, setSchedule] = useState([]);
+  const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingHistory, setLoadingHistory] = useState(false);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('queue'); // 'queue' | 'prescribe'
+  const [activeTab, setActiveTab] = useState('queue'); // 'queue' | 'prescribe' | 'history'
 
   // Selected Consultation & Associated Patient Data
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [patientDetails, setPatientDetails] = useState(null);
-  const [loadingPatient, setLoadingPatient] = useState(false);
 
-  // Prescription Form State mapped strictly to CreatePrescriptionRequest & PrescriptionItemDto
+  // Prescription Modal Viewer for History
+  const [viewingPrescription, setViewingPrescription] = useState(null);
+  const [searchHistoryQuery, setSearchHistoryQuery] = useState('');
+
+  // Prescription Form State
   const [diagnosis, setDiagnosis] = useState('');
   const [notes, setNotes] = useState('');
   const [medicines, setMedicines] = useState([
@@ -47,7 +54,7 @@ export default function DoctorDashboard() {
         console.warn("Could not load doctor profile:", err);
       }
 
-      // Calls GET /api/v1/appointments/doctor/my-schedule
+      // GET /api/v1/appointments/doctor/my-schedule
       const schedRes = await doctorApi.getMySchedule();
       const list = schedRes.data?.data || schedRes.data;
       setSchedule(Array.isArray(list) ? list : []);
@@ -60,23 +67,32 @@ export default function DoctorDashboard() {
     }
   };
 
-  // When doctor selects an appointment, fetch additional patient profile info if available
+  const fetchPrescriptionHistory = async () => {
+    setLoadingHistory(true);
+    try {
+      // Calls GET /api/v1/prescriptions/doctor-history
+      const res = await doctorApi.getDoctorPrescriptionHistory();
+      const list = res.data?.data || res.data;
+      setHistory(Array.isArray(list) ? list : []);
+    } catch (err) {
+      console.error("Failed to load prescription history:", err);
+      setHistory([]);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
   const handleSelectAppointment = async (apt) => {
     setSelectedAppointment(apt);
     setPatientDetails(null);
     if (!apt || !apt.patientId) return;
 
-    setLoadingPatient(true);
     try {
-      // Try to read profile using patient ID or user ID
       const res = await api.get(`/patients/${apt.patientId}`);
       const data = res.data?.data || res.data;
       if (data) setPatientDetails(data);
     } catch {
-      // If no separate patient endpoint is exposed to doctor, fallback gracefully to appointment response data
       setPatientDetails(null);
-    } finally {
-      setLoadingPatient(false);
     }
   };
 
@@ -179,8 +195,6 @@ export default function DoctorDashboard() {
     setPrescribing(true);
 
     try {
-      // Matches CreatePrescriptionRequest.java exactly:
-      // Long appointmentId, String diagnosis, String notes, List<PrescriptionItemDto> items
       const payload = {
         appointmentId: Number(selectedAppointment.id),
         diagnosis: diagnosis.trim(),
@@ -200,6 +214,7 @@ export default function DoctorDashboard() {
       setPatientDetails(null);
 
       fetchDoctorData();
+      if (activeTab === 'history') fetchPrescriptionHistory();
     } catch (err) {
       console.error("Prescription error response:", err.response?.data);
       const backendMsg = 
@@ -215,6 +230,13 @@ export default function DoctorDashboard() {
   const doctorDisplayName = 
     profile?.name || 
     (profile?.user ? `Dr. ${profile.user.firstName} ${profile.user.lastName}` : user?.name || user?.email);
+
+  const filteredHistory = history.filter((p) => {
+    const diag = (p.diagnosis || '').toLowerCase();
+    const patName = (p.patientName || '').toLowerCase();
+    const q = searchHistoryQuery.toLowerCase();
+    return diag.includes(q) || patName.includes(q) || String(p.id).includes(q);
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#eaf4fb] via-[#f3f9fd] to-white pt-24 pb-16 text-[#1e3a5f]">
@@ -232,17 +254,20 @@ export default function DoctorDashboard() {
               {doctorDisplayName}
             </h1>
             <p className="text-slate-500 text-xs sm:text-sm mt-0.5">
-              Specialty: <strong>{profile?.specialty || profile?.specialization || 'Clinical Specialist'}</strong> · Roster Active
+              Specialty: <strong>{profile?.specialty || profile?.specialization || 'Clinical Specialist'}</strong> · Fee: <strong>${profile?.consultationFee || '50.00'}</strong>
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <button
-              onClick={fetchDoctorData}
+              onClick={() => {
+                fetchDoctorData();
+                if (activeTab === 'history') fetchPrescriptionHistory();
+              }}
               className="flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-sky-100 text-xs font-bold text-[#1e3a5f] shadow-xs hover:bg-slate-50 transition"
             >
               <RefreshCw size={14} className="text-[#0ea5e9]" />
-              <span>Refresh Queue</span>
+              <span>Refresh</span>
             </button>
             <div className="px-5 py-2.5 rounded-2xl bg-white border border-sky-100 shadow-xs text-center">
               <span className="text-[10px] text-slate-400 block font-bold uppercase tracking-wider">Queue</span>
@@ -259,7 +284,7 @@ export default function DoctorDashboard() {
         )}
 
         {/* Tab Controls */}
-        <div className="flex items-center gap-2 p-1 bg-white/80 backdrop-blur-md rounded-full border border-sky-100 mb-8 max-w-sm shadow-xs">
+        <div className="flex items-center gap-2 p-1 bg-white/80 backdrop-blur-md rounded-full border border-sky-100 mb-8 max-w-lg shadow-xs">
           <button
             onClick={() => setActiveTab('queue')}
             className={`flex-1 py-2 px-4 rounded-full text-xs font-bold transition-all ${
@@ -275,6 +300,17 @@ export default function DoctorDashboard() {
             }`}
           >
             Review & Prescribe
+          </button>
+          <button
+            onClick={() => {
+              setActiveTab('history');
+              fetchPrescriptionHistory();
+            }}
+            className={`flex-1 py-2 px-4 rounded-full text-xs font-bold transition-all ${
+              activeTab === 'history' ? 'bg-[#1e3a5f] text-white shadow-xs' : 'text-slate-600 hover:text-[#1e3a5f]'
+            }`}
+          >
+            Rx Archives
           </button>
         </div>
 
@@ -450,7 +486,6 @@ export default function DoctorDashboard() {
                     </div>
                   </div>
 
-                  {/* Blood Group Badge */}
                   <div className="flex items-center gap-2">
                     <div className="px-4 py-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-black flex items-center gap-2 shadow-xs">
                       <span className="text-rose-600">🩸 Blood Group:</span>
@@ -461,7 +496,6 @@ export default function DoctorDashboard() {
                   </div>
                 </div>
 
-                {/* Patient Attributes Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 text-xs">
                   <div className="p-3 rounded-xl bg-white/90 border border-sky-100">
                     <span className="text-slate-400 block font-bold text-[10px] uppercase">Gender</span>
@@ -494,7 +528,6 @@ export default function DoctorDashboard() {
                   </div>
                 </div>
 
-                {/* Stated Reason For Consultation */}
                 <div className="mt-3 p-3 rounded-xl bg-white/90 border border-sky-100 flex items-start gap-2">
                   <AlertTriangle size={15} className="text-amber-500 shrink-0 mt-0.5" />
                   <div className="text-xs">
@@ -509,7 +542,6 @@ export default function DoctorDashboard() {
 
             {/* PRESCRIPTION FORM */}
             <form onSubmit={handleCreatePrescription} className="space-y-6">
-              {/* Diagnosis */}
               <div>
                 <label className="block text-xs font-bold text-[#1e3a5f] mb-1.5">
                   Clinical Diagnosis * (max 255 chars)
@@ -525,7 +557,6 @@ export default function DoctorDashboard() {
                 />
               </div>
 
-              {/* Medication Line Items */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-xs font-bold text-[#1e3a5f]">
@@ -612,7 +643,6 @@ export default function DoctorDashboard() {
                 </div>
               </div>
 
-              {/* Notes */}
               <div>
                 <label className="block text-xs font-bold text-[#1e3a5f] mb-1.5">
                   Doctor Notes & Advice (max 2000 chars)
@@ -648,7 +678,108 @@ export default function DoctorDashboard() {
           </div>
         )}
 
+        {/* TAB 3: RX ARCHIVES (PRESCRIPTION HISTORY) */}
+        {activeTab === 'history' && (
+          <div className="space-y-6">
+            <div className="bg-white p-4 rounded-3xl border border-sky-100 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="relative flex-1">
+                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search past prescriptions by patient name, diagnosis, or Rx ID..."
+                  value={searchHistoryQuery}
+                  onChange={(e) => setSearchHistoryQuery(e.target.value)}
+                  className="w-full pl-11 pr-4 py-2.5 rounded-full bg-slate-50 border border-slate-200 text-xs text-[#1e3a5f] focus:outline-none"
+                />
+              </div>
+
+              <button
+                onClick={fetchPrescriptionHistory}
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-sky-50 text-[#0ea5e9] text-xs font-bold hover:bg-sky-100 transition self-start sm:self-auto"
+              >
+                <RefreshCw size={13} />
+                <span>Refresh Archives</span>
+              </button>
+            </div>
+
+            {loadingHistory ? (
+              <div className="p-16 text-center bg-white rounded-3xl border border-sky-100 shadow-xs">
+                <Loader2 size={24} className="animate-spin text-[#0ea5e9] mx-auto mb-3" />
+                <p className="text-xs font-bold text-slate-400">Loading prescription archives from database...</p>
+              </div>
+            ) : filteredHistory.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {filteredHistory.map((p) => (
+                  <div
+                    key={p.id}
+                    className="p-5 rounded-3xl bg-white border border-sky-100 hover:border-sky-300 shadow-xs transition-all flex flex-col justify-between group"
+                  >
+                    <div>
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-100 text-[#0ea5e9] flex items-center justify-center font-bold">
+                            <FileText size={20} />
+                          </div>
+                          <div>
+                            <span className="text-[11px] font-mono font-bold text-[#0ea5e9]">
+                              RX-#{p.id}
+                            </span>
+                            <h4 className="text-sm font-bold text-[#1e3a5f]">
+                              {p.patientName || `Patient #${p.patientId}`}
+                            </h4>
+                          </div>
+                        </div>
+
+                        <span className="text-[10px] font-medium text-slate-400">
+                          {p.createdAt ? new Date(p.createdAt).toLocaleDateString() : 'Recorded'}
+                        </span>
+                      </div>
+
+                      <div className="p-3 rounded-2xl bg-slate-50/70 border border-slate-100 mb-3 text-xs">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase block">Diagnosis:</span>
+                        <p className="font-bold text-[#1e3a5f] truncate mt-0.5">
+                          {p.diagnosis || 'Clinical Prescription'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                      <span className="text-[11px] text-slate-400 font-medium">
+                        {(p.items || p.prescriptionItems || []).length} Medications Prescribed
+                      </span>
+                      <button
+                        onClick={() => setViewingPrescription(p)}
+                        className="px-4 py-1.5 rounded-full bg-[#1e3a5f] hover:bg-[#284d7a] text-white text-xs font-bold transition shadow-xs"
+                      >
+                        Inspect Slip
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-16 text-center bg-white rounded-3xl border border-sky-100 shadow-xs">
+                <History size={36} className="mx-auto text-slate-300 mb-2" />
+                <p className="text-sm font-bold text-[#1e3a5f]">No past prescriptions found</p>
+                <p className="text-xs text-slate-400 mt-1">
+                  {searchHistoryQuery
+                    ? 'No prescriptions matched your search query.'
+                    : 'Prescriptions you issue to patients will be archived here automatically.'}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
       </div>
+
+      {/* Prescription Viewer Modal */}
+      <PrescriptionModal
+        prescription={viewingPrescription}
+        isOpen={Boolean(viewingPrescription)}
+        onClose={() => setViewingPrescription(null)}
+      />
+
     </div>
   );
 }
