@@ -4,6 +4,7 @@ import { patientApi } from '../../services/api';
 import api from '../../services/api';
 import DoctorBookingModal from './DoctorBookingModal';
 import PrescriptionModal from './PrescriptionModal';
+import CancelAppointmentModal from './CancelAppointmentModal';
 import { 
   Calendar, Stethoscope, Search, Clock, FileText, 
   XCircle, CheckCircle2, AlertCircle, Loader2, Filter, 
@@ -44,6 +45,8 @@ export default function PatientDashboard() {
   // Modals
   const [bookingDoctor, setBookingDoctor] = useState(null);
   const [selectedPrescription, setSelectedPrescription] = useState(null);
+  const [cancellingAppointment, setCancellingAppointment] = useState(null);
+  const [cancelModalLoading, setCancelModalLoading] = useState(false);
 
   useEffect(() => {
     loadAllPatientData();
@@ -127,7 +130,7 @@ export default function PatientDashboard() {
     }
   };
 
-  // PUT /api/v1/patient/profile (Mapped to UpdatePatientProfileRequest)
+  // PUT /api/v1/patient/profile
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     setProfileSaving(true);
@@ -163,22 +166,17 @@ export default function PatientDashboard() {
     }
   };
 
-  // PUT /api/v1/appointments/{id}/cancel
-  const handleCancelAppointment = async (id) => {
-    const reason = window.prompt(
-      'Please state a reason for cancelling this appointment (optional):', 
-      'Schedule conflict'
-    );
-    if (reason === null) return;
-
-    setActionLoading(id);
+  // PUT /api/v1/appointments/{id}/cancel via Modal
+  const handleConfirmCancel = async (id, reason) => {
+    setCancelModalLoading(true);
     try {
       await patientApi.cancelAppointment(id, reason);
+      setCancellingAppointment(null);
       await fetchAppointmentsFromDb();
     } catch (err) {
       alert(err.response?.data?.message || 'Cancellation request failed.');
     } finally {
-      setActionLoading(null);
+      setCancelModalLoading(false);
     }
   };
 
@@ -494,15 +492,10 @@ export default function PatientDashboard() {
 
                         {!isCancelled && !isCompleted && (
                           <button
-                            onClick={() => handleCancelAppointment(apt.id)}
-                            disabled={actionLoading === apt.id}
-                            className="flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition-all disabled:opacity-50"
+                            onClick={() => setCancellingAppointment(apt)}
+                            className="flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition-all"
                           >
-                            {actionLoading === apt.id ? (
-                              <Loader2 size={12} className="animate-spin" />
-                            ) : (
-                              <XCircle size={14} />
-                            )}
+                            <XCircle size={14} />
                             <span>Cancel</span>
                           </button>
                         )}
@@ -584,7 +577,7 @@ export default function PatientDashboard() {
           </div>
         )}
 
-        {/* TAB 4: MY MEDICAL PROFILE (GET & PUT /api/v1/patient/profile) */}
+        {/* TAB 4: MY MEDICAL PROFILE */}
         {activeTab === 'profile' && (
           <div className="max-w-3xl space-y-6">
             {profileSuccess && (
@@ -607,7 +600,6 @@ export default function PatientDashboard() {
                 <p className="text-xs font-bold text-slate-400">Loading your health profile from database...</p>
               </div>
             ) : isEditingProfile ? (
-              /* PROFILE EDIT MODE (Submits UpdatePatientProfileRequest) */
               <div className="bg-white rounded-3xl border border-sky-100 p-6 sm:p-8 shadow-xs">
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
                   <div>
@@ -713,7 +705,6 @@ export default function PatientDashboard() {
                 </form>
               </div>
             ) : (
-              /* PROFILE VIEW MODE */
               <div className="bg-white rounded-3xl border border-sky-100 p-6 sm:p-8 shadow-xs">
                 <div className="flex items-center justify-between pb-6 border-b border-slate-100">
                   <div className="flex items-center gap-4">
@@ -744,7 +735,6 @@ export default function PatientDashboard() {
                   </button>
                 </div>
 
-                {/* Profile Grid Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
                   <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-100">
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Email Address</span>
@@ -804,6 +794,15 @@ export default function PatientDashboard() {
         prescription={selectedPrescription}
         isOpen={Boolean(selectedPrescription)}
         onClose={() => setSelectedPrescription(null)}
+      />
+
+      {/* Custom Cancellation Modal */}
+      <CancelAppointmentModal
+        appointment={cancellingAppointment}
+        isOpen={Boolean(cancellingAppointment)}
+        onClose={() => setCancellingAppointment(null)}
+        onConfirm={handleConfirmCancel}
+        loading={cancelModalLoading}
       />
 
     </div>
