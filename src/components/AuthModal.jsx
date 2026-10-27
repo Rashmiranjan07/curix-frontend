@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { 
   X, User, Stethoscope, Shield, AlertCircle, ArrowRight, 
@@ -16,7 +16,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
   const [loading, setLoading] = useState(false);
   const { login, registerPatient } = useAuth();
 
-  const [formData, setFormData] = useState({
+  const emptyForm = {
     firstName: '',
     lastName: '',
     email: '',
@@ -26,7 +26,18 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
     dateOfBirth: '',
     gender: 'MALE',
     bloodGroup: 'O+',
-  });
+  };
+
+  const [formData, setFormData] = useState(emptyForm);
+
+  // Clear fields whenever modal opens or initialRole changes
+  useEffect(() => {
+    setActiveRole(initialRole);
+    setIsRegisterMode(false);
+    setFormData(emptyForm);
+    setError('');
+    setSuccessMsg('');
+  }, [isOpen, initialRole]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -34,9 +45,11 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
     if (successMsg) setSuccessMsg('');
   };
 
+  // Reset form and errors immediately upon tab switch
   const switchRole = (role) => {
     setActiveRole(role);
     setIsRegisterMode(false);
+    setFormData(emptyForm); // <-- Clears previously filled doctor/patient credentials
     setError('');
     setSuccessMsg('');
   };
@@ -49,7 +62,6 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
 
     try {
       if (activeRole === 'PATIENT' && isRegisterMode) {
-        // Registration flow for patient
         await registerPatient({
           email: formData.email.trim(),
           password: formData.password,
@@ -62,16 +74,15 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
           emergencyContact: formData.emergencyContact.trim(),
         });
 
-        // Attempt automatic login enforcing PATIENT role
         try {
           await login(formData.email.trim(), formData.password, 'PATIENT');
           onClose();
         } catch {
           setSuccessMsg('Account registered successfully! Please sign in below.');
           setIsRegisterMode(false);
+          setFormData(emptyForm);
         }
       } else {
-        // Direct Sign In with activeRole enforcement
         await login(formData.email.trim(), formData.password, activeRole);
         onClose();
       }
@@ -94,6 +105,13 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
     { id: 'DOCTOR', label: 'Doctor', icon: Stethoscope },
     { id: 'ADMIN', label: 'Admin', icon: Shield },
   ];
+
+  // Role-specific email placeholders
+  const getEmailPlaceholder = () => {
+    if (activeRole === 'PATIENT') return 'e.g. patient@gmail.com';
+    if (activeRole === 'DOCTOR') return 'e.g. dr.smith@curix.com';
+    return 'e.g. admin@curix.com';
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1e3a5f]/40 backdrop-blur-sm transition-opacity duration-300">
@@ -161,10 +179,10 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
         )}
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
           {isRegisterMode && activeRole === 'PATIENT' ? (
             <>
-              {/* First Name & Last Name */}
+              {/* Registration Fields */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-[#1e3a5f] mb-1">First Name *</label>
@@ -172,7 +190,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                     type="text"
                     name="firstName"
                     required
-                    placeholder="kiran"
+                    placeholder="John"
                     value={formData.firstName}
                     onChange={handleChange}
                     className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-[#1e3a5f] placeholder:text-slate-400 focus:border-[#0ea5e9] focus:outline-none transition-all"
@@ -184,7 +202,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                     type="text"
                     name="lastName"
                     required
-                    placeholder="Sahu"
+                    placeholder="Doe"
                     value={formData.lastName}
                     onChange={handleChange}
                     className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-[#1e3a5f] placeholder:text-slate-400 focus:border-[#0ea5e9] focus:outline-none transition-all"
@@ -192,7 +210,6 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                 </div>
               </div>
 
-              {/* Email & Password */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Email *</label>
@@ -200,7 +217,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                     type="email"
                     name="email"
                     required
-                    placeholder="kiran@gmail.com"
+                    placeholder="john.doe@gmail.com"
                     value={formData.email}
                     onChange={handleChange}
                     className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-[#1e3a5f] placeholder:text-slate-400 focus:border-[#0ea5e9] focus:outline-none transition-all"
@@ -230,7 +247,6 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                 </div>
               </div>
 
-              {/* Phone & Emergency Contact */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Phone Number *</label>
@@ -258,10 +274,9 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                 </div>
               </div>
 
-              {/* Date of Birth, Gender, Blood Group */}
               <div className="grid grid-cols-3 gap-2.5">
                 <div>
-                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Date of Birth *</label>
+                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">DOB *</label>
                   <input
                     type="date"
                     name="dateOfBirth"
@@ -301,7 +316,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
             </>
           ) : (
             <>
-              {/* Sign In Mode */}
+              {/* Sign In Fields */}
               <div>
                 <label className="block text-xs font-semibold text-[#1e3a5f] mb-1">
                   {activeRole} Email
@@ -309,8 +324,9 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                 <input
                   type="email"
                   name="email"
+                  autoComplete="off"
                   required
-                  placeholder={`name@curix-${activeRole.toLowerCase()}.com`}
+                  placeholder={getEmailPlaceholder()}
                   value={formData.email}
                   onChange={handleChange}
                   className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 text-sm text-[#1e3a5f] placeholder:text-slate-400 focus:border-[#0ea5e9] focus:outline-none transition-all"
@@ -323,8 +339,9 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                   <input
                     type={showPassword ? 'text' : 'password'}
                     name="password"
+                    autoComplete="new-password"
                     required
-                    placeholder="••••••••"
+                    placeholder="Enter your password"
                     value={formData.password}
                     onChange={handleChange}
                     className="w-full pl-4 pr-11 py-3 rounded-xl bg-white border border-slate-200 text-sm text-[#1e3a5f] placeholder:text-slate-400 focus:border-[#0ea5e9] focus:outline-none transition-all"
@@ -341,7 +358,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
             </>
           )}
 
-          {/* Action Button */}
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
@@ -371,7 +388,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                 Already registered?{' '}
                 <button
                   type="button"
-                  onClick={() => { setIsRegisterMode(false); setError(''); setSuccessMsg(''); }}
+                  onClick={() => { setIsRegisterMode(false); setFormData(emptyForm); setError(''); setSuccessMsg(''); }}
                   className="text-[#0ea5e9] font-bold hover:underline ml-1"
                 >
                   Sign In
@@ -382,7 +399,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                 First time patient?{' '}
                 <button
                   type="button"
-                  onClick={() => { setIsRegisterMode(true); setError(''); setSuccessMsg(''); }}
+                  onClick={() => { setIsRegisterMode(true); setFormData(emptyForm); setError(''); setSuccessMsg(''); }}
                   className="text-[#0ea5e9] font-bold hover:underline ml-1"
                 >
                   Register Account
