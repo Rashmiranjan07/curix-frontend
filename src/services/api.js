@@ -7,7 +7,6 @@ const api = axios.create({
   },
 });
 
-// Auto-attach JWT token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -19,7 +18,6 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Session expiry handler
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -35,31 +33,22 @@ api.interceptors.response.use(
 );
 
 export const patientApi = {
-  // Doctors
   getDoctors: (departmentId, specialty) => 
     api.get('/doctors', { params: { departmentId, specialty } }),
   getDoctorById: (id) => 
     api.get(`/doctors/${id}`),
-
-  // Appointment Slots (From AppointmentController)
   getAvailableSlots: (doctorId, date) => 
     api.get('/appointments/slots', { params: { doctorId, date } }),
-
-  // Appointments (From AppointmentController)
   bookAppointment: (payload) => 
     api.post('/appointments/book', payload),
   getMyAppointments: () => 
     api.get('/appointments/my-appointments'),
   cancelAppointment: (id, reason) => 
     api.put(`/appointments/${id}/cancel`, reason ? { reason } : {}),
-
-  // Prescriptions (From PrescriptionController)
   getMyPrescriptions: () => 
     api.get('/prescriptions/my-prescriptions'),
   getPrescriptionByAppointment: (appointmentId) => 
     api.get(`/prescriptions/appointment/${appointmentId}`),
-
-  // Patient Profile (From PatientController)
   getMyProfile: () => 
     api.get('/patient/profile'),
   updateMyProfile: (data) => 
@@ -67,23 +56,40 @@ export const patientApi = {
 };
 
 export const doctorApi = {
-  // Doctor Profile (From DoctorController)
   getMyProfile: () => 
     api.get('/doctors/me'),
-
-  // Doctor Schedule (From AppointmentController)
   getMySchedule: () => 
     api.get('/appointments/doctor/my-schedule'),
   completeAppointment: (id) => 
     api.put(`/appointments/${id}/complete`),
   cancelAppointment: (id, reason) => 
     api.put(`/appointments/${id}/cancel`, reason ? { reason } : {}),
-
-  // Doctor Prescriptions (From PrescriptionController)
   createPrescription: (payload) => 
     api.post('/prescriptions', payload),
   getDoctorPrescriptionHistory: () => 
     api.get('/prescriptions/doctor-history'),
+};
+
+export const adminApi = {
+  // Analytics
+  getDashboardMetrics: () => 
+    api.get('/admin/analytics/dashboard'),
+
+  // Doctor Provisioning
+  provisionDoctor: (payload) => 
+    api.post('/admin/doctors', payload),
+  getAllDoctors: () => 
+    api.get('/doctors'),
+
+  // Departments
+  getDepartments: () => 
+    api.get('/departments'),
+  createDepartment: (payload) => 
+    api.post('/departments', payload),
+
+  // Audit Logs (Pageable)
+  getAuditLogs: (page = 0, size = 20) => 
+    api.get('/admin/audit-logs', { params: { page, size } }),
 };
 
 export default api;
