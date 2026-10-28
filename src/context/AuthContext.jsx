@@ -3,7 +3,8 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
-const API_BASE = 'http://localhost:8080/api/v1/auth';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
+const API_BASE = `${BASE_URL}/auth`;
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -24,7 +25,6 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password, expectedRole = null) => {
-    // 1. Authenticate credentials against backend
     const res = await axios.post(`${API_BASE}/login`, {
       email: email,
       password: password,
@@ -37,10 +37,8 @@ export function AuthProvider({ children }) {
       throw new Error(res.data?.message || 'Login succeeded, but no accessToken was found.');
     }
 
-    // Clean role format (e.g. "ROLE_DOCTOR" -> "DOCTOR")
     const cleanRole = authData.role ? authData.role.replace('ROLE_', '') : 'PATIENT';
 
-    // 2. Strict Role Enforcement Check
     if (expectedRole && cleanRole !== expectedRole) {
       const roleDisplayName = 
         cleanRole === 'DOCTOR' ? 'Doctor' : 
@@ -58,7 +56,6 @@ export function AuthProvider({ children }) {
       role: cleanRole,
     };
 
-    // 3. Save to localStorage only after role validation passes
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);

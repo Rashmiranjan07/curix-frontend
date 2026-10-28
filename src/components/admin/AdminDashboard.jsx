@@ -4,8 +4,17 @@ import { adminApi } from '../../services/api';
 import { 
   Building2, Users, Stethoscope, DollarSign, Activity, 
   FileText, Shield, Plus, RefreshCw, AlertCircle, CheckCircle2, 
-  Loader2, X, Search, Calendar, ChevronRight, Hash, Clock, Edit3, Save
+  Loader2, X, Search, Calendar, ChevronLeft, ChevronRight, Clock, Edit3, Save
 } from 'lucide-react';
+
+const WEEKDAYS = [
+  { id: 'MONDAY', label: 'Mon' },
+  { id: 'TUESDAY', label: 'Tue' },
+  { id: 'WEDNESDAY', label: 'Wed' },
+  { id: 'THURSDAY', label: 'Thu' },
+  { id: 'FRIDAY', label: 'Fri' },
+  { id: 'SATURDAY', label: 'Sat' },
+];
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -41,6 +50,12 @@ export default function AdminDashboard() {
     consultationFee: 50.00,
   });
 
+  // Shift & Availability Config for New Doctor
+  const [selectedDays, setSelectedDays] = useState(['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY']);
+  const [shiftStartTime, setShiftStartTime] = useState('09:00');
+  const [shiftEndTime, setShiftEndTime] = useState('17:00');
+  const [slotMinutes, setSlotMinutes] = useState(30);
+
   // Doctor Edit Modal State
   const [editingDoctor, setEditingDoctor] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -57,10 +72,11 @@ export default function AdminDashboard() {
     licenseNumber: ''
   });
 
-  // 4. Audit Logs Data
+  // 4. Audit Logs Data with Pagination
   const [auditLogs, setAuditLogs] = useState([]);
   const [auditPage, setAuditPage] = useState(0);
   const [auditTotalPages, setAuditTotalPages] = useState(1);
+  const [auditTotalElements, setAuditTotalElements] = useState(0);
   const [auditLoading, setAuditLoading] = useState(false);
 
   useEffect(() => {
@@ -122,8 +138,12 @@ export default function AdminDashboard() {
         setAuditLogs(pageData.content);
         setAuditTotalPages(pageData.totalPages || 1);
         setAuditPage(pageData.number || 0);
+        setAuditTotalElements(pageData.totalElements || pageData.content.length);
       } else if (Array.isArray(pageData)) {
         setAuditLogs(pageData);
+        setAuditTotalPages(1);
+        setAuditPage(0);
+        setAuditTotalElements(pageData.length);
       }
     } catch (err) {
       console.warn("Could not load audit logs:", err);
@@ -133,7 +153,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // Robust doctor name resolver
   const getDoctorDisplayName = (doc) => {
     if (!doc) return 'Attending Physician';
     if (doc.firstName && doc.lastName) {
@@ -161,7 +180,15 @@ export default function AdminDashboard() {
     return `Doctor #${doc.id}`;
   };
 
-  // Create Department (POST /api/v1/departments)
+  const toggleDaySelection = (day) => {
+    if (selectedDays.includes(day)) {
+      if (selectedDays.length <= 1) return;
+      setSelectedDays(selectedDays.filter((d) => d !== day));
+    } else {
+      setSelectedDays([...selectedDays, day]);
+    }
+  };
+
   const handleCreateDepartment = async (e) => {
     e.preventDefault();
     setDeptSaving(true);
@@ -188,7 +215,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // Provision Doctor (POST /api/v1/admin/doctors)
   const handleProvisionDoctor = async (e) => {
     e.preventDefault();
     setDoctorSaving(true);
@@ -196,6 +222,14 @@ export default function AdminDashboard() {
     setSuccessNotice('');
 
     try {
+      const formattedAvailabilities = selectedDays.map((day) => ({
+        dayOfWeek: day,
+        startTime: shiftStartTime.length === 5 ? `${shiftStartTime}:00` : shiftStartTime,
+        endTime: shiftEndTime.length === 5 ? `${shiftEndTime}:00` : shiftEndTime,
+        slotMinutes: Number(slotMinutes),
+        active: true,
+      }));
+
       const payload = {
         email: doctorForm.email.trim(),
         password: doctorForm.password,
@@ -207,11 +241,11 @@ export default function AdminDashboard() {
         qualification: doctorForm.qualification.trim(),
         experienceYears: Number(doctorForm.experienceYears),
         consultationFee: parseFloat(doctorForm.consultationFee),
-        availabilities: []
+        availabilities: formattedAvailabilities
       };
 
       await adminApi.provisionDoctor(payload);
-      setSuccessNotice(`Doctor Dr. ${payload.firstName} ${payload.lastName} provisioned successfully!`);
+      setSuccessNotice(`Doctor Dr. ${payload.firstName} ${payload.lastName} provisioned with ${selectedDays.length} active shift days!`);
       setIsDoctorModalOpen(false);
       setDoctorForm({
         email: '',
@@ -235,7 +269,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // Open Edit Doctor Modal
   const handleOpenEditDoctor = (doc) => {
     setEditingDoctor(doc);
     setEditDoctorForm({
@@ -252,7 +285,6 @@ export default function AdminDashboard() {
     setIsEditModalOpen(true);
   };
 
-  // Save Doctor Edit (PUT /api/v1/admin/doctors/{id})
   const handleSaveDoctorEdit = async (e) => {
     e.preventDefault();
     if (!editingDoctor) return;
@@ -272,6 +304,7 @@ export default function AdminDashboard() {
         experienceYears: Number(editDoctorForm.experienceYears),
         consultationFee: parseFloat(editDoctorForm.consultationFee),
         licenseNumber: editDoctorForm.licenseNumber.trim(),
+        password: '',
       };
 
       await adminApi.updateDoctor(editingDoctor.id, payload);
@@ -280,12 +313,11 @@ export default function AdminDashboard() {
       setEditingDoctor(null);
       await fetchDoctors();
     } catch (err) {
-      console.error("Doctor edit failed:", err);
-      setErrorNotice(
+      const serverMessage = 
         err.response?.data?.message || 
         err.response?.data?.error || 
-        'Could not update doctor profile. Please ensure the update endpoint is active on the backend.'
-      );
+        (err.response ? `HTTP ${err.response.status}: ${err.response.statusText}` : 'Could not update doctor profile.');
+      setErrorNotice(serverMessage);
     } finally {
       setEditDoctorSaving(false);
     }
@@ -555,7 +587,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* TAB 3: MEDICAL STAFF ONBOARDING & EDITING */}
+        {/* TAB 3: MEDICAL STAFF DIRECTORY */}
         {activeTab === 'doctors' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-2">
@@ -600,7 +632,6 @@ export default function AdminDashboard() {
                           </span>
                         </div>
 
-                        {/* Edit Doctor Profile Button */}
                         <button
                           onClick={() => handleOpenEditDoctor(doc)}
                           className="flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-[#1e3a5f] hover:text-white text-slate-700 text-xs font-bold transition shadow-xs"
@@ -623,11 +654,14 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* TAB 4: SYSTEM AUDIT LOGS */}
+        {/* TAB 4: SYSTEM AUDIT LOGS WITH PAGINATION */}
         {activeTab === 'audit' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-base font-bold text-[#1e3a5f]">System Security & Action Logs</h3>
+              <div>
+                <h3 className="text-base font-bold text-[#1e3a5f]">System Security & Action Logs</h3>
+                <p className="text-xs text-slate-400">Total recorded events: {auditTotalElements}</p>
+              </div>
               <button
                 onClick={() => fetchAuditLogs(auditPage)}
                 className="flex items-center gap-1.5 text-xs text-[#0ea5e9] font-bold hover:underline"
@@ -642,35 +676,61 @@ export default function AdminDashboard() {
                 <p className="text-xs font-bold text-slate-400">Loading audit records...</p>
               </div>
             ) : auditLogs.length > 0 ? (
-              <div className="divide-y divide-slate-100 bg-white rounded-3xl border border-sky-100 shadow-xs overflow-hidden">
-                {auditLogs.map((log, idx) => (
-                  <div key={log.id || idx} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:bg-slate-50/50 transition">
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold shrink-0 mt-0.5">
-                        <Shield size={14} />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono font-bold text-[#1e3a5f]">
-                            {log.action || log.eventType || 'SYSTEM_ACTION'}
-                          </span>
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-slate-100 text-slate-700">
-                            {log.userRole || log.principal || 'ADMIN'}
-                          </span>
+              <div className="bg-white rounded-3xl border border-sky-100 shadow-xs overflow-hidden">
+                <div className="divide-y divide-slate-100">
+                  {auditLogs.map((log, idx) => (
+                    <div key={log.id || idx} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:bg-slate-50/50 transition">
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold shrink-0 mt-0.5">
+                          <Shield size={14} />
                         </div>
-                        <p className="text-slate-500 mt-0.5 font-medium">
-                          {log.details || log.description || log.message || 'Administrative operation performed.'}
-                        </p>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono font-bold text-[#1e3a5f]">
+                              {log.action || log.eventType || 'SYSTEM_ACTION'}
+                            </span>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-slate-100 text-slate-700">
+                              {log.userRole || log.principal || 'ADMIN'}
+                            </span>
+                          </div>
+                          <p className="text-slate-500 mt-0.5 font-medium">
+                            {log.details || log.description || log.message || 'Administrative operation performed.'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="text-slate-400 sm:text-right shrink-0">
+                        <span className="text-[11px] font-mono">
+                          {log.timestamp ? new Date(log.timestamp).toLocaleString() : 'Recent'}
+                        </span>
                       </div>
                     </div>
+                  ))}
+                </div>
 
-                    <div className="text-slate-400 sm:text-right shrink-0">
-                      <span className="text-[11px] font-mono">
-                        {log.timestamp ? new Date(log.timestamp).toLocaleString() : 'Recent'}
-                      </span>
-                    </div>
+                {/* Pagination Controls */}
+                <div className="p-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 bg-slate-50/50">
+                  <span>Page {auditPage + 1} of {Math.max(1, auditTotalPages)}</span>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => fetchAuditLogs(auditPage - 1)}
+                      disabled={auditPage <= 0 || auditLoading}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 transition font-bold"
+                    >
+                      <ChevronLeft size={14} />
+                      <span>Prev</span>
+                    </button>
+                    <button
+                      onClick={() => fetchAuditLogs(auditPage + 1)}
+                      disabled={auditPage + 1 >= auditTotalPages || auditLoading}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 transition font-bold"
+                    >
+                      <span>Next</span>
+                      <ChevronRight size={14} />
+                    </button>
                   </div>
-                ))}
+                </div>
               </div>
             ) : (
               <div className="p-16 text-center bg-white rounded-3xl border border-sky-100 shadow-xs">
@@ -745,7 +805,7 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* MODAL 2: PROVISION DOCTOR */}
+      {/* MODAL 2: PROVISION DOCTOR (With Shift & Availability Configurator) */}
       {isDoctorModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1e3a5f]/40 backdrop-blur-sm">
           <div className="relative w-full max-w-2xl bg-white border border-sky-100 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
@@ -757,7 +817,7 @@ export default function AdminDashboard() {
             </button>
 
             <h3 className="text-xl font-black text-[#1e3a5f] mb-1">Provision Physician Credentials</h3>
-            <p className="text-xs text-slate-400 mb-5">Assign clinical credentials and departments directly into MySQL.</p>
+            <p className="text-xs text-slate-400 mb-5">Assign clinical credentials and working shifts directly into MySQL.</p>
 
             <form onSubmit={handleProvisionDoctor} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -888,6 +948,75 @@ export default function AdminDashboard() {
                     onChange={(e) => setDoctorForm({ ...doctorForm, consultationFee: e.target.value })}
                     className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-[#1e3a5f]"
                   />
+                </div>
+              </div>
+
+              {/* Working Shifts & Availability Configurator */}
+              <div className="p-4 rounded-2xl bg-sky-50/70 border border-sky-100 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Clock size={16} className="text-[#0ea5e9]" />
+                  <span className="text-xs font-bold text-[#1e3a5f] uppercase tracking-wider">
+                    Working Shifts & Available Consultation Days
+                  </span>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-500 mb-1.5">
+                    Select Active Consultation Days
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {WEEKDAYS.map((day) => {
+                      const isSelected = selectedDays.includes(day.id);
+                      return (
+                        <button
+                          key={day.id}
+                          type="button"
+                          onClick={() => toggleDaySelection(day.id)}
+                          className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                            isSelected
+                              ? 'bg-[#1e3a5f] text-white shadow-xs'
+                              : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+                          }`}
+                        >
+                          {day.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2.5 pt-1">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Start Time</label>
+                    <input
+                      type="time"
+                      value={shiftStartTime}
+                      onChange={(e) => setShiftStartTime(e.target.value)}
+                      className="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs bg-white font-semibold text-[#1e3a5f]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 mb-1">End Time</label>
+                    <input
+                      type="time"
+                      value={shiftEndTime}
+                      onChange={(e) => setShiftEndTime(e.target.value)}
+                      className="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs bg-white font-semibold text-[#1e3a5f]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Slot Duration</label>
+                    <select
+                      value={slotMinutes}
+                      onChange={(e) => setSlotMinutes(Number(e.target.value))}
+                      className="w-full px-2 py-1.5 rounded-xl border border-slate-200 text-xs bg-white font-semibold text-[#1e3a5f]"
+                    >
+                      <option value={15}>15 mins</option>
+                      <option value={30}>30 mins</option>
+                      <option value={45}>45 mins</option>
+                      <option value={60}>60 mins</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 

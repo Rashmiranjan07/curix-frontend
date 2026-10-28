@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
+
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api/v1',
+  baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -71,26 +73,19 @@ export const doctorApi = {
 };
 
 export const adminApi = {
-  // Analytics
   getDashboardMetrics: () => 
     api.get('/admin/analytics/dashboard'),
-
-  // Doctor Provisioning
   provisionDoctor: (payload) => 
     api.post('/admin/doctors', payload),
   updateDoctor: (id, payload) => 
     api.put(`/admin/doctors/${id}`, payload),
   getAllDoctors: () => 
     api.get('/doctors'),
-
-  // Departments
   getDepartments: () => 
     api.get('/departments'),
   createDepartment: (payload) => 
     api.post('/departments', payload),
-
-  // Audit Logs (Pageable)
-  getAuditLogs: (page = 0, size = 20) => 
+  getAuditLogs: (page = 0, size = 15) => 
     api.get('/admin/audit-logs', { params: { page, size } }),
 };
 
