@@ -14,14 +14,14 @@ function MainContent() {
       {/* Navigation Bar */}
       <Navbar onOpenAuth={() => setAuthModalOpen(true)} />
 
-      {/* Conditional View: Dashboard if logged in, Landing Page if visitor */}
+      {/* Conditional View: Dashboard if authenticated, Landing Page if visitor */}
       {user ? (
         <DashboardShell />
       ) : (
         <LandingPage onOpenAuth={() => setAuthModalOpen(true)} />
       )}
 
-      {/* Multi-Role Login / Register Modal */}
+      {/* Multi-Role Authentication Modal */}
       <AuthModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}

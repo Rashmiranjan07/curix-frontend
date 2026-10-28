@@ -3,10 +3,10 @@ import { useAuth } from '../../context/AuthContext';
 import { doctorApi } from '../../services/api';
 import api from '../../services/api';
 import PrescriptionModal from '../patient/PrescriptionModal';
-import { 
-  Stethoscope, Calendar, Clock, CheckCircle2, 
-  XCircle, FileText, User, RefreshCw, AlertCircle, 
-  Loader2, Pill, Plus, Trash2, HeartPulse, AlertTriangle, 
+import {
+  Stethoscope, Calendar, Clock, CheckCircle2,
+  XCircle, FileText, User, RefreshCw, AlertCircle,
+  Loader2, Pill, Plus, Trash2, HeartPulse, AlertTriangle,
   Search, History, Printer
 } from 'lucide-react';
 
@@ -131,7 +131,7 @@ export default function DoctorDashboard() {
 
   const addMedicineRow = () => {
     setMedicines([
-      ...medicines, 
+      ...medicines,
       { medicationName: '', dosage: '', frequency: '', duration: '5 days', instructions: '' }
     ]);
   };
@@ -217,9 +217,9 @@ export default function DoctorDashboard() {
       if (activeTab === 'history') fetchPrescriptionHistory();
     } catch (err) {
       console.error("Prescription error response:", err.response?.data);
-      const backendMsg = 
-        err.response?.data?.message || 
-        err.response?.data?.error || 
+      const backendMsg =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
         'Validation failed for one or more fields. Check your inputs.';
       setPrescribeError(backendMsg);
     } finally {
@@ -227,8 +227,8 @@ export default function DoctorDashboard() {
     }
   };
 
-  const doctorDisplayName = 
-    profile?.name || 
+  const doctorDisplayName =
+    profile?.name ||
     (profile?.user ? `Dr. ${profile.user.firstName} ${profile.user.lastName}` : user?.name || user?.email);
 
   const filteredHistory = history.filter((p) => {
@@ -241,8 +241,9 @@ export default function DoctorDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#eaf4fb] via-[#f3f9fd] to-white pt-24 pb-16 text-[#1e3a5f]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Workspace Banner */}
+        {/* Doctor Workspace Header */}
         <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="inline-block mb-1">
@@ -253,9 +254,29 @@ export default function DoctorDashboard() {
             <h1 className="text-3xl font-black text-[#1e3a5f]">
               {doctorDisplayName}
             </h1>
-            <p className="text-slate-500 text-xs sm:text-sm mt-0.5">
-              Specialty: <strong>{profile?.specialty || profile?.specialization || 'Clinical Specialist'}</strong> · Fee: <strong>${profile?.consultationFee || '50.00'}</strong>
-            </p>
+            <div className="flex flex-wrap items-center gap-2 text-slate-500 text-xs sm:text-sm mt-1">
+              <span>Specialty: <strong>{profile?.specialty || profile?.specialization || 'Clinical Specialist'}</strong></span>
+              <span>·</span>
+              <span>Fee: <strong>${profile?.consultationFee || '50.00'}</strong></span>
+            </div>
+
+            {/* Live Shift Badges */}
+            {profile?.availabilities && profile.availabilities.length > 0 && (
+              <div className="flex items-center gap-1.5 mt-2.5">
+                <Clock size={13} className="text-[#0ea5e9]" />
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">Active Shifts:</span>
+                <div className="flex flex-wrap gap-1">
+                  {profile.availabilities.filter(a => a.active).map((avail) => (
+                    <span
+                      key={avail.dayOfWeek}
+                      className="px-2 py-0.5 rounded-md bg-white border border-sky-100 text-[10px] font-bold text-[#1e3a5f] shadow-2xs"
+                    >
+                      {avail.dayOfWeek.slice(0, 3)} ({avail.startTime?.slice(0, 5)} - {avail.endTime?.slice(0, 5)})
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-3">
@@ -287,17 +308,15 @@ export default function DoctorDashboard() {
         <div className="flex items-center gap-2 p-1 bg-white/80 backdrop-blur-md rounded-full border border-sky-100 mb-8 max-w-lg shadow-xs">
           <button
             onClick={() => setActiveTab('queue')}
-            className={`flex-1 py-2 px-4 rounded-full text-xs font-bold transition-all ${
-              activeTab === 'queue' ? 'bg-[#1e3a5f] text-white shadow-xs' : 'text-slate-600 hover:text-[#1e3a5f]'
-            }`}
+            className={`flex-1 py-2 px-4 rounded-full text-xs font-bold transition-all ${activeTab === 'queue' ? 'bg-[#1e3a5f] text-white shadow-xs' : 'text-slate-600 hover:text-[#1e3a5f]'
+              }`}
           >
             Consultation Roster
           </button>
           <button
             onClick={() => setActiveTab('prescribe')}
-            className={`flex-1 py-2 px-4 rounded-full text-xs font-bold transition-all ${
-              activeTab === 'prescribe' ? 'bg-[#1e3a5f] text-white shadow-xs' : 'text-slate-600 hover:text-[#1e3a5f]'
-            }`}
+            className={`flex-1 py-2 px-4 rounded-full text-xs font-bold transition-all ${activeTab === 'prescribe' ? 'bg-[#1e3a5f] text-white shadow-xs' : 'text-slate-600 hover:text-[#1e3a5f]'
+              }`}
           >
             Review & Prescribe
           </button>
@@ -306,9 +325,8 @@ export default function DoctorDashboard() {
               setActiveTab('history');
               fetchPrescriptionHistory();
             }}
-            className={`flex-1 py-2 px-4 rounded-full text-xs font-bold transition-all ${
-              activeTab === 'history' ? 'bg-[#1e3a5f] text-white shadow-xs' : 'text-slate-600 hover:text-[#1e3a5f]'
-            }`}
+            className={`flex-1 py-2 px-4 rounded-full text-xs font-bold transition-all ${activeTab === 'history' ? 'bg-[#1e3a5f] text-white shadow-xs' : 'text-slate-600 hover:text-[#1e3a5f]'
+              }`}
           >
             Rx Archives
           </button>
@@ -340,22 +358,21 @@ export default function DoctorDashboard() {
                             <h4 className="text-sm font-bold text-[#1e3a5f]">
                               {apt.patientName || `Patient #${apt.patientId}`}
                             </h4>
-                            
+
                             {apt.patientNumber && (
                               <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-100 text-slate-700">
                                 {apt.patientNumber}
                               </span>
                             )}
 
-                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                              isCompleted ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                              isCancelled ? 'bg-rose-50 text-rose-700 border-rose-200' :
-                              'bg-sky-50 text-[#0ea5e9] border-sky-200'
-                            }`}>
+                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${isCompleted ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                isCancelled ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                                  'bg-sky-50 text-[#0ea5e9] border-sky-200'
+                              }`}>
                               {status}
                             </span>
                           </div>
-                          
+
                           <p className="text-xs text-slate-500 font-medium mt-1 flex items-center gap-3">
                             <span className="flex items-center gap-1">
                               <Calendar size={13} className="text-[#0ea5e9]" />
@@ -507,8 +524,8 @@ export default function DoctorDashboard() {
                   <div className="p-3 rounded-xl bg-white/90 border border-sky-100">
                     <span className="text-slate-400 block font-bold text-[10px] uppercase">Age / DOB</span>
                     <span className="font-extrabold text-[#1e3a5f]">
-                      {calculateAge(patientDetails?.dateOfBirth) 
-                        ? `${calculateAge(patientDetails?.dateOfBirth)} (${patientDetails?.dateOfBirth})` 
+                      {calculateAge(patientDetails?.dateOfBirth)
+                        ? `${calculateAge(patientDetails?.dateOfBirth)} (${patientDetails?.dateOfBirth})`
                         : (patientDetails?.dateOfBirth || 'Recorded in profile')}
                     </span>
                   </div>

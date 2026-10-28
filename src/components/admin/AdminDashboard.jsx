@@ -472,51 +472,100 @@ export default function AdminDashboard() {
                   <span>Consultation Lifecycle Breakdown</span>
                 </h3>
 
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                    <span className="text-xs font-semibold text-slate-600">Completed Consultations</span>
-                    <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                      {metrics?.completedAppointments ?? metrics?.statusCounts?.COMPLETED ?? 0}
-                    </span>
-                  </div>
+                {(() => {
+                  const completed = Number(metrics?.completedAppointments ?? metrics?.statusCounts?.COMPLETED ?? 0);
+                  const pending = Number(metrics?.pendingOrConfirmedAppointments ?? metrics?.statusCounts?.CONFIRMED ?? 0);
+                  const cancelled = Number(metrics?.cancelledAppointments ?? metrics?.statusCounts?.CANCELLED ?? 0);
+                  const total = completed + pending + cancelled || 1;
 
-                  <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                    <span className="text-xs font-semibold text-slate-600">Pending / Confirmed Consultations</span>
-                    <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-sky-100 text-[#1e3a5f]">
-                      {metrics?.pendingOrConfirmedAppointments ?? metrics?.statusCounts?.CONFIRMED ?? 0}
-                    </span>
-                  </div>
+                  const completedPct = Math.round((completed / total) * 100);
+                  const pendingPct = Math.round((pending / total) * 100);
+                  const cancelledPct = Math.round((cancelled / total) * 100);
 
-                  <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                    <span className="text-xs font-semibold text-slate-600">Cancelled Bookings</span>
-                    <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800">
-                      {metrics?.cancelledAppointments ?? metrics?.statusCounts?.CANCELLED ?? 0}
-                    </span>
-                  </div>
+                  return (
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex justify-between text-xs font-bold mb-1">
+                          <span className="text-emerald-700">Completed Consultations</span>
+                          <span className="text-slate-500">{completed} ({completedPct}%)</span>
+                        </div>
+                        <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                            style={{ width: `${completedPct}%` }}
+                          />
+                        </div>
+                      </div>
 
-                  <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                    <span className="text-xs font-semibold text-slate-600">Total Rx Slips Issued</span>
-                    <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800">
-                      {metrics?.totalPrescriptions ?? 0}
-                    </span>
-                  </div>
-                </div>
+                      <div>
+                        <div className="flex justify-between text-xs font-bold mb-1">
+                          <span className="text-[#1e3a5f]">Pending / Confirmed</span>
+                          <span className="text-slate-500">{pending} ({pendingPct}%)</span>
+                        </div>
+                        <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-[#0ea5e9] rounded-full transition-all duration-500"
+                            style={{ width: `${pendingPct}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between text-xs font-bold mb-1">
+                          <span className="text-rose-700">Cancelled Bookings</span>
+                          <span className="text-slate-500">{cancelled} ({cancelledPct}%)</span>
+                        </div>
+                        <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-rose-500 rounded-full transition-all duration-500"
+                            style={{ width: `${cancelledPct}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-500">
+                        <span>Total Digital Rx Slips Issued:</span>
+                        <span className="font-mono font-bold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full">
+                          {metrics?.totalPrescriptions ?? 0} Slips
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
 
               <div className="p-6 rounded-3xl bg-white border border-sky-100 shadow-xs">
                 <h3 className="text-sm font-bold text-[#1e3a5f] uppercase tracking-wider mb-4 flex items-center gap-2">
                   <Building2 size={16} className="text-[#0ea5e9]" />
-                  <span>Clinical Department Distribution</span>
+                  <span>Department Consultation Distribution</span>
                 </h3>
 
                 {metrics?.appointmentsByDepartment && Object.keys(metrics.appointmentsByDepartment).length > 0 ? (
-                  <div className="space-y-2.5">
-                    {Object.entries(metrics.appointmentsByDepartment).map(([dept, count]) => (
-                      <div key={dept} className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                        <span className="text-xs font-bold text-[#1e3a5f]">{dept}</span>
-                        <span className="text-xs font-extrabold text-[#0ea5e9]">{count} visits</span>
-                      </div>
-                    ))}
+                  <div className="space-y-3.5">
+                    {(() => {
+                      const deptEntries = Object.entries(metrics.appointmentsByDepartment);
+                      const maxVisits = Math.max(...deptEntries.map(([, count]) => Number(count)), 1);
+
+                      return deptEntries.map(([dept, count]) => {
+                        const countNum = Number(count);
+                        const relativeWidth = Math.max(10, Math.round((countNum / maxVisits) * 100));
+
+                        return (
+                          <div key={dept}>
+                            <div className="flex justify-between text-xs font-bold mb-1">
+                              <span className="text-[#1e3a5f]">{dept}</span>
+                              <span className="text-[#0ea5e9] font-mono">{countNum} visits</span>
+                            </div>
+                            <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-gradient-to-r from-sky-400 to-[#1e3a5f] rounded-full transition-all duration-500"
+                                style={{ width: `${relativeWidth}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      });
+                    })()}
                   </div>
                 ) : (
                   <div className="p-8 text-center text-slate-400 text-xs">
