@@ -3,8 +3,9 @@ import { useAuth } from '../../context/AuthContext';
 import { adminApi } from '../../services/api';
 import { 
   Building2, Users, Stethoscope, DollarSign, Activity, 
-  FileText, Shield, Plus, RefreshCw, AlertCircle, CheckCircle2, 
-  Loader2, X, Search, Calendar, ChevronLeft, ChevronRight, Clock, Edit3, Save
+  Shield, Plus, RefreshCw, AlertCircle, CheckCircle2, 
+  Loader2, X, Search, Calendar, ChevronLeft, ChevronRight, 
+  Clock, Edit3, Save, Layers, ArrowUpRight
 } from 'lucide-react';
 
 const WEEKDAYS = [
@@ -17,7 +18,7 @@ const WEEKDAYS = [
 ];
 
 export default function AdminDashboard() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const [activeTab, setActiveTab] = useState('analytics'); // 'analytics' | 'departments' | 'doctors' | 'audit'
   const [loading, setLoading] = useState(true);
@@ -29,12 +30,15 @@ export default function AdminDashboard() {
 
   // 2. Departments Data
   const [departments, setDepartments] = useState([]);
+  const [deptSearch, setDeptSearch] = useState('');
   const [isDeptModalOpen, setIsDeptModalOpen] = useState(false);
   const [deptForm, setDeptForm] = useState({ name: '', description: '', active: true });
   const [deptSaving, setDeptSaving] = useState(false);
 
   // 3. Doctors Data & Provisioning
   const [doctors, setDoctors] = useState([]);
+  const [doctorSearch, setDoctorSearch] = useState('');
+  const [selectedDeptFilter, setSelectedDeptFilter] = useState('ALL');
   const [isDoctorModalOpen, setIsDoctorModalOpen] = useState(false);
   const [doctorSaving, setDoctorSaving] = useState(false);
   const [doctorForm, setDoctorForm] = useState({
@@ -155,27 +159,11 @@ export default function AdminDashboard() {
 
   const getDoctorDisplayName = (doc) => {
     if (!doc) return 'Attending Physician';
-    if (doc.firstName && doc.lastName) {
-      return `Dr. ${doc.firstName} ${doc.lastName}`;
-    }
-    if (doc.fullName) {
-      return doc.fullName.startsWith('Dr.') ? doc.fullName : `Dr. ${doc.fullName}`;
-    }
-    if (doc.doctorName) {
-      return doc.doctorName.startsWith('Dr.') ? doc.doctorName : `Dr. ${doc.doctorName}`;
-    }
-    if (doc.name) {
-      return doc.name.startsWith('Dr.') ? doc.name : `Dr. ${doc.name}`;
-    }
-    if (doc.user) {
-      if (doc.user.firstName && doc.user.lastName) {
-        return `Dr. ${doc.user.firstName} ${doc.user.lastName}`;
-      }
-      if (doc.user.name) {
-        return doc.user.name.startsWith('Dr.') ? doc.user.name : `Dr. ${doc.user.name}`;
-      }
-    }
-    if (doc.firstName) return `Dr. ${doc.firstName}`;
+    if (doc.firstName && doc.lastName) return `Dr. ${doc.firstName} ${doc.lastName}`;
+    if (doc.fullName) return doc.fullName.startsWith('Dr.') ? doc.fullName : `Dr. ${doc.fullName}`;
+    if (doc.doctorName) return doc.doctorName.startsWith('Dr.') ? doc.doctorName : `Dr. ${doc.doctorName}`;
+    if (doc.name) return doc.name.startsWith('Dr.') ? doc.name : `Dr. ${doc.name}`;
+    if (doc.user && doc.user.firstName) return `Dr. ${doc.user.firstName} ${doc.user.lastName || ''}`;
     if (doc.email) return doc.email.split('@')[0];
     return `Doctor #${doc.id}`;
   };
@@ -203,13 +191,13 @@ export default function AdminDashboard() {
       };
 
       await adminApi.createDepartment(payload);
-      setSuccessNotice(`Department "${payload.name}" created successfully!`);
+      setSuccessNotice(`Department "${payload.name}" registered successfully.`);
       setIsDeptModalOpen(false);
       setDeptForm({ name: '', description: '', active: true });
       await fetchDepartments();
       await fetchMetrics();
     } catch (err) {
-      setErrorNotice(err.response?.data?.message || err.response?.data?.error || 'Failed to create department.');
+      setErrorNotice(err.response?.data?.message || 'Failed to create department.');
     } finally {
       setDeptSaving(false);
     }
@@ -245,7 +233,7 @@ export default function AdminDashboard() {
       };
 
       await adminApi.provisionDoctor(payload);
-      setSuccessNotice(`Doctor Dr. ${payload.firstName} ${payload.lastName} provisioned with ${selectedDays.length} active shift days!`);
+      setSuccessNotice(`Physician credentials for Dr. ${payload.firstName} ${payload.lastName} provisioned successfully.`);
       setIsDoctorModalOpen(false);
       setDoctorForm({
         email: '',
@@ -263,7 +251,7 @@ export default function AdminDashboard() {
       await fetchMetrics();
       await fetchAuditLogs(0);
     } catch (err) {
-      setErrorNotice(err.response?.data?.message || err.response?.data?.error || 'Failed to provision doctor account.');
+      setErrorNotice(err.response?.data?.message || 'Failed to provision doctor account.');
     } finally {
       setDoctorSaving(false);
     }
@@ -308,156 +296,302 @@ export default function AdminDashboard() {
       };
 
       await adminApi.updateDoctor(editingDoctor.id, payload);
-      setSuccessNotice(`Doctor profile for Dr. ${payload.firstName} ${payload.lastName} updated successfully!`);
+      setSuccessNotice(`Profile for Dr. ${payload.firstName} ${payload.lastName} updated successfully.`);
       setIsEditModalOpen(false);
       setEditingDoctor(null);
       await fetchDoctors();
     } catch (err) {
-      const serverMessage = 
-        err.response?.data?.message || 
-        err.response?.data?.error || 
-        (err.response ? `HTTP ${err.response.status}: ${err.response.statusText}` : 'Could not update doctor profile.');
+      const serverMessage = err.response?.data?.message || 'Could not update doctor profile.';
       setErrorNotice(serverMessage);
     } finally {
       setEditDoctorSaving(false);
     }
   };
 
+  // Search & Filter
+  const filteredDepartments = departments.filter((d) => 
+    d.name?.toLowerCase().includes(deptSearch.toLowerCase()) ||
+    d.description?.toLowerCase().includes(deptSearch.toLowerCase())
+  );
+
+  const filteredDoctors = doctors.filter((doc) => {
+    const nameMatch = getDoctorDisplayName(doc).toLowerCase().includes(doctorSearch.toLowerCase()) ||
+                      doc.specialty?.toLowerCase().includes(doctorSearch.toLowerCase()) ||
+                      doc.licenseNumber?.toLowerCase().includes(doctorSearch.toLowerCase());
+    const deptMatch = selectedDeptFilter === 'ALL' || String(doc.departmentId || doc.department?.id) === String(selectedDeptFilter);
+    return nameMatch && deptMatch;
+  });
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#eaf4fb] via-[#f3f9fd] to-white pt-24 pb-16 text-[#1e3a5f]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex pt-16">
+      
+      {/* SIDEBAR NAVIGATION - MODERN CLINICAL DARK THEME */}
+      <aside className="w-72 border-r border-slate-800/80 bg-gradient-to-b from-[#0b1329] via-[#0f172a] to-[#070d1e] hidden lg:flex flex-col justify-between fixed top-16 bottom-0 left-0 z-30 shadow-2xl text-slate-300">
         
-        {/* Header */}
-        <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="inline-block mb-1">
-              <span className="text-[11px] font-black tracking-widest text-[#0ea5e9] uppercase pb-0.5 border-b border-[#0ea5e9]">
-                CURIX HOSPITAL ADMINISTRATION
-              </span>
+        <div className="p-5 space-y-6">
+          
+          {/* Node Status Indicator Card */}
+          <div className="relative overflow-hidden p-3.5 rounded-2xl bg-gradient-to-r from-sky-500/10 via-teal-500/10 to-indigo-500/10 border border-sky-500/20 backdrop-blur-md">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-sky-500/10 rounded-full blur-2xl -mr-8 -mt-8 pointer-events-none" />
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#0ea5e9] to-[#06b6d4] text-white flex items-center justify-center shadow-lg shadow-sky-500/25 shrink-0">
+                <Shield size={18} />
+              </div>
+              <div className="truncate">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-xs shadow-emerald-400" />
+                  <span className="text-[10px] uppercase font-black tracking-widest text-sky-400 leading-none">Security Node</span>
+                </div>
+                <span className="text-xs font-black text-white tracking-wide truncate block mt-0.5">Super Admin Console</span>
+              </div>
             </div>
-            <h1 className="text-3xl font-black text-[#1e3a5f]">
-              Administrative Operations Console
-            </h1>
-            <p className="text-slate-500 text-xs sm:text-sm mt-0.5">
-              Clinical department lifecycle, medical staff provisioning, real-time analytics, and security audits.
-            </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* Navigation Menu */}
+          <div className="space-y-1.5">
+            <span className="text-[11px] font-extrabold text-slate-400 px-3 uppercase tracking-wider block mb-2">
+              Operational Control
+            </span>
+
+            {/* 1. Analytics Button */}
             <button
-              onClick={loadAllAdminData}
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-sky-100 text-xs font-bold text-[#1e3a5f] shadow-xs hover:bg-slate-50 transition"
+              onClick={() => setActiveTab('analytics')}
+              className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 ${
+                activeTab === 'analytics'
+                  ? 'bg-gradient-to-r from-sky-500/20 via-sky-500/15 to-transparent text-white border-l-4 border-[#0ea5e9] shadow-md shadow-sky-950/40'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border-l-4 border-transparent'
+              }`}
             >
-              <RefreshCw size={14} className="text-[#0ea5e9]" />
-              <span>Sync System</span>
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                  activeTab === 'analytics'
+                    ? 'bg-[#0ea5e9] text-white shadow-md shadow-sky-500/30'
+                    : 'bg-slate-800/80 text-slate-400 group-hover:text-sky-400 group-hover:bg-slate-800'
+                }`}>
+                  <Activity size={16} />
+                </div>
+                <span className="text-[13px] tracking-tight">Executive Analytics</span>
+              </div>
+              {activeTab === 'analytics' && (
+                <span className="w-1.5 h-1.5 rounded-full bg-[#0ea5e9] shadow-xs shadow-sky-400" />
+              )}
             </button>
-            <div className="px-5 py-2 rounded-2xl bg-[#1e3a5f] text-white shadow-xs text-center">
-              <span className="text-[10px] text-sky-200 block font-bold uppercase tracking-wider">Access</span>
-              <span className="text-xs font-black tracking-wider">SUPER ADMIN</span>
-            </div>
+
+            {/* 2. Departments Button */}
+            <button
+              onClick={() => setActiveTab('departments')}
+              className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 ${
+                activeTab === 'departments'
+                  ? 'bg-gradient-to-r from-teal-500/20 via-teal-500/15 to-transparent text-white border-l-4 border-teal-400 shadow-md shadow-teal-950/40'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border-l-4 border-transparent'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                  activeTab === 'departments'
+                    ? 'bg-teal-500 text-white shadow-md shadow-teal-500/30'
+                    : 'bg-slate-800/80 text-slate-400 group-hover:text-teal-400 group-hover:bg-slate-800'
+                }`}>
+                  <Building2 size={16} />
+                </div>
+                <span className="text-[13px] tracking-tight">Clinical Units</span>
+              </div>
+              <span className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-all ${
+                activeTab === 'departments'
+                  ? 'bg-teal-400/20 text-teal-300 border border-teal-400/30'
+                  : 'bg-slate-800 text-slate-400 group-hover:text-slate-200'
+              }`}>
+                {departments.length}
+              </span>
+            </button>
+
+            {/* 3. Doctors Button */}
+            <button
+              onClick={() => setActiveTab('doctors')}
+              className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 ${
+                activeTab === 'doctors'
+                  ? 'bg-gradient-to-r from-indigo-500/20 via-indigo-500/15 to-transparent text-white border-l-4 border-indigo-400 shadow-md shadow-indigo-950/40'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border-l-4 border-transparent'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                  activeTab === 'doctors'
+                    ? 'bg-indigo-500 text-white shadow-md shadow-indigo-500/30'
+                    : 'bg-slate-800/80 text-slate-400 group-hover:text-indigo-400 group-hover:bg-slate-800'
+                }`}>
+                  <Stethoscope size={16} />
+                </div>
+                <span className="text-[13px] tracking-tight">Physician Roster</span>
+              </div>
+              <span className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-all ${
+                activeTab === 'doctors'
+                  ? 'bg-indigo-400/20 text-indigo-300 border border-indigo-400/30'
+                  : 'bg-slate-800 text-slate-400 group-hover:text-slate-200'
+              }`}>
+                {doctors.length}
+              </span>
+            </button>
+
+            {/* 4. Audit Trail Button */}
+            <button
+              onClick={() => {
+                setActiveTab('audit');
+                fetchAuditLogs(0);
+              }}
+              className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 ${
+                activeTab === 'audit'
+                  ? 'bg-gradient-to-r from-amber-500/20 via-amber-500/15 to-transparent text-white border-l-4 border-amber-400 shadow-md shadow-amber-950/40'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border-l-4 border-transparent'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                  activeTab === 'audit'
+                    ? 'bg-amber-500 text-white shadow-md shadow-amber-500/30'
+                    : 'bg-slate-800/80 text-slate-400 group-hover:text-amber-400 group-hover:bg-slate-800'
+                }`}>
+                  <Layers size={16} />
+                </div>
+                <span className="text-[13px] tracking-tight">Audit Trail</span>
+              </div>
+              {activeTab === 'audit' && (
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shadow-xs shadow-amber-400" />
+              )}
+            </button>
           </div>
+        </div>
+
+        {/* Admin Profile & Sign-out Card */}
+        <div className="p-4 border-t border-slate-800/80 bg-[#090f20]/60 backdrop-blur-xs">
+          <div className="p-3 rounded-2xl bg-slate-900/90 border border-slate-700/60 flex items-center justify-between">
+            <div className="truncate mr-2">
+              <span className="text-xs font-bold text-white block truncate">{user?.email}</span>
+              <span className="text-[10px] font-semibold text-emerald-400 flex items-center gap-1.5 mt-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Active Verified Node
+              </span>
+            </div>
+            <button
+              onClick={logout}
+              title="Sign Out"
+              className="text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 p-2 rounded-xl border border-transparent hover:border-rose-500/20 transition-all"
+            >
+              <ArrowUpRight size={16} />
+            </button>
+          </div>
+        </div>
+
+      </aside>
+
+      {/* MAIN CANVAS */}
+      <main className="flex-1 lg:ml-72 p-6 sm:p-10 max-w-7xl w-full mx-auto">
+        
+        {/* MOBILE HORIZONTAL TABS */}
+        <div className="flex lg:hidden overflow-x-auto gap-2 pb-4 mb-4">
+          {['analytics', 'departments', 'doctors', 'audit'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap capitalize ${
+                activeTab === tab ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-600'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
         </div>
 
         {/* Global Notifications */}
         {successNotice && (
-          <div className="flex items-center gap-2.5 p-4 mb-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
-            <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
-            <span>{successNotice}</span>
+          <div className="flex items-center justify-between p-4 mb-6 rounded-2xl bg-emerald-50/90 border border-emerald-200/80 text-emerald-800 text-xs font-bold shadow-xs">
+            <div className="flex items-center gap-2.5">
+              <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+              <span>{successNotice}</span>
+            </div>
+            <button onClick={() => setSuccessNotice('')} className="text-emerald-700 hover:text-emerald-900">
+              <X size={14} />
+            </button>
           </div>
         )}
 
         {errorNotice && (
-          <div className="flex items-center gap-2.5 p-4 mb-6 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold">
-            <AlertCircle size={16} className="text-rose-600 shrink-0" />
-            <span>{errorNotice}</span>
+          <div className="flex items-center justify-between p-4 mb-6 rounded-2xl bg-rose-50/90 border border-rose-200/80 text-rose-800 text-xs font-bold shadow-xs">
+            <div className="flex items-center gap-2.5">
+              <AlertCircle size={16} className="text-rose-600 shrink-0" />
+              <span>{errorNotice}</span>
+            </div>
+            <button onClick={() => setErrorNotice('')} className="text-rose-700 hover:text-rose-900">
+              <X size={14} />
+            </button>
           </div>
         )}
 
-        {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 p-1 bg-white/80 backdrop-blur-md rounded-full border border-sky-100 mb-8 max-w-2xl shadow-xs overflow-x-auto">
-          <button
-            onClick={() => setActiveTab('analytics')}
-            className={`flex-1 py-2 px-4 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
-              activeTab === 'analytics' ? 'bg-[#1e3a5f] text-white shadow-xs' : 'text-slate-600 hover:text-[#1e3a5f]'
-            }`}
-          >
-            Analytics & KPIs
-          </button>
-          <button
-            onClick={() => setActiveTab('departments')}
-            className={`flex-1 py-2 px-4 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
-              activeTab === 'departments' ? 'bg-[#1e3a5f] text-white shadow-xs' : 'text-slate-600 hover:text-[#1e3a5f]'
-            }`}
-          >
-            Departments ({departments.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('doctors')}
-            className={`flex-1 py-2 px-4 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
-              activeTab === 'doctors' ? 'bg-[#1e3a5f] text-white shadow-xs' : 'text-slate-600 hover:text-[#1e3a5f]'
-            }`}
-          >
-            Medical Staff ({doctors.length})
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab('audit');
-              fetchAuditLogs(0);
-            }}
-            className={`flex-1 py-2 px-4 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
-              activeTab === 'audit' ? 'bg-[#1e3a5f] text-white shadow-xs' : 'text-slate-600 hover:text-[#1e3a5f]'
-            }`}
-          >
-            Security Audit Trail
-          </button>
-        </div>
-
-        {/* TAB 1: ANALYTICS & METRICS */}
+        {/* TAB 1: EXECUTIVE ANALYTICS */}
         {activeTab === 'analytics' && (
           <div className="space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="p-5 rounded-3xl bg-white border border-sky-100 shadow-xs flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+              <div>
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Executive Intelligence</h2>
+                <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Real-time consultation metrics and clinical throughput overview.</p>
+              </div>
+              <button
+                onClick={loadAllAdminData}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-2xs transition"
+              >
+                <RefreshCw size={13} className="text-[#0ea5e9]" />
+                <span>Sync Node</span>
+              </button>
+            </div>
+
+            {/* METRICS CARDS */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Registered Patients</span>
-                  <span className="text-2xl font-black text-[#1e3a5f] mt-1 block">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Registered Patients</span>
+                  <span className="text-2xl font-black text-slate-900 mt-1 block">
                     {metrics?.totalPatients !== undefined ? metrics.totalPatients : '0'}
                   </span>
+                  <span className="text-[10px] text-emerald-600 font-bold mt-1 inline-block">Active E-Charts</span>
                 </div>
                 <div className="w-12 h-12 rounded-2xl bg-sky-50 text-[#0ea5e9] flex items-center justify-center">
                   <Users size={22} />
                 </div>
               </div>
 
-              <div className="p-5 rounded-3xl bg-white border border-sky-100 shadow-xs flex items-center justify-between">
+              <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Active Physicians</span>
-                  <span className="text-2xl font-black text-[#1e3a5f] mt-1 block">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Medical Staff</span>
+                  <span className="text-2xl font-black text-slate-900 mt-1 block">
                     {metrics?.totalDoctors !== undefined ? metrics.totalDoctors : '0'}
                   </span>
+                  <span className="text-[10px] text-sky-600 font-bold mt-1 inline-block">Licensed Physicians</span>
                 </div>
                 <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
                   <Stethoscope size={22} />
                 </div>
               </div>
 
-              <div className="p-5 rounded-3xl bg-white border border-sky-100 shadow-xs flex items-center justify-between">
+              <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Consultations</span>
-                  <span className="text-2xl font-black text-[#1e3a5f] mt-1 block">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Consultations</span>
+                  <span className="text-2xl font-black text-slate-900 mt-1 block">
                     {metrics?.totalAppointments !== undefined ? metrics.totalAppointments : '0'}
                   </span>
+                  <span className="text-[10px] text-slate-500 font-bold mt-1 inline-block">Lifetime Visits</span>
                 </div>
                 <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
                   <Calendar size={22} />
                 </div>
               </div>
 
-              <div className="p-5 rounded-3xl bg-white border border-sky-100 shadow-xs flex items-center justify-between">
+              <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Estimated Revenue</span>
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Consultation Volume</span>
                   <span className="text-2xl font-black text-emerald-700 mt-1 block">
                     ${metrics?.totalRevenue || metrics?.estimatedRevenue || '0.00'}
                   </span>
+                  <span className="text-[10px] text-emerald-600 font-bold mt-1 inline-block">Gross System Fees</span>
                 </div>
                 <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
                   <DollarSign size={22} />
@@ -465,12 +599,16 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="p-6 rounded-3xl bg-white border border-sky-100 shadow-xs">
-                <h3 className="text-sm font-bold text-[#1e3a5f] uppercase tracking-wider mb-4 flex items-center gap-2">
-                  <Activity size={16} className="text-[#0ea5e9]" />
-                  <span>Consultation Lifecycle Breakdown</span>
-                </h3>
+            {/* VISUAL CHARTS */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              <div className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-xs">
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                    <Activity size={16} className="text-[#0ea5e9]" />
+                    <span>Lifecycle Distribution</span>
+                  </h3>
+                  <span className="text-[11px] text-slate-400 font-semibold">Status Breakout</span>
+                </div>
 
                 {(() => {
                   const completed = Number(metrics?.completedAppointments ?? metrics?.statusCounts?.COMPLETED ?? 0);
@@ -485,48 +623,45 @@ export default function AdminDashboard() {
                   return (
                     <div className="space-y-4">
                       <div>
-                        <div className="flex justify-between text-xs font-bold mb-1">
-                          <span className="text-emerald-700">Completed Consultations</span>
-                          <span className="text-slate-500">{completed} ({completedPct}%)</span>
+                        <div className="flex justify-between text-xs font-bold mb-1.5">
+                          <span className="text-emerald-700 flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500" /> Completed
+                          </span>
+                          <span className="text-slate-600 font-mono">{completed} ({completedPct}%)</span>
                         </div>
                         <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-emerald-500 rounded-full transition-all duration-500"
-                            style={{ width: `${completedPct}%` }}
-                          />
+                          <div className="h-full bg-emerald-500 rounded-full transition-all duration-500" style={{ width: `${completedPct}%` }} />
                         </div>
                       </div>
 
                       <div>
-                        <div className="flex justify-between text-xs font-bold mb-1">
-                          <span className="text-[#1e3a5f]">Pending / Confirmed</span>
-                          <span className="text-slate-500">{pending} ({pendingPct}%)</span>
+                        <div className="flex justify-between text-xs font-bold mb-1.5">
+                          <span className="text-[#0ea5e9] flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-[#0ea5e9]" /> Confirmed / Active
+                          </span>
+                          <span className="text-slate-600 font-mono">{pending} ({pendingPct}%)</span>
                         </div>
                         <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-[#0ea5e9] rounded-full transition-all duration-500"
-                            style={{ width: `${pendingPct}%` }}
-                          />
+                          <div className="h-full bg-[#0ea5e9] rounded-full transition-all duration-500" style={{ width: `${pendingPct}%` }} />
                         </div>
                       </div>
 
                       <div>
-                        <div className="flex justify-between text-xs font-bold mb-1">
-                          <span className="text-rose-700">Cancelled Bookings</span>
-                          <span className="text-slate-500">{cancelled} ({cancelledPct}%)</span>
+                        <div className="flex justify-between text-xs font-bold mb-1.5">
+                          <span className="text-rose-600 flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-rose-500" /> Cancelled
+                          </span>
+                          <span className="text-slate-600 font-mono">{cancelled} ({cancelledPct}%)</span>
                         </div>
                         <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-rose-500 rounded-full transition-all duration-500"
-                            style={{ width: `${cancelledPct}%` }}
-                          />
+                          <div className="h-full bg-rose-500 rounded-full transition-all duration-500" style={{ width: `${cancelledPct}%` }} />
                         </div>
                       </div>
 
-                      <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-500">
-                        <span>Total Digital Rx Slips Issued:</span>
-                        <span className="font-mono font-bold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full">
-                          {metrics?.totalPrescriptions ?? 0} Slips
+                      <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-600">
+                        <span>Issued Digital Prescriptions:</span>
+                        <span className="font-mono text-indigo-700 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-full">
+                          {metrics?.totalPrescriptions ?? 0} Slips Recorded
                         </span>
                       </div>
                     </div>
@@ -534,11 +669,15 @@ export default function AdminDashboard() {
                 })()}
               </div>
 
-              <div className="p-6 rounded-3xl bg-white border border-sky-100 shadow-xs">
-                <h3 className="text-sm font-bold text-[#1e3a5f] uppercase tracking-wider mb-4 flex items-center gap-2">
-                  <Building2 size={16} className="text-[#0ea5e9]" />
-                  <span>Department Consultation Distribution</span>
-                </h3>
+              {/* DEPARTMENT DISTRIBUTION */}
+              <div className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-xs">
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                    <Building2 size={16} className="text-[#0ea5e9]" />
+                    <span>Unit Workload</span>
+                  </h3>
+                  <span className="text-[11px] text-slate-400 font-semibold">{departments.length} Active Departments</span>
+                </div>
 
                 {metrics?.appointmentsByDepartment && Object.keys(metrics.appointmentsByDepartment).length > 0 ? (
                   <div className="space-y-3.5">
@@ -552,13 +691,13 @@ export default function AdminDashboard() {
 
                         return (
                           <div key={dept}>
-                            <div className="flex justify-between text-xs font-bold mb-1">
-                              <span className="text-[#1e3a5f]">{dept}</span>
-                              <span className="text-[#0ea5e9] font-mono">{countNum} visits</span>
+                            <div className="flex justify-between text-xs font-bold mb-1.5">
+                              <span className="text-slate-800">{dept}</span>
+                              <span className="text-[#0ea5e9] font-mono">{countNum} consultations</span>
                             </div>
                             <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                               <div
-                                className="h-full bg-gradient-to-r from-sky-400 to-[#1e3a5f] rounded-full transition-all duration-500"
+                                className="h-full bg-gradient-to-r from-sky-400 to-indigo-600 rounded-full transition-all duration-500"
                                 style={{ width: `${relativeWidth}%` }}
                               />
                             </div>
@@ -568,7 +707,7 @@ export default function AdminDashboard() {
                     })()}
                   </div>
                 ) : (
-                  <div className="p-8 text-center text-slate-400 text-xs">
+                  <div className="py-12 text-center text-slate-400 text-xs">
                     No departmental appointment distribution registered yet.
                   </div>
                 )}
@@ -580,175 +719,233 @@ export default function AdminDashboard() {
         {/* TAB 2: DEPARTMENTS MANAGEMENT */}
         {activeTab === 'departments' && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-base font-bold text-[#1e3a5f]">Clinical Department Roster</h3>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Clinical Departments</h2>
+                <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Manage hospital specialties and operational units.</p>
+              </div>
               <button
                 onClick={() => setIsDeptModalOpen(true)}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#1e3a5f] hover:bg-[#284d7a] text-white text-xs font-bold shadow-xs transition"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs transition"
               >
-                <Plus size={14} />
+                <Plus size={15} />
                 <span>Add Department</span>
               </button>
             </div>
 
-            {loading ? (
-              <div className="p-16 text-center bg-white rounded-3xl border border-sky-100 shadow-xs">
-                <Loader2 size={24} className="animate-spin text-[#0ea5e9] mx-auto mb-3" />
-                <p className="text-xs font-bold text-slate-400">Loading departments...</p>
-              </div>
-            ) : departments.length > 0 ? (
+            {/* SEARCH BAR */}
+            <div className="relative">
+              <Search size={15} className="absolute left-3.5 top-3 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search departments by name or description..."
+                value={deptSearch}
+                onChange={(e) => setDeptSearch(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200/80 bg-white text-xs focus:outline-none focus:border-[#0ea5e9]"
+              />
+            </div>
+
+            {/* DEPARTMENTS GRID */}
+            {filteredDepartments.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {departments.map((dept) => (
-                  <div key={dept.id} className="p-5 rounded-3xl bg-white border border-sky-100 shadow-xs flex flex-col justify-between">
+                {filteredDepartments.map((dept) => (
+                  <div key={dept.id} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between hover:border-slate-300 transition">
                     <div>
                       <div className="flex items-start justify-between mb-3">
                         <div className="w-10 h-10 rounded-xl bg-sky-50 text-[#0ea5e9] flex items-center justify-center font-bold">
-                          <Building2 size={20} />
+                          <Building2 size={18} />
                         </div>
                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
                           dept.active !== false 
                             ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
                             : 'bg-slate-100 text-slate-500 border-slate-200'
                         }`}>
-                          {dept.active !== false ? 'Active' : 'Inactive'}
+                          {dept.active !== false ? 'Operational' : 'Disabled'}
                         </span>
                       </div>
-                      <h4 className="text-base font-bold text-[#1e3a5f]">{dept.name}</h4>
+                      <h4 className="text-sm font-bold text-slate-900">{dept.name}</h4>
                       <p className="text-xs text-slate-500 mt-1 line-clamp-2">
-                        {dept.description || 'General clinical specialty department.'}
+                        {dept.description || 'Specialized clinical discipline.'}
                       </p>
                     </div>
 
-                    <div className="pt-4 mt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400 font-medium">
-                      <span>Dept ID: #{dept.id}</span>
-                      <span className="text-[#0ea5e9] font-bold">Operational</span>
+                    <div className="pt-4 mt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400 font-mono">
+                      <span>ID: #{dept.id}</span>
+                      <span className="text-[#0ea5e9] font-sans font-bold">Unit Ready</span>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="p-16 text-center bg-white rounded-3xl border border-sky-100 shadow-xs">
+              <div className="py-16 text-center bg-white rounded-2xl border border-slate-200/80 shadow-xs">
                 <Building2 size={36} className="mx-auto text-slate-300 mb-2" />
-                <p className="text-sm font-bold text-[#1e3a5f]">No clinical departments found</p>
-                <p className="text-xs text-slate-400 mt-1">Click "Add Department" to register your first clinical unit.</p>
+                <p className="text-sm font-bold text-slate-800">No departments match your query</p>
+                <p className="text-xs text-slate-400 mt-1">Try another search term or create a new clinical department.</p>
               </div>
             )}
           </div>
         )}
 
-        {/* TAB 3: MEDICAL STAFF DIRECTORY */}
+        {/* TAB 3: PHYSICIANS DIRECTORY */}
         {activeTab === 'doctors' && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-base font-bold text-[#1e3a5f]">Provisioned Physician Directory</h3>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Physician Directory</h2>
+                <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Provision medical credentials, manage shift schedules, and update fees.</p>
+              </div>
               <button
                 onClick={() => setIsDoctorModalOpen(true)}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#1e3a5f] hover:bg-[#284d7a] text-white text-xs font-bold shadow-xs transition"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs transition"
               >
-                <Plus size={14} />
+                <Plus size={15} />
                 <span>Provision Doctor</span>
               </button>
             </div>
 
-            {doctors.length > 0 ? (
-              <div className="divide-y divide-slate-100 bg-white rounded-3xl border border-sky-100 shadow-xs overflow-hidden">
-                {doctors.map((doc) => {
-                  const docDisplayName = getDoctorDisplayName(doc);
-                  return (
-                    <div key={doc.id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/50 transition">
-                      <div className="flex items-start gap-4">
-                        <div className="w-11 h-11 rounded-2xl bg-sky-50 text-[#0ea5e9] flex items-center justify-center shrink-0">
-                          <Stethoscope size={20} />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="text-sm font-bold text-[#1e3a5f]">{docDisplayName}</h4>
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-[#0ea5e9] border border-sky-200 uppercase">
-                              {doc.specialty || doc.specialization || 'Clinical'}
-                            </span>
-                          </div>
-                          <p className="text-xs text-slate-500 font-medium mt-1">
-                            {doc.qualification || 'Physician'} {doc.experienceYears ? `· ${doc.experienceYears} Years Experience` : ''} · License: <span className="font-mono text-slate-700">{doc.licenseNumber || 'VERIFIED'}</span>
-                          </p>
-                        </div>
-                      </div>
+            {/* FILTER TOOLBAR */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search size={15} className="absolute left-3.5 top-3 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search by physician name, specialty, or license..."
+                  value={doctorSearch}
+                  onChange={(e) => setDoctorSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200/80 bg-white text-xs focus:outline-none focus:border-[#0ea5e9]"
+                />
+              </div>
 
-                      <div className="flex items-center gap-4 sm:text-right">
-                        <div>
-                          <span className="text-[10px] text-slate-400 block font-medium">Consultation Fee</span>
-                          <span className="text-sm font-black text-[#1e3a5f]">
-                            ${doc.consultationFee !== undefined ? doc.consultationFee : '50.00'}
-                          </span>
-                        </div>
+              <div className="sm:w-60">
+                <select
+                  value={selectedDeptFilter}
+                  onChange={(e) => setSelectedDeptFilter(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200/80 bg-white text-xs font-bold text-slate-700 focus:outline-none focus:border-[#0ea5e9]"
+                >
+                  <option value="ALL">All Departments ({doctors.length})</option>
+                  {departments.map((d) => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
-                        <button
-                          onClick={() => handleOpenEditDoctor(doc)}
-                          className="flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-[#1e3a5f] hover:text-white text-slate-700 text-xs font-bold transition shadow-xs"
-                        >
-                          <Edit3 size={12} />
-                          <span>Edit</span>
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
+            {/* PHYSICIAN TABLE */}
+            {filteredDoctors.length > 0 ? (
+              <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-100 bg-slate-50/50 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                        <th className="py-3 px-5">Physician Details</th>
+                        <th className="py-3 px-5">Specialty & License</th>
+                        <th className="py-3 px-5">Consultation Fee</th>
+                        <th className="py-3 px-5 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-xs">
+                      {filteredDoctors.map((doc) => {
+                        const docDisplayName = getDoctorDisplayName(doc);
+                        return (
+                          <tr key={doc.id} className="hover:bg-slate-50/60 transition">
+                            <td className="py-4 px-5">
+                              <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-xl bg-sky-50 text-[#0ea5e9] flex items-center justify-center font-bold text-xs shrink-0">
+                                  {docDisplayName.replace('Dr. ', '').charAt(0)}
+                                </div>
+                                <div>
+                                  <span className="font-bold text-slate-900 block">{docDisplayName}</span>
+                                  <span className="text-[11px] text-slate-400 font-normal">{doc.qualification || 'Physician'} · {doc.experienceYears || 0} yrs exp</span>
+                                </div>
+                              </div>
+                            </td>
+
+                            <td className="py-4 px-5">
+                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-[#0ea5e9] border border-sky-100 uppercase inline-block">
+                                {doc.specialty || 'General Practitioner'}
+                              </span>
+                              <span className="text-[11px] text-slate-400 block font-mono mt-1">LIC: {doc.licenseNumber || 'VERIFIED'}</span>
+                            </td>
+
+                            <td className="py-4 px-5">
+                              <span className="font-black text-slate-900 text-sm">
+                                ${doc.consultationFee !== undefined ? doc.consultationFee : '50.00'}
+                              </span>
+                            </td>
+
+                            <td className="py-4 px-5 text-right">
+                              <button
+                                onClick={() => handleOpenEditDoctor(doc)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition shadow-2xs"
+                              >
+                                <Edit3 size={12} />
+                                <span>Edit</span>
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             ) : (
-              <div className="p-16 text-center bg-white rounded-3xl border border-sky-100 shadow-xs">
+              <div className="py-16 text-center bg-white rounded-2xl border border-slate-200/80 shadow-xs">
                 <Stethoscope size={36} className="mx-auto text-slate-300 mb-2" />
-                <p className="text-sm font-bold text-[#1e3a5f]">No medical staff registered</p>
-                <p className="text-xs text-slate-400 mt-1">Use "Provision Doctor" to register credentials directly into MySQL.</p>
+                <p className="text-sm font-bold text-slate-800">No physicians found</p>
+                <p className="text-xs text-slate-400 mt-1">Adjust search parameters or provision a new physician account.</p>
               </div>
             )}
           </div>
         )}
 
-        {/* TAB 4: SYSTEM AUDIT LOGS WITH PAGINATION */}
+        {/* TAB 4: AUDIT LOGS */}
         {activeTab === 'audit' && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h3 className="text-base font-bold text-[#1e3a5f]">System Security & Action Logs</h3>
-                <p className="text-xs text-slate-400">Total recorded events: {auditTotalElements}</p>
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Security Audit Trail</h2>
+                <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Chronological record of administrative events, provisioning, and edits ({auditTotalElements} total events).</p>
               </div>
               <button
                 onClick={() => fetchAuditLogs(auditPage)}
-                className="flex items-center gap-1.5 text-xs text-[#0ea5e9] font-bold hover:underline"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-2xs transition"
               >
-                <RefreshCw size={12} /> Refresh Logs
+                <RefreshCw size={13} className="text-[#0ea5e9]" />
+                <span>Refresh Log</span>
               </button>
             </div>
 
             {auditLoading ? (
-              <div className="p-16 text-center bg-white rounded-3xl border border-sky-100 shadow-xs">
+              <div className="py-16 text-center bg-white rounded-2xl border border-slate-200/80 shadow-xs">
                 <Loader2 size={24} className="animate-spin text-[#0ea5e9] mx-auto mb-3" />
                 <p className="text-xs font-bold text-slate-400">Loading audit records...</p>
               </div>
             ) : auditLogs.length > 0 ? (
-              <div className="bg-white rounded-3xl border border-sky-100 shadow-xs overflow-hidden">
+              <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
                 <div className="divide-y divide-slate-100">
                   {auditLogs.map((log, idx) => (
                     <div key={log.id || idx} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:bg-slate-50/50 transition">
                       <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold shrink-0 mt-0.5">
+                        <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center font-bold shrink-0 mt-0.5">
                           <Shield size={14} />
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-mono font-bold text-[#1e3a5f]">
+                            <span className="font-mono font-bold text-slate-900">
                               {log.action || log.eventType || 'SYSTEM_ACTION'}
                             </span>
                             <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-slate-100 text-slate-700">
                               {log.userRole || log.principal || 'ADMIN'}
                             </span>
                           </div>
-                          <p className="text-slate-500 mt-0.5 font-medium">
-                            {log.details || log.description || log.message || 'Administrative operation performed.'}
+                          <p className="text-slate-500 mt-0.5">
+                            {log.details || log.description || log.message || 'Administrative operation recorded.'}
                           </p>
                         </div>
                       </div>
 
-                      <div className="text-slate-400 sm:text-right shrink-0">
+                      <div className="text-slate-400 text-right shrink-0">
                         <span className="text-[11px] font-mono">
                           {log.timestamp ? new Date(log.timestamp).toLocaleString() : 'Recent'}
                         </span>
@@ -757,7 +954,7 @@ export default function AdminDashboard() {
                   ))}
                 </div>
 
-                {/* Pagination Controls */}
+                {/* PAGINATION */}
                 <div className="p-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 bg-slate-50/50">
                   <span>Page {auditPage + 1} of {Math.max(1, auditTotalPages)}</span>
 
@@ -765,7 +962,7 @@ export default function AdminDashboard() {
                     <button
                       onClick={() => fetchAuditLogs(auditPage - 1)}
                       disabled={auditPage <= 0 || auditLoading}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 transition font-bold"
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 transition font-bold"
                     >
                       <ChevronLeft size={14} />
                       <span>Prev</span>
@@ -773,7 +970,7 @@ export default function AdminDashboard() {
                     <button
                       onClick={() => fetchAuditLogs(auditPage + 1)}
                       disabled={auditPage + 1 >= auditTotalPages || auditLoading}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 transition font-bold"
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 transition font-bold"
                     >
                       <span>Next</span>
                       <ChevronRight size={14} />
@@ -782,21 +979,21 @@ export default function AdminDashboard() {
                 </div>
               </div>
             ) : (
-              <div className="p-16 text-center bg-white rounded-3xl border border-sky-100 shadow-xs">
+              <div className="py-16 text-center bg-white rounded-2xl border border-slate-200/80 shadow-xs">
                 <Shield size={36} className="mx-auto text-slate-300 mb-2" />
-                <p className="text-sm font-bold text-[#1e3a5f]">No audit logs registered yet</p>
-                <p className="text-xs text-slate-400 mt-1">Actions such as doctor provisioning and user modifications will be logged here automatically.</p>
+                <p className="text-sm font-bold text-slate-800">No audit records logged</p>
+                <p className="text-xs text-slate-400 mt-1">Actions performed on the console will automatically appear here.</p>
               </div>
             )}
           </div>
         )}
 
-      </div>
+      </main>
 
       {/* MODAL 1: ADD DEPARTMENT */}
       {isDeptModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1e3a5f]/40 backdrop-blur-sm">
-          <div className="relative w-full max-w-lg bg-white border border-sky-100 rounded-3xl p-6 sm:p-8 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="relative w-full max-w-lg bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-2xl">
             <button
               onClick={() => setIsDeptModalOpen(false)}
               className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-100"
@@ -804,12 +1001,12 @@ export default function AdminDashboard() {
               <X size={18} />
             </button>
 
-            <h3 className="text-xl font-black text-[#1e3a5f] mb-1">Create Clinical Department</h3>
-            <p className="text-xs text-slate-400 mb-5">Register a medical department to organize specialized physicians.</p>
+            <h3 className="text-xl font-black text-slate-900 mb-1">Add Clinical Department</h3>
+            <p className="text-xs text-slate-500 mb-5">Register a specialized hospital department for physician assignment.</p>
 
             <form onSubmit={handleCreateDepartment} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Department Name *</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Department Name *</label>
                 <input
                   type="text"
                   required
@@ -817,18 +1014,18 @@ export default function AdminDashboard() {
                   placeholder="e.g. Cardiology, Neurology, Pediatrics"
                   value={deptForm.name}
                   onChange={(e) => setDeptForm({ ...deptForm, name: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-[#1e3a5f] focus:outline-none focus:border-[#0ea5e9]"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:border-[#0ea5e9]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Description</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Description</label>
                 <textarea
                   rows={3}
-                  placeholder="Clinical functions, diagnostic equipment, or unit specifics..."
+                  placeholder="Clinical functions, diagnostic scope, or unit specifics..."
                   value={deptForm.description}
                   onChange={(e) => setDeptForm({ ...deptForm, description: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs text-[#1e3a5f] focus:outline-none focus:border-[#0ea5e9] resize-none"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-[#0ea5e9] resize-none"
                 />
               </div>
 
@@ -836,17 +1033,17 @@ export default function AdminDashboard() {
                 <button
                   type="button"
                   onClick={() => setIsDeptModalOpen(false)}
-                  className="px-4 py-2 rounded-full border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50"
+                  className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={deptSaving}
-                  className="px-6 py-2.5 rounded-full bg-[#1e3a5f] hover:bg-[#284d7a] text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5 disabled:opacity-50"
                 >
                   {deptSaving ? <Loader2 size={13} className="animate-spin" /> : <Plus size={14} />}
-                  <span>Save Department</span>
+                  <span>Save Unit</span>
                 </button>
               </div>
             </form>
@@ -854,10 +1051,10 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* MODAL 2: PROVISION DOCTOR (With Shift & Availability Configurator) */}
+      {/* MODAL 2: PROVISION DOCTOR */}
       {isDoctorModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1e3a5f]/40 backdrop-blur-sm">
-          <div className="relative w-full max-w-2xl bg-white border border-sky-100 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="relative w-full max-w-2xl bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
             <button
               onClick={() => setIsDoctorModalOpen(false)}
               className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-100"
@@ -865,49 +1062,49 @@ export default function AdminDashboard() {
               <X size={18} />
             </button>
 
-            <h3 className="text-xl font-black text-[#1e3a5f] mb-1">Provision Physician Credentials</h3>
-            <p className="text-xs text-slate-400 mb-5">Assign clinical credentials and working shifts directly into MySQL.</p>
+            <h3 className="text-xl font-black text-slate-900 mb-1">Provision Physician Credentials</h3>
+            <p className="text-xs text-slate-500 mb-5">Assign medical specialty, consultation fee, and active working shifts.</p>
 
             <form onSubmit={handleProvisionDoctor} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">First Name *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">First Name *</label>
                   <input
                     type="text"
                     required
                     placeholder="Sarah"
                     value={doctorForm.firstName}
                     onChange={(e) => setDoctorForm({ ...doctorForm, firstName: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-[#1e3a5f]"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-slate-900"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Last Name *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Last Name *</label>
                   <input
                     type="text"
                     required
                     placeholder="Connor"
                     value={doctorForm.lastName}
                     onChange={(e) => setDoctorForm({ ...doctorForm, lastName: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-[#1e3a5f]"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-slate-900"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Doctor Email *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Email Address *</label>
                   <input
                     type="email"
                     required
                     placeholder="dr.connor@curix.com"
                     value={doctorForm.email}
                     onChange={(e) => setDoctorForm({ ...doctorForm, email: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-[#1e3a5f]"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-slate-900"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Temporary Password * (min 8 chars)</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Temporary Password * (min 8 chars)</label>
                   <input
                     type="password"
                     required
@@ -916,78 +1113,78 @@ export default function AdminDashboard() {
                     placeholder="••••••••"
                     value={doctorForm.password}
                     onChange={(e) => setDoctorForm({ ...doctorForm, password: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-[#1e3a5f]"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-slate-900"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Department *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Department *</label>
                   <select
                     required
                     value={doctorForm.departmentId}
                     onChange={(e) => setDoctorForm({ ...doctorForm, departmentId: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-[#1e3a5f]"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-800"
                   >
-                    <option value="">-- Choose Department --</option>
+                    <option value="">-- Select Department --</option>
                     {departments.map((d) => (
                       <option key={d.id} value={d.id}>{d.name}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">License Number *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">License Number *</label>
                   <input
                     type="text"
                     required
                     placeholder="MED-LIC-98214"
                     value={doctorForm.licenseNumber}
                     onChange={(e) => setDoctorForm({ ...doctorForm, licenseNumber: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-[#1e3a5f]"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-slate-900"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Specialty *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Specialty *</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Interventional Cardiology"
                     value={doctorForm.specialty}
                     onChange={(e) => setDoctorForm({ ...doctorForm, specialty: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-[#1e3a5f]"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-slate-900"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Qualification *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Qualification *</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. MBBS, MD, FACC"
                     value={doctorForm.qualification}
                     onChange={(e) => setDoctorForm({ ...doctorForm, qualification: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-[#1e3a5f]"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-slate-900"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Experience (Years) *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Experience (Years) *</label>
                   <input
                     type="number"
                     min={0}
                     required
                     value={doctorForm.experienceYears}
                     onChange={(e) => setDoctorForm({ ...doctorForm, experienceYears: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-[#1e3a5f]"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-slate-900"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Consultation Fee ($) *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Consultation Fee ($) *</label>
                   <input
                     type="number"
                     min={0}
@@ -995,16 +1192,16 @@ export default function AdminDashboard() {
                     required
                     value={doctorForm.consultationFee}
                     onChange={(e) => setDoctorForm({ ...doctorForm, consultationFee: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-[#1e3a5f]"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-900"
                   />
                 </div>
               </div>
 
-              {/* Working Shifts & Availability Configurator */}
-              <div className="p-4 rounded-2xl bg-sky-50/70 border border-sky-100 space-y-3">
+              {/* Working Shifts Configurator */}
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
                 <div className="flex items-center gap-2">
-                  <Clock size={16} className="text-[#0ea5e9]" />
-                  <span className="text-xs font-bold text-[#1e3a5f] uppercase tracking-wider">
+                  <Clock size={15} className="text-[#0ea5e9]" />
+                  <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
                     Working Shifts & Available Consultation Days
                   </span>
                 </div>
@@ -1021,9 +1218,9 @@ export default function AdminDashboard() {
                           key={day.id}
                           type="button"
                           onClick={() => toggleDaySelection(day.id)}
-                          className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                             isSelected
-                              ? 'bg-[#1e3a5f] text-white shadow-xs'
+                              ? 'bg-slate-900 text-white shadow-xs'
                               : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
                           }`}
                         >
@@ -1041,7 +1238,7 @@ export default function AdminDashboard() {
                       type="time"
                       value={shiftStartTime}
                       onChange={(e) => setShiftStartTime(e.target.value)}
-                      className="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs bg-white font-semibold text-[#1e3a5f]"
+                      className="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs bg-white font-semibold text-slate-800"
                     />
                   </div>
                   <div>
@@ -1050,7 +1247,7 @@ export default function AdminDashboard() {
                       type="time"
                       value={shiftEndTime}
                       onChange={(e) => setShiftEndTime(e.target.value)}
-                      className="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs bg-white font-semibold text-[#1e3a5f]"
+                      className="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs bg-white font-semibold text-slate-800"
                     />
                   </div>
                   <div>
@@ -1058,7 +1255,7 @@ export default function AdminDashboard() {
                     <select
                       value={slotMinutes}
                       onChange={(e) => setSlotMinutes(Number(e.target.value))}
-                      className="w-full px-2 py-1.5 rounded-xl border border-slate-200 text-xs bg-white font-semibold text-[#1e3a5f]"
+                      className="w-full px-2 py-1.5 rounded-xl border border-slate-200 text-xs bg-white font-semibold text-slate-800"
                     >
                       <option value={15}>15 mins</option>
                       <option value={30}>30 mins</option>
@@ -1073,17 +1270,17 @@ export default function AdminDashboard() {
                 <button
                   type="button"
                   onClick={() => setIsDoctorModalOpen(false)}
-                  className="px-4 py-2 rounded-full border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50"
+                  className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={doctorSaving}
-                  className="px-6 py-2.5 rounded-full bg-[#1e3a5f] hover:bg-[#284d7a] text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5 disabled:opacity-50"
                 >
                   {doctorSaving ? <Loader2 size={13} className="animate-spin" /> : <Plus size={14} />}
-                  <span>Provision Physician Account</span>
+                  <span>Provision Account</span>
                 </button>
               </div>
             </form>
@@ -1093,8 +1290,8 @@ export default function AdminDashboard() {
 
       {/* MODAL 3: EDIT DOCTOR PROFILE */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1e3a5f]/40 backdrop-blur-sm">
-          <div className="relative w-full max-w-xl bg-white border border-sky-100 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="relative w-full max-w-xl bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
             <button
               onClick={() => setIsEditModalOpen(false)}
               className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-100"
@@ -1102,95 +1299,95 @@ export default function AdminDashboard() {
               <X size={18} />
             </button>
 
-            <h3 className="text-xl font-black text-[#1e3a5f] mb-1">Edit Physician Profile</h3>
-            <p className="text-xs text-slate-400 mb-5">Update clinical qualifications, department, and consultation fees.</p>
+            <h3 className="text-xl font-black text-slate-900 mb-1">Edit Physician Profile</h3>
+            <p className="text-xs text-slate-500 mb-5">Update qualifications, department, and consultation rate.</p>
 
             <form onSubmit={handleSaveDoctorEdit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">First Name *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">First Name *</label>
                   <input
                     type="text"
                     required
                     value={editDoctorForm.firstName}
                     onChange={(e) => setEditDoctorForm({ ...editDoctorForm, firstName: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-[#1e3a5f]"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Last Name *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Last Name *</label>
                   <input
                     type="text"
                     required
                     value={editDoctorForm.lastName}
                     onChange={(e) => setEditDoctorForm({ ...editDoctorForm, lastName: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-[#1e3a5f]"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Department *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Department *</label>
                   <select
                     required
                     value={editDoctorForm.departmentId}
                     onChange={(e) => setEditDoctorForm({ ...editDoctorForm, departmentId: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-[#1e3a5f]"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-800"
                   >
-                    <option value="">-- Choose Department --</option>
+                    <option value="">-- Select Department --</option>
                     {departments.map((d) => (
                       <option key={d.id} value={d.id}>{d.name}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Specialty *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Specialty *</label>
                   <input
                     type="text"
                     required
                     value={editDoctorForm.specialty}
                     onChange={(e) => setEditDoctorForm({ ...editDoctorForm, specialty: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-[#1e3a5f]"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-slate-800"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Qualification *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Qualification *</label>
                   <input
                     type="text"
                     required
                     value={editDoctorForm.qualification}
                     onChange={(e) => setEditDoctorForm({ ...editDoctorForm, qualification: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-[#1e3a5f]"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-slate-800"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">License Number</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">License Number</label>
                   <input
                     type="text"
                     value={editDoctorForm.licenseNumber}
                     onChange={(e) => setEditDoctorForm({ ...editDoctorForm, licenseNumber: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-[#1e3a5f]"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-slate-800"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Experience (Years)</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Experience (Years)</label>
                   <input
                     type="number"
                     min={0}
                     value={editDoctorForm.experienceYears}
                     onChange={(e) => setEditDoctorForm({ ...editDoctorForm, experienceYears: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-[#1e3a5f]"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-slate-800"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#1e3a5f] mb-1">Consultation Fee ($) *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Consultation Fee ($) *</label>
                   <input
                     type="number"
                     min={0}
@@ -1198,7 +1395,7 @@ export default function AdminDashboard() {
                     required
                     value={editDoctorForm.consultationFee}
                     onChange={(e) => setEditDoctorForm({ ...editDoctorForm, consultationFee: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-[#1e3a5f]"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-800"
                   />
                 </div>
               </div>
@@ -1207,14 +1404,14 @@ export default function AdminDashboard() {
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(false)}
-                  className="px-4 py-2 rounded-full border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50"
+                  className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={editDoctorSaving}
-                  className="px-6 py-2.5 rounded-full bg-[#1e3a5f] hover:bg-[#284d7a] text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5 disabled:opacity-50"
                 >
                   {editDoctorSaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={14} />}
                   <span>Save Changes</span>
