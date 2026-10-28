@@ -254,24 +254,23 @@ export default function PatientDashboard() {
   });
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex pt-16">
+    <div className="min-h-screen bg-[#F7FAF9] text-slate-800 flex pt-16">
       
-      {/* SIDEBAR NAVIGATION */}
-      <aside className="w-72 border-r border-slate-800/80 bg-gradient-to-b from-[#0b1329] via-[#0f172a] to-[#070d1e] hidden lg:flex flex-col justify-between fixed top-16 bottom-0 left-0 z-30 shadow-2xl text-slate-300">
+      {/* SIDEBAR NAVIGATION - PORTEA DEEP PINE THEME */}
+      <aside className="w-72 border-r border-[#005A5B]/15 bg-gradient-to-b from-[#005A5B] via-[#004849] to-[#003839] hidden lg:flex flex-col justify-between fixed top-16 bottom-0 left-0 z-30 shadow-2xl text-slate-200">
         
         <div className="p-5 space-y-6">
           
           {/* Node Status Indicator Card */}
-          <div className="relative overflow-hidden p-3.5 rounded-2xl bg-gradient-to-r from-sky-500/10 via-cyan-500/10 to-indigo-500/10 border border-sky-500/20 backdrop-blur-md">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-sky-500/10 rounded-full blur-2xl -mr-8 -mt-8 pointer-events-none" />
+          <div className="relative overflow-hidden p-3.5 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-md">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#0ea5e9] to-[#06b6d4] text-white flex items-center justify-center shadow-lg shadow-sky-500/25 shrink-0">
-                <Heart size={18} />
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#F26522] to-[#FF7E47] text-white flex items-center justify-center shadow-lg shadow-[#F26522]/30 shrink-0">
+                <Heart size={18} className="fill-white/20" />
               </div>
               <div className="truncate">
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-xs shadow-emerald-400" />
-                  <span className="text-[10px] uppercase font-black tracking-widest text-sky-400 leading-none">Patient Portal</span>
+                  <span className="text-[10px] uppercase font-black tracking-widest text-[#FF9E6C] leading-none">Patient Portal</span>
                 </div>
                 <span className="text-xs font-black text-white tracking-wide truncate block mt-0.5">Care Management</span>
               </div>
@@ -280,7 +279,7 @@ export default function PatientDashboard() {
 
           {/* Navigation Menu */}
           <div className="space-y-1.5">
-            <span className="text-[11px] font-extrabold text-slate-400 px-3 uppercase tracking-wider block mb-2">
+            <span className="text-[11px] font-extrabold text-white/60 px-3 uppercase tracking-wider block mb-2">
               Healthcare Services
             </span>
 
@@ -289,15 +288,15 @@ export default function PatientDashboard() {
               onClick={() => setActiveTab('book')}
               className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 ${
                 activeTab === 'book'
-                  ? 'bg-gradient-to-r from-sky-500/20 via-sky-500/15 to-transparent text-white border-l-4 border-[#0ea5e9] shadow-md shadow-sky-950/40'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border-l-4 border-transparent'
+                  ? 'bg-gradient-to-r from-[#F26522]/25 via-[#F26522]/15 to-transparent text-white border-l-4 border-[#F26522] shadow-md shadow-black/20'
+                  : 'text-slate-300 hover:text-white hover:bg-white/5 border-l-4 border-transparent'
               }`}
             >
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
                   activeTab === 'book'
-                    ? 'bg-[#0ea5e9] text-white shadow-md shadow-sky-500/30'
-                    : 'bg-slate-800/80 text-slate-400 group-hover:text-sky-400 group-hover:bg-slate-800'
+                    ? 'bg-[#F26522] text-white shadow-md shadow-[#F26522]/30'
+                    : 'bg-white/10 text-slate-300 group-hover:text-[#F26522] group-hover:bg-white/15'
                 }`}>
                   <Stethoscope size={16} />
                 </div>
@@ -310,15 +309,15 @@ export default function PatientDashboard() {
               onClick={() => setActiveTab('appointments')}
               className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 ${
                 activeTab === 'appointments'
-                  ? 'bg-gradient-to-r from-teal-500/20 via-teal-500/15 to-transparent text-white border-l-4 border-teal-400 shadow-md shadow-teal-950/40'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border-l-4 border-transparent'
+                  ? 'bg-gradient-to-r from-[#F26522]/25 via-[#F26522]/15 to-transparent text-white border-l-4 border-[#F26522] shadow-md shadow-black/20'
+                  : 'text-slate-300 hover:text-white hover:bg-white/5 border-l-4 border-transparent'
               }`}
             >
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
                   activeTab === 'appointments'
-                    ? 'bg-teal-500 text-white shadow-md shadow-teal-500/30'
-                    : 'bg-slate-800/80 text-slate-400 group-hover:text-teal-400 group-hover:bg-slate-800'
+                    ? 'bg-[#F26522] text-white shadow-md shadow-[#F26522]/30'
+                    : 'bg-white/10 text-slate-300 group-hover:text-[#F26522] group-hover:bg-white/15'
                 }`}>
                   <Calendar size={16} />
                 </div>
@@ -326,8 +325,8 @@ export default function PatientDashboard() {
               </div>
               <span className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-all ${
                 activeTab === 'appointments'
-                  ? 'bg-teal-400/20 text-teal-300 border border-teal-400/30'
-                  : 'bg-slate-800 text-slate-400 group-hover:text-slate-200'
+                  ? 'bg-[#F26522]/30 text-white border border-[#F26522]/40'
+                  : 'bg-white/10 text-slate-300 group-hover:text-white'
               }`}>
                 {myAppointments.length}
               </span>
@@ -338,15 +337,15 @@ export default function PatientDashboard() {
               onClick={() => setActiveTab('prescriptions')}
               className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 ${
                 activeTab === 'prescriptions'
-                  ? 'bg-gradient-to-r from-indigo-500/20 via-indigo-500/15 to-transparent text-white border-l-4 border-indigo-400 shadow-md shadow-indigo-950/40'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border-l-4 border-transparent'
+                  ? 'bg-gradient-to-r from-[#F26522]/25 via-[#F26522]/15 to-transparent text-white border-l-4 border-[#F26522] shadow-md shadow-black/20'
+                  : 'text-slate-300 hover:text-white hover:bg-white/5 border-l-4 border-transparent'
               }`}
             >
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
                   activeTab === 'prescriptions'
-                    ? 'bg-indigo-500 text-white shadow-md shadow-indigo-500/30'
-                    : 'bg-slate-800/80 text-slate-400 group-hover:text-indigo-400 group-hover:bg-slate-800'
+                    ? 'bg-[#F26522] text-white shadow-md shadow-[#F26522]/30'
+                    : 'bg-white/10 text-slate-300 group-hover:text-[#F26522] group-hover:bg-white/15'
                 }`}>
                   <FileText size={16} />
                 </div>
@@ -354,8 +353,8 @@ export default function PatientDashboard() {
               </div>
               <span className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-all ${
                 activeTab === 'prescriptions'
-                  ? 'bg-indigo-400/20 text-indigo-300 border border-indigo-400/30'
-                  : 'bg-slate-800 text-slate-400 group-hover:text-slate-200'
+                  ? 'bg-[#F26522]/30 text-white border border-[#F26522]/40'
+                  : 'bg-white/10 text-slate-300 group-hover:text-white'
               }`}>
                 {myPrescriptions.length}
               </span>
@@ -366,15 +365,15 @@ export default function PatientDashboard() {
               onClick={() => setActiveTab('profile')}
               className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 ${
                 activeTab === 'profile'
-                  ? 'bg-gradient-to-r from-amber-500/20 via-amber-500/15 to-transparent text-white border-l-4 border-amber-400 shadow-md shadow-amber-950/40'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border-l-4 border-transparent'
+                  ? 'bg-gradient-to-r from-[#F26522]/25 via-[#F26522]/15 to-transparent text-white border-l-4 border-[#F26522] shadow-md shadow-black/20'
+                  : 'text-slate-300 hover:text-white hover:bg-white/5 border-l-4 border-transparent'
               }`}
             >
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
                   activeTab === 'profile'
-                    ? 'bg-amber-500 text-white shadow-md shadow-amber-500/30'
-                    : 'bg-slate-800/80 text-slate-400 group-hover:text-amber-400 group-hover:bg-slate-800'
+                    ? 'bg-[#F26522] text-white shadow-md shadow-[#F26522]/30'
+                    : 'bg-white/10 text-slate-300 group-hover:text-[#F26522] group-hover:bg-white/15'
                 }`}>
                   <User size={16} />
                 </div>
@@ -385,13 +384,13 @@ export default function PatientDashboard() {
         </div>
 
         {/* User Card */}
-        <div className="p-4 border-t border-slate-800/80 bg-[#090f20]/60 backdrop-blur-xs">
-          <div className="p-3 rounded-2xl bg-slate-900/90 border border-slate-700/60 flex items-center justify-between">
+        <div className="p-4 border-t border-white/10 bg-[#003839]/60 backdrop-blur-xs">
+          <div className="p-3 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
             <div className="truncate mr-2">
               <span className="text-xs font-bold text-white block truncate">
                 {profile.firstName ? `${profile.firstName} ${profile.lastName}` : user?.email}
               </span>
-              <span className="text-[10px] font-semibold text-emerald-400 flex items-center gap-1.5 mt-0.5">
+              <span className="text-[10px] font-semibold text-emerald-300 flex items-center gap-1.5 mt-0.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Verified Patient
               </span>
@@ -399,7 +398,7 @@ export default function PatientDashboard() {
             <button
               onClick={logout}
               title="Sign Out"
-              className="text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 p-2 rounded-xl border border-transparent hover:border-rose-500/20 transition-all"
+              className="text-slate-300 hover:text-rose-400 hover:bg-rose-500/10 p-2 rounded-xl border border-transparent transition-all"
             >
               <ArrowUpRight size={16} />
             </button>
@@ -423,7 +422,7 @@ export default function PatientDashboard() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap ${
-                activeTab === tab.id ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-600'
+                activeTab === tab.id ? 'bg-[#F26522] text-white' : 'bg-white border border-[#005A5B]/15 text-slate-600'
               }`}
             >
               {tab.label}
@@ -433,7 +432,7 @@ export default function PatientDashboard() {
 
         {/* Notifications */}
         {successNotice && (
-          <div className="flex items-center justify-between p-4 mb-6 rounded-2xl bg-emerald-50/90 border border-emerald-200/80 text-emerald-800 text-xs font-bold shadow-xs">
+          <div className="flex items-center justify-between p-4 mb-6 rounded-2xl bg-emerald-50/90 border border-emerald-200 text-emerald-800 text-xs font-bold shadow-xs">
             <div className="flex items-center gap-2.5">
               <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
               <span>{successNotice}</span>
@@ -445,7 +444,7 @@ export default function PatientDashboard() {
         )}
 
         {errorNotice && (
-          <div className="flex items-center justify-between p-4 mb-6 rounded-2xl bg-rose-50/90 border border-rose-200/80 text-rose-800 text-xs font-bold shadow-xs">
+          <div className="flex items-center justify-between p-4 mb-6 rounded-2xl bg-rose-50/90 border border-rose-200 text-rose-800 text-xs font-bold shadow-xs">
             <div className="flex items-center gap-2.5">
               <AlertCircle size={16} className="text-rose-600 shrink-0" />
               <span>{errorNotice}</span>
@@ -464,24 +463,24 @@ export default function PatientDashboard() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-1">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[11px] font-black tracking-widest text-[#0ea5e9] uppercase">CURIX CLINICAL ROSTER</span>
+                  <span className="text-[11px] font-black tracking-widest text-[#005A5B] uppercase">CURIX CLINICAL NETWORK</span>
                   <span className="text-slate-300">·</span>
-                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-[10px] font-bold text-emerald-700">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#EBF5F5] border border-[#005A5B]/15 text-[10px] font-bold text-[#005A5B]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#00A896] animate-pulse" />
                     Available Specialist Network
                   </span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Find & Book a Physician</h2>
-                <p className="text-xs sm:text-sm text-slate-500 mt-0.5 font-medium">Select a medical specialty, choose your preferred physician, and book an immediate consultation slot.</p>
+                <h2 className="text-2xl sm:text-3xl font-black text-[#005A5B] tracking-tight">Find & Book a Physician</h2>
+                <p className="text-xs sm:text-sm text-slate-500 mt-0.5 font-medium">Select a medical specialty, choose your preferred physician, and reserve an appointment slot.</p>
               </div>
 
               <div className="flex items-center gap-2">
                 <button
                   onClick={loadAllPatientData}
                   disabled={isSyncing}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:border-slate-300 text-xs font-extrabold text-slate-700 hover:bg-slate-50 shadow-xs transition disabled:opacity-60"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-[#005A5B]/20 hover:border-[#F26522] text-xs font-extrabold text-[#005A5B] hover:bg-[#EBF5F5]/30 shadow-xs transition disabled:opacity-60"
                 >
-                  <RefreshCw size={14} className={`text-[#0ea5e9] ${isSyncing ? 'animate-spin' : ''}`} />
+                  <RefreshCw size={14} className={`text-[#F26522] ${isSyncing ? 'animate-spin' : ''}`} />
                   <span>{isSyncing ? 'Refreshing...' : 'Refresh Network'}</span>
                 </button>
               </div>
@@ -496,7 +495,7 @@ export default function PatientDashboard() {
                   placeholder="Search physician by name or clinical specialty..."
                   value={doctorSearch}
                   onChange={(e) => setDoctorSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200/80 bg-white text-xs focus:outline-none focus:border-[#0ea5e9]"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#005A5B]/15 bg-white text-xs focus:outline-none focus:border-[#F26522]"
                 />
               </div>
 
@@ -504,7 +503,7 @@ export default function PatientDashboard() {
                 <select
                   value={selectedDept}
                   onChange={(e) => setSelectedDept(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200/80 bg-white text-xs font-bold text-slate-700 focus:outline-none focus:border-[#0ea5e9]"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#005A5B]/15 bg-white text-xs font-bold text-[#005A5B] focus:outline-none focus:border-[#F26522]"
                 >
                   <option value="ALL">All Departments ({departments.length})</option>
                   {departments.map((d) => (
@@ -520,10 +519,10 @@ export default function PatientDashboard() {
                 {filteredDoctors.map((doc) => {
                   const docName = getDoctorName(doc);
                   return (
-                    <div key={doc.id} className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-sky-300 transition group">
+                    <div key={doc.id} className="p-5 rounded-2xl bg-white border border-[#005A5B]/10 shadow-xs flex flex-col justify-between hover:border-[#F26522]/50 hover:shadow-md transition group">
                       <div>
                         <div className="flex items-start justify-between mb-3">
-                          <div className="w-11 h-11 rounded-2xl bg-sky-50 text-[#0ea5e9] flex items-center justify-center font-bold text-sm shrink-0">
+                          <div className="w-11 h-11 rounded-2xl bg-[#EBF5F5] text-[#005A5B] flex items-center justify-center font-bold text-sm shrink-0">
                             {docName.replace('Dr. ', '').charAt(0)}
                           </div>
                           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
@@ -531,8 +530,8 @@ export default function PatientDashboard() {
                           </span>
                         </div>
 
-                        <h4 className="text-sm font-black text-slate-900 group-hover:text-[#0ea5e9] transition-colors">{docName}</h4>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-[#0ea5e9] border border-sky-100 uppercase inline-block mt-1">
+                        <h4 className="text-sm font-black text-[#005A5B] group-hover:text-[#F26522] transition-colors">{docName}</h4>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#EBF5F5] text-[#005A5B] border border-[#005A5B]/15 uppercase inline-block mt-1">
                           {doc.specialty || 'Specialist'}
                         </span>
 
@@ -544,14 +543,14 @@ export default function PatientDashboard() {
                       <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
                         <div>
                           <span className="text-[10px] text-slate-400 uppercase font-bold block leading-none">Consultation Fee</span>
-                          <span className="text-base font-black text-slate-900 font-mono mt-1 block">
+                          <span className="text-base font-black text-[#005A5B] font-mono mt-1 block">
                             ${doc.consultationFee !== undefined ? doc.consultationFee : '50.00'}
                           </span>
                         </div>
 
                         <button
                           onClick={() => handleOpenBooking(doc)}
-                          className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5"
+                          className="px-5 py-2.5 rounded-xl bg-[#F26522] hover:bg-[#D95316] text-white text-xs font-bold transition shadow-md shadow-[#F26522]/20 flex items-center gap-1.5"
                         >
                           <Calendar size={13} />
                           <span>Book Slot</span>
@@ -562,9 +561,9 @@ export default function PatientDashboard() {
                 })}
               </div>
             ) : (
-              <div className="py-16 text-center bg-white rounded-2xl border border-slate-200/90 shadow-xs">
+              <div className="py-16 text-center bg-white rounded-2xl border border-[#005A5B]/10 shadow-xs">
                 <Stethoscope size={36} className="mx-auto text-slate-300 mb-2" />
-                <p className="text-sm font-bold text-slate-800">No physicians match your filter</p>
+                <p className="text-sm font-bold text-[#005A5B]">No physicians match your filter</p>
                 <p className="text-xs text-slate-400 mt-1">Try selecting another department or clearing search parameters.</p>
               </div>
             )}
@@ -577,14 +576,14 @@ export default function PatientDashboard() {
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-black text-slate-900 tracking-tight">My Consultations</h2>
+                <h2 className="text-2xl font-black text-[#005A5B] tracking-tight">My Consultations</h2>
                 <p className="text-xs sm:text-sm text-slate-500 mt-0.5">History of booked hospital appointments and consultation status.</p>
               </div>
               <button
                 onClick={fetchMyAppointments}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-2xs transition"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-[#005A5B]/15 text-xs font-bold text-[#005A5B] hover:bg-[#EBF5F5]/30 shadow-2xs transition"
               >
-                <RefreshCw size={13} className="text-[#0ea5e9]" />
+                <RefreshCw size={13} className="text-[#F26522]" />
                 <span>Refresh Visits</span>
               </button>
             </div>
@@ -601,29 +600,29 @@ export default function PatientDashboard() {
                   return (
                     <div 
                       key={appt.id} 
-                      className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-slate-300 transition"
+                      className="p-5 rounded-2xl bg-white border border-[#005A5B]/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-[#005A5B]/30 transition"
                     >
                       <div className="flex items-start gap-4">
                         <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-sm shrink-0 ${
                           isCompleted ? 'bg-emerald-100 text-emerald-800' :
-                          isCancelled ? 'bg-slate-100 text-slate-500' : 'bg-sky-50 text-[#0ea5e9]'
+                          isCancelled ? 'bg-slate-100 text-slate-500' : 'bg-[#EBF5F5] text-[#005A5B]'
                         }`}>
                           <Stethoscope size={18} />
                         </div>
 
                         <div>
                           <div className="flex items-center gap-2">
-                            <h4 className="text-sm font-black text-slate-900">{docName}</h4>
+                            <h4 className="text-sm font-black text-[#005A5B]">{docName}</h4>
                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
                               isCompleted ? 'bg-emerald-100 text-emerald-800' :
-                              isCancelled ? 'bg-rose-100 text-rose-800' : 'bg-sky-100 text-[#0ea5e9]'
+                              isCancelled ? 'bg-rose-100 text-rose-800' : 'bg-[#F26522]/10 text-[#F26522]'
                             }`}>
                               {appt.status}
                             </span>
                           </div>
 
                           <p className="text-xs text-slate-500 font-medium mt-1">
-                            {doc.specialty || 'Specialist'} · Fee: <strong className="font-mono text-slate-800">${appt.consultationFee || doc.consultationFee || '50.00'}</strong>
+                            {doc.specialty || 'Specialist'} · Fee: <strong className="font-mono text-[#005A5B]">${appt.consultationFee || doc.consultationFee || '50.00'}</strong>
                           </p>
 
                           {appt.reason && (
@@ -637,7 +636,7 @@ export default function PatientDashboard() {
                       <div className="flex items-center gap-3">
                         <div className="sm:text-right pr-2">
                           <span className="text-[10px] font-bold text-slate-400 block uppercase">Appointment Slot</span>
-                          <span className="text-xs font-black text-slate-800 font-mono block mt-0.5">
+                          <span className="text-xs font-black text-[#005A5B] font-mono block mt-0.5">
                             {appt.appointmentDate} · {appt.appointmentTime?.slice(0, 5)}
                           </span>
                         </div>
@@ -654,7 +653,7 @@ export default function PatientDashboard() {
                         {isCompleted && (
                           <button
                             onClick={() => setActiveTab('prescriptions')}
-                            className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs"
+                            className="px-4 py-2 rounded-xl bg-[#005A5B] hover:bg-[#004849] text-white text-xs font-bold transition shadow-xs"
                           >
                             View Prescription
                           </button>
@@ -665,9 +664,9 @@ export default function PatientDashboard() {
                 })}
               </div>
             ) : (
-              <div className="py-16 text-center bg-white rounded-2xl border border-slate-200/90 shadow-xs">
+              <div className="py-16 text-center bg-white rounded-2xl border border-[#005A5B]/10 shadow-xs">
                 <Calendar size={36} className="mx-auto text-slate-300 mb-2" />
-                <p className="text-sm font-bold text-slate-800">No consultations booked</p>
+                <p className="text-sm font-bold text-[#005A5B]">No consultations booked</p>
                 <p className="text-xs text-slate-400 mt-1">Switch to "Find & Book Doctor" to reserve your first slot.</p>
               </div>
             )}
@@ -679,14 +678,14 @@ export default function PatientDashboard() {
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Digital Prescription Vault</h2>
+                <h2 className="text-2xl font-black text-[#005A5B] tracking-tight">Digital Prescription Vault</h2>
                 <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Official medical prescriptions issued by your attending physicians.</p>
               </div>
               <button
                 onClick={fetchMyPrescriptions}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-2xs transition"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-[#005A5B]/15 text-xs font-bold text-[#005A5B] hover:bg-[#EBF5F5]/30 shadow-2xs transition"
               >
-                <RefreshCw size={13} className="text-[#0ea5e9]" />
+                <RefreshCw size={13} className="text-[#F26522]" />
                 <span>Refresh Vault</span>
               </button>
             </div>
@@ -694,10 +693,10 @@ export default function PatientDashboard() {
             {myPrescriptions.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {myPrescriptions.map((rx) => (
-                  <div key={rx.id} className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 transition">
+                  <div key={rx.id} className="p-5 rounded-2xl bg-white border border-[#005A5B]/10 shadow-xs flex flex-col justify-between hover:border-[#005A5B]/30 transition">
                     <div>
                       <div className="flex items-start justify-between mb-3">
-                        <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                        <div className="w-10 h-10 rounded-xl bg-[#EBF5F5] text-[#005A5B] flex items-center justify-center font-bold">
                           <FileText size={18} />
                         </div>
                         <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
@@ -706,7 +705,7 @@ export default function PatientDashboard() {
                       </div>
 
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Clinical Diagnosis</span>
-                      <h4 className="text-sm font-black text-slate-900 mt-0.5">{rx.diagnosis || 'Clinical Consultation'}</h4>
+                      <h4 className="text-sm font-black text-[#005A5B] mt-0.5">{rx.diagnosis || 'Clinical Consultation'}</h4>
 
                       <p className="text-xs text-slate-500 mt-2">
                         {rx.medicines?.length || 0} medications prescribed · Issued {rx.createdAt ? new Date(rx.createdAt).toLocaleDateString() : 'Recent'}
@@ -717,7 +716,7 @@ export default function PatientDashboard() {
                       <span className="text-xs text-slate-400">Official Record</span>
                       <button
                         onClick={() => setViewingRx(rx)}
-                        className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5"
+                        className="px-4 py-2 rounded-xl bg-[#F26522] hover:bg-[#D95316] text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5"
                       >
                         <Printer size={13} />
                         <span>View / Print Slip</span>
@@ -727,9 +726,9 @@ export default function PatientDashboard() {
                 ))}
               </div>
             ) : (
-              <div className="py-16 text-center bg-white rounded-2xl border border-slate-200/90 shadow-xs">
+              <div className="py-16 text-center bg-white rounded-2xl border border-[#005A5B]/10 shadow-xs">
                 <FileText size={36} className="mx-auto text-slate-300 mb-2" />
-                <p className="text-sm font-bold text-slate-800">No prescriptions found</p>
+                <p className="text-sm font-bold text-[#005A5B]">No prescriptions found</p>
                 <p className="text-xs text-slate-400 mt-1">Prescriptions issued by doctors after consultations will appear here automatically.</p>
               </div>
             )}
@@ -740,52 +739,52 @@ export default function PatientDashboard() {
         {activeTab === 'profile' && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-2xl font-black text-slate-900 tracking-tight">Personal Health Chart</h2>
+              <h2 className="text-2xl font-black text-[#005A5B] tracking-tight">Personal Health Chart</h2>
               <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Maintain your emergency contact, blood group, and demographic vitals.</p>
             </div>
 
-            <div className="p-6 sm:p-8 rounded-2xl bg-white border border-slate-200/90 shadow-xs max-w-2xl">
+            <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#005A5B]/10 shadow-xs max-w-2xl">
               <form onSubmit={handleSaveProfile} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">First Name *</label>
+                    <label className="block text-xs font-bold text-[#005A5B] mb-1">First Name *</label>
                     <input
                       type="text"
                       required
                       value={profile.firstName}
                       onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
-                      className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:border-[#0ea5e9]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-semibold text-[#1A2E35] focus:outline-none focus:border-[#F26522]"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Last Name *</label>
+                    <label className="block text-xs font-bold text-[#005A5B] mb-1">Last Name *</label>
                     <input
                       type="text"
                       required
                       value={profile.lastName}
                       onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
-                      className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:border-[#0ea5e9]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-semibold text-[#1A2E35] focus:outline-none focus:border-[#F26522]"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Phone Number</label>
+                    <label className="block text-xs font-bold text-[#005A5B] mb-1">Phone Number</label>
                     <input
                       type="tel"
                       placeholder="+1 (555) 000-0000"
                       value={profile.contactNumber}
                       onChange={(e) => setProfile({ ...profile, contactNumber: e.target.value })}
-                      className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-[#0ea5e9]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs text-[#1A2E35] focus:outline-none focus:border-[#F26522]"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Blood Group</label>
+                    <label className="block text-xs font-bold text-[#005A5B] mb-1">Blood Group</label>
                     <select
                       value={profile.bloodGroup}
                       onChange={(e) => setProfile({ ...profile, bloodGroup: e.target.value })}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#0ea5e9]"
+                      className="w-full px-3 py-2.5 rounded-xl border border-stone-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#F26522]"
                     >
                       <option value="">-- Select Blood Group --</option>
                       {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((bg) => (
@@ -797,21 +796,21 @@ export default function PatientDashboard() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Age</label>
+                    <label className="block text-xs font-bold text-[#005A5B] mb-1">Age</label>
                     <input
                       type="number"
                       min={0}
                       value={profile.age}
                       onChange={(e) => setProfile({ ...profile, age: e.target.value })}
-                      className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-[#0ea5e9]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs text-[#1A2E35] focus:outline-none focus:border-[#F26522]"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Gender</label>
+                    <label className="block text-xs font-bold text-[#005A5B] mb-1">Gender</label>
                     <select
                       value={profile.gender}
                       onChange={(e) => setProfile({ ...profile, gender: e.target.value })}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#0ea5e9]"
+                      className="w-full px-3 py-2.5 rounded-xl border border-stone-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#F26522]"
                     >
                       <option value="MALE">Male</option>
                       <option value="FEMALE">Female</option>
@@ -821,12 +820,12 @@ export default function PatientDashboard() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Residential Address</label>
+                  <label className="block text-xs font-bold text-[#005A5B] mb-1">Residential Address</label>
                   <textarea
                     rows={2}
                     value={profile.address}
                     onChange={(e) => setProfile({ ...profile, address: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-[#0ea5e9] resize-none"
+                    className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs text-[#1A2E35] focus:outline-none focus:border-[#F26522] resize-none"
                   />
                 </div>
 
@@ -834,7 +833,7 @@ export default function PatientDashboard() {
                   <button
                     type="submit"
                     disabled={profileSaving}
-                    className="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs disabled:opacity-50"
+                    className="px-6 py-2.5 rounded-xl bg-[#F26522] hover:bg-[#D95316] text-white text-xs font-bold transition shadow-xs disabled:opacity-50"
                   >
                     {profileSaving ? 'Saving...' : 'Update Health Chart'}
                   </button>
@@ -848,8 +847,8 @@ export default function PatientDashboard() {
 
       {/* MODAL 1: BOOKING & SLOT SELECTION */}
       {selectedDoctor && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="relative w-full max-w-lg bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#005A5B]/40 backdrop-blur-xs">
+          <div className="relative w-full max-w-lg bg-white border border-[#005A5B]/15 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
             <button
               onClick={() => setSelectedDoctor(null)}
               className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-100"
@@ -857,27 +856,27 @@ export default function PatientDashboard() {
               <X size={18} />
             </button>
 
-            <span className="text-[10px] font-black text-[#0ea5e9] tracking-widest uppercase">SLOT RESERVATION</span>
-            <h3 className="text-xl font-black text-slate-900 mt-0.5">Book with {getDoctorName(selectedDoctor)}</h3>
+            <span className="text-[10px] font-black text-[#F26522] tracking-widest uppercase">SLOT RESERVATION</span>
+            <h3 className="text-xl font-black text-[#005A5B] mt-0.5">Book with {getDoctorName(selectedDoctor)}</h3>
             <p className="text-xs text-slate-500 mb-5">{selectedDoctor.specialty} · Fee: ${selectedDoctor.consultationFee || '50.00'}</p>
 
             <form onSubmit={handleConfirmBooking} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Consultation Date *</label>
+                <label className="block text-xs font-bold text-[#005A5B] mb-1">Consultation Date *</label>
                 <input
                   type="date"
                   required
                   min={new Date().toISOString().split('T')[0]}
                   value={bookingDate}
                   onChange={(e) => handleDateChange(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#0ea5e9]"
+                  className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#F26522]"
                 />
               </div>
 
               {/* Slot Grid */}
               {bookingDate && (
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  <label className="block text-xs font-bold text-[#005A5B] mb-1.5">
                     Select Available Consultation Slot *
                   </label>
 
@@ -897,8 +896,8 @@ export default function PatientDashboard() {
                             onClick={() => setSelectedSlot(slotTime)}
                             className={`py-2 px-2.5 rounded-xl text-xs font-mono font-bold transition-all ${
                               isSelected
-                                ? 'bg-slate-900 text-white shadow-xs'
-                                : 'bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100'
+                                ? 'bg-[#F26522] text-white shadow-xs'
+                                : 'bg-[#EBF5F5] border border-[#005A5B]/15 text-[#005A5B] hover:bg-[#005A5B]/10'
                             }`}
                           >
                             {slotTime?.slice(0, 5)}
@@ -915,13 +914,13 @@ export default function PatientDashboard() {
               )}
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Reason for Visit / Symptoms</label>
+                <label className="block text-xs font-bold text-[#005A5B] mb-1">Reason for Visit / Symptoms</label>
                 <textarea
                   rows={2}
                   placeholder="Describe symptoms, concerns, or checkup reason..."
                   value={bookingReason}
                   onChange={(e) => setBookingReason(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-[#0ea5e9] resize-none"
+                  className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs text-[#1A2E35] focus:outline-none focus:border-[#F26522] resize-none"
                 />
               </div>
 
@@ -929,14 +928,14 @@ export default function PatientDashboard() {
                 <button
                   type="button"
                   onClick={() => setSelectedDoctor(null)}
-                  className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50"
+                  className="px-4 py-2 rounded-xl border border-stone-200 text-xs font-bold text-slate-600 hover:bg-stone-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={!selectedSlot || isBookingSubmitting}
-                  className="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-xl bg-[#F26522] hover:bg-[#D95316] text-white text-xs font-bold transition shadow-xs disabled:opacity-50"
                 >
                   {isBookingSubmitting ? 'Reserving...' : 'Confirm Consultation'}
                 </button>
@@ -948,18 +947,18 @@ export default function PatientDashboard() {
 
       {/* MODAL 2: CANCEL APPOINTMENT */}
       {cancellingAppt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="relative w-full max-w-md bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-2xl">
-            <h3 className="text-lg font-black text-slate-900 mb-1">Cancel Consultation</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#005A5B]/40 backdrop-blur-xs">
+          <div className="relative w-full max-w-md bg-white border border-[#005A5B]/15 rounded-3xl p-6 sm:p-8 shadow-2xl">
+            <h3 className="text-lg font-black text-[#005A5B] mb-1">Cancel Consultation</h3>
             <p className="text-xs text-slate-500 mb-4">Are you sure you want to cancel consultation #{cancellingAppt.id}?</p>
 
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Cancellation Reason</label>
+                <label className="block text-xs font-bold text-[#005A5B] mb-1">Cancellation Reason</label>
                 <select
                   value={cancelReason}
                   onChange={(e) => setCancelReason(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-800"
+                  className="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs font-bold text-slate-800"
                 >
                   <option value="Schedule Conflict">Schedule Conflict</option>
                   <option value="Feeling Better">Feeling Better / Resolved</option>
@@ -974,7 +973,7 @@ export default function PatientDashboard() {
                   placeholder="Enter reason..."
                   value={customCancelText}
                   onChange={(e) => setCustomCancelText(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900"
+                  className="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs text-[#1A2E35]"
                 />
               )}
 
@@ -982,7 +981,7 @@ export default function PatientDashboard() {
                 <button
                   type="button"
                   onClick={() => setCancellingAppt(null)}
-                  className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50"
+                  className="px-4 py-2 rounded-xl border border-stone-200 text-xs font-bold text-slate-600 hover:bg-stone-50"
                 >
                   Keep Visit
                 </button>
@@ -1002,8 +1001,8 @@ export default function PatientDashboard() {
 
       {/* MODAL 3: VIEW & PRINT DIGITAL PRESCRIPTION */}
       {viewingRx && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
-          <div className="relative w-full max-w-2xl bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#005A5B]/40 backdrop-blur-xs">
+          <div className="relative w-full max-w-2xl bg-white border border-[#005A5B]/15 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
             
             <button
               onClick={() => setViewingRx(null)}
@@ -1016,13 +1015,13 @@ export default function PatientDashboard() {
             <div id="printable-prescription-slip" className="space-y-6">
               
               {/* Slip Header */}
-              <div className="border-b-2 border-slate-800 pb-4 flex items-start justify-between">
+              <div className="border-b-2 border-[#005A5B] pb-4 flex items-start justify-between">
                 <div>
-                  <span className="text-xl font-black text-slate-900 tracking-tight">CURIX HEALTHCARE SYSTEM</span>
+                  <span className="text-xl font-black text-[#005A5B] tracking-tight">CURIX HEALTHCARE SYSTEM</span>
                   <p className="text-xs font-semibold text-slate-500 mt-0.5">Outpatient Department (OPD) · Clinical Prescription</p>
                 </div>
                 <div className="text-right">
-                  <span className="text-xs font-mono font-bold text-slate-900 block">Rx ID: #{viewingRx.id}</span>
+                  <span className="text-xs font-mono font-bold text-[#005A5B] block">Rx ID: #{viewingRx.id}</span>
                   <span className="text-[11px] font-medium text-slate-500 block">
                     Date: {viewingRx.createdAt ? new Date(viewingRx.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}
                   </span>
@@ -1030,10 +1029,10 @@ export default function PatientDashboard() {
               </div>
 
               {/* Patient & Doctor Details */}
-              <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700">
+              <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-[#EBF5F5] border border-[#005A5B]/15 text-xs text-slate-700">
                 <div>
                   <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Patient Identification</span>
-                  <span className="text-sm font-black text-slate-900 block mt-0.5">
+                  <span className="text-sm font-black text-[#005A5B] block mt-0.5">
                     {profile.firstName ? `${profile.firstName} ${profile.lastName}` : `Patient #${viewingRx.patientId || 'Record'}`}
                   </span>
                   <span className="text-slate-600 font-medium">
@@ -1045,7 +1044,7 @@ export default function PatientDashboard() {
 
                 <div className="text-right">
                   <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Attending Physician</span>
-                  <span className="text-sm font-black text-slate-900 block mt-0.5">
+                  <span className="text-sm font-black text-[#005A5B] block mt-0.5">
                     {viewingRx.doctorName || viewingRx.doctor?.name || 'Attending Physician'}
                   </span>
                   <span className="text-slate-600 font-medium">
@@ -1055,23 +1054,23 @@ export default function PatientDashboard() {
               </div>
 
               {/* Clinical Diagnosis */}
-              <div className="p-4 rounded-xl border border-slate-200 bg-white">
+              <div className="p-4 rounded-xl border border-stone-200 bg-white">
                 <span className="text-[10px] uppercase font-extrabold text-slate-400 tracking-wider block">Clinical Diagnosis</span>
-                <p className="text-sm font-black text-slate-900 mt-1">
+                <p className="text-sm font-black text-[#005A5B] mt-1">
                   {viewingRx.diagnosis || 'Routine General Consultation'}
                 </p>
               </div>
 
               {/* Prescribed Medications Table */}
               <div>
-                <span className="text-xs font-black uppercase tracking-wider text-slate-900 block mb-2.5">
+                <span className="text-xs font-black uppercase tracking-wider text-[#005A5B] block mb-2.5">
                   ℞ Prescribed Medications
                 </span>
 
-                <div className="border border-slate-200 rounded-xl overflow-hidden">
+                <div className="border border-stone-200 rounded-xl overflow-hidden">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="bg-slate-100 border-b border-slate-200 text-[10px] uppercase font-bold text-slate-600 tracking-wider">
+                      <tr className="bg-[#EBF5F5] border-b border-[#005A5B]/15 text-[10px] uppercase font-bold text-[#005A5B] tracking-wider">
                         <th className="py-2.5 px-3">#</th>
                         <th className="py-2.5 px-3">Medicine & Strength</th>
                         <th className="py-2.5 px-3">Dosage / Frequency</th>
@@ -1079,7 +1078,7 @@ export default function PatientDashboard() {
                         <th className="py-2.5 px-3">Instructions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200 text-slate-800">
+                    <tbody className="divide-y divide-stone-200 text-slate-800">
                       {(viewingRx.medicines || []).map((m, idx) => {
                         const medName = m.name || m.medicineName || 'Medication';
                         const medDose = m.dosage || m.dose || m.strength || 'As directed';
@@ -1088,14 +1087,14 @@ export default function PatientDashboard() {
                         const medInstructions = m.instructions || m.instruction || m.notes || 'After meals';
 
                         return (
-                          <tr key={idx} className="hover:bg-slate-50">
+                          <tr key={idx} className="hover:bg-stone-50">
                             <td className="py-3 px-3 font-mono font-bold text-slate-400">{idx + 1}</td>
                             <td className="py-3 px-3">
-                              <span className="font-black text-slate-900 text-xs block">{medName}</span>
+                              <span className="font-black text-[#005A5B] text-xs block">{medName}</span>
                             </td>
                             <td className="py-3 px-3">
                               <span className="font-bold text-slate-900">{medDose}</span>
-                              <span className="text-[11px] text-slate-600 block font-mono font-bold">({medFreq})</span>
+                              <span className="text-[11px] text-[#F26522] block font-mono font-bold">({medFreq})</span>
                             </td>
                             <td className="py-3 px-3 font-semibold text-slate-700">{medDuration}</td>
                             <td className="py-3 px-3 font-medium text-slate-700">{medInstructions}</td>
@@ -1109,17 +1108,17 @@ export default function PatientDashboard() {
 
               {/* Dietary & Clinical Advice */}
               {viewingRx.notes && (
-                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/60">
+                <div className="p-4 rounded-xl border border-stone-200 bg-stone-50/60">
                   <span className="text-[10px] uppercase font-extrabold text-slate-400 tracking-wider block">Doctor's Dietary & Clinical Notes</span>
                   <p className="text-xs font-semibold text-slate-800 mt-1 leading-relaxed">{viewingRx.notes}</p>
                 </div>
               )}
 
               {/* Official Stamp / Signature Line */}
-              <div className="pt-8 flex justify-between items-end border-t border-slate-200 text-xs">
+              <div className="pt-8 flex justify-between items-end border-t border-stone-200 text-xs">
                 <span className="text-[10px] text-slate-400 italic">This is an electronically generated and verified medical record.</span>
                 <div className="text-center">
-                  <div className="w-40 border-b border-slate-400 pb-1 font-mono text-[11px] font-bold text-slate-800">
+                  <div className="w-40 border-b border-[#005A5B] pb-1 font-mono text-[11px] font-bold text-[#005A5B]">
                     Digitally Authorized
                   </div>
                   <span className="text-[10px] text-slate-500 uppercase tracking-wider block mt-1">Medical Officer Seal</span>
@@ -1133,14 +1132,14 @@ export default function PatientDashboard() {
               <button
                 type="button"
                 onClick={() => setViewingRx(null)}
-                className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition"
+                className="px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-bold text-slate-600 hover:bg-stone-50 transition"
               >
                 Close
               </button>
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs transition flex items-center gap-2"
+                className="px-6 py-2.5 rounded-xl bg-[#F26522] hover:bg-[#D95316] text-white text-xs font-bold shadow-xs transition flex items-center gap-2"
               >
                 <Printer size={14} />
                 <span>Print Official Slip</span>

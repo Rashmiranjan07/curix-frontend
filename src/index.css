@@ -2,57 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  background-color: #ffffff;
-  color: #1e3a5f;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  overflow-x: hidden;
+@layer base {
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #F7FAF9;
+    color: #1A2E35;
+    -webkit-font-smoothing: antialiased;
+  }
 }
 
-/* Smooth micro-animations */
-@keyframes spinRing {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+/* Portea Button & Accent Tokens */
+.btn-portea-orange {
+  background-color: #F26522;
+  color: #FFFFFF;
+  transition: all 0.2s ease-in-out;
+}
+.btn-portea-orange:hover {
+  background-color: #D95316;
+  box-shadow: 0 4px 14px rgba(242, 101, 34, 0.35);
 }
 
-@keyframes pulseAura {
-  0%, 100% { transform: scale(0.97); opacity: 0.45; }
-  50% { transform: scale(1.03); opacity: 0.8; }
+.portea-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 90, 91, 0.08);
+  box-shadow: 0 2px 10px rgba(0, 72, 73, 0.04);
 }
 
-@keyframes floatSlow {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-7px); }
-}
-
-@keyframes floatDelayed {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(7px); }
-}
-
-.animate-pulse-ring {
-  animation: pulseAura 5s ease-in-out infinite;
-}
-
-.animate-float-slow {
-  animation: floatSlow 4.5s ease-in-out infinite;
-}
-
-.animate-float-delayed {
-  animation: floatDelayed 4.5s ease-in-out 2.25s infinite;
-}
-
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #f1f8fc;
-}
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #0ea5e9;
+/* Official Print Rules */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  #printable-prescription-slip,
+  #printable-prescription-slip * {
+    visibility: visible !important;
+  }
+  #printable-prescription-slip {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 32px !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
 }
