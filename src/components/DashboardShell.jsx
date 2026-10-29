@@ -12,16 +12,11 @@ export default function DashboardShell() {
   // Normalize role string (handles both "ADMIN" and "ROLE_ADMIN")
   const role = user.role ? user.role.replace('ROLE_', '').toUpperCase() : 'PATIENT';
 
-  // Admin Workspace
-  if (role === 'ADMIN') {
-    return <AdminDashboard />;
-  }
-
-  // Doctor Clinical Workspace
-  if (role === 'DOCTOR') {
-    return <DoctorDashboard />;
-  }
-
-  // Patient Medical Care Portal
-  return <PatientDashboard />;
+  return (
+    <div className="min-h-screen bg-[#F4F8FB]">
+      {role === 'ADMIN' && <AdminDashboard />}
+      {role === 'DOCTOR' && <DoctorDashboard />}
+      {role === 'PATIENT' && <PatientDashboard />}
+    </div>
+  );
 }

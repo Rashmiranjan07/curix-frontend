@@ -3,46 +3,47 @@ import doctorImage from '../assets/doctor.png';
 import { 
   Calendar, Stethoscope, ShieldCheck, CheckCircle2, 
   Heart, Activity, Lock, PhoneCall, Clock, Award, 
-  FileText, ArrowRight, Search, LogIn, Check
+  FileText, ArrowRight, Search, LogIn, Check, Star,
+  Sparkles, PlusCircle
 } from 'lucide-react';
 
-export default function LandingPage({ onOpenAuth }) {
-  // 6 Primary Clinical Services
+export default function LandingPage({ onOpenAuth = () => {} }) {
+  // 6 Primary Curix Clinical Services
   const clinicalServices = [
     {
       title: 'Doctor Consultations',
       desc: 'Connect with verified physicians for outpatient appointments, follow-ups, and home clinical visits.',
-      icon: <Stethoscope size={28} className="text-[#005A5B]" />,
+      icon: <Stethoscope size={24} className="text-[#00A896]" />,
       tag: 'OPD & In-Clinic'
     },
     {
       title: 'Nursing Care',
       desc: 'Post-operative recovery, elderly assistance, wound dressing, and routine vitals tracking by qualified nurses.',
-      icon: <Heart size={28} className="text-[#005A5B]" />,
+      icon: <Heart size={24} className="text-[#00A896]" />,
       tag: 'Certified Staff'
     },
     {
       title: 'Diagnostics & Lab Tests',
       desc: 'Full-body health packages, blood panels, and doorstep sample collections with fast digital reports.',
-      icon: <Activity size={28} className="text-[#005A5B]" />,
+      icon: <Activity size={24} className="text-[#00A896]" />,
       tag: 'NABL Aligned'
     },
     {
       title: 'Critical Care & ICU Setup',
       desc: 'Hospital-grade bedside patient monitors, oxygen concentrators, and specialized palliative care protocols.',
-      icon: <ShieldCheck size={28} className="text-[#005A5B]" />,
+      icon: <ShieldCheck size={24} className="text-[#00A896]" />,
       tag: '24/7 Monitoring'
     },
     {
       title: 'Digital Prescriptions',
       desc: 'Access verified clinical prescription slips with line-item dosages directly from your digital health vault.',
-      icon: <FileText size={28} className="text-[#005A5B]" />,
+      icon: <FileText size={24} className="text-[#00A896]" />,
       tag: 'Tamper-Proof'
     },
     {
       title: 'Emergency Medical Support',
       desc: 'Priority slot booking, immediate doctor routing, and integrated hospital admission assistance.',
-      icon: <PhoneCall size={28} className="text-[#005A5B]" />,
+      icon: <PhoneCall size={24} className="text-[#00A896]" />,
       tag: 'Rapid Response'
     }
   ];
@@ -50,145 +51,139 @@ export default function LandingPage({ onOpenAuth }) {
   // 4 Steps: How Curix Works
   const processSteps = [
     {
-      step: '1',
+      step: '01',
       title: 'Visit Curix',
       desc: 'Access our secure digital healthcare platform on any device to explore accredited hospital units and specialists.',
-      icon: <Search size={18} className="text-[#5eead4]" />
+      icon: <Search size={20} className="text-[#00A896]" />
     },
     {
-      step: '2',
+      step: '02',
       title: 'Login as a Patient',
       desc: 'Sign in to your verified patient portal to safely unlock personalized health charts, records, and history.',
-      icon: <LogIn size={18} className="text-[#5eead4]" />
+      icon: <LogIn size={20} className="text-[#00A896]" />
     },
     {
-      step: '3',
+      step: '03',
       title: 'Find What You Need',
       desc: 'Filter attending physicians by medical specialty, qualifications, experience, and transparent consultation fees.',
-      icon: <Stethoscope size={18} className="text-[#5eead4]" />
+      icon: <Stethoscope size={20} className="text-[#00A896]" />
     },
     {
-      step: '4',
+      step: '04',
       title: 'Book an Appointment',
       desc: 'Select an open real-time calendar slot with zero double-booking and receive an instant digital confirmation.',
-      icon: <Calendar size={18} className="text-[#5eead4]" />
+      icon: <Calendar size={20} className="text-[#00A896]" />
     }
   ];
 
-  return (
-    <div className="relative pt-20 pb-16 bg-[#F8FAFC] text-slate-800">
-      
-      {/* 1. HERO SECTION */}
-      <section id="home" className="relative pt-12 pb-16 overflow-hidden bg-gradient-to-b from-[#EBF5F5]/60 via-[#F8FAFC] to-white">
-        
-        {/* Soft Ambient Auras */}
-        <div className="absolute top-0 left-0 w-[55%] h-[600px] bg-gradient-to-br from-[#005A5B]/10 via-[#00A896]/10 to-transparent blur-3xl pointer-events-none" />
-        <div className="absolute top-20 right-0 w-[45%] h-[550px] bg-gradient-to-bl from-[#F26522]/10 via-slate-100/40 to-transparent blur-3xl pointer-events-none" />
+  const specialties = [
+    { name: 'Cardiology', icon: <Heart size={20} className="text-[#00A896]" /> },
+    { name: 'Dermatology', icon: <Sparkles size={20} className="text-[#00A896]" /> },
+    { name: 'Neurology', icon: <Activity size={20} className="text-[#00A896]" /> },
+    { name: 'Orthopedics', icon: <Award size={20} className="text-[#00A896]" /> },
+    { name: 'Pediatrics', icon: <Stethoscope size={20} className="text-[#00A896]" /> },
+  ];
 
+  return (
+    <div className="relative pt-20 bg-white text-slate-700 font-sans">
+      
+      {/* 1. HERO SECTION (Curix Context with Antixor Geometry) */}
+      <section id="home" className="relative pt-8 sm:pt-16 pb-20 overflow-hidden bg-gradient-to-b from-[#F4F8FB] via-white to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             
-            {/* Left Column: Exact Headline Layout & Colors */}
-            <div className="lg:col-span-7 text-left space-y-6">
-              
-              <div className="inline-block">
-                <div className="w-12 h-1 bg-[#005A5B] mb-2.5 rounded-full" />
-                <span className="text-xs sm:text-sm font-black tracking-widest text-[#005A5B] uppercase block">
-                  PORT-GRADE HEALTHCARE AT YOUR FINGERTIPS
-                </span>
-              </div>
+            {/* Left Headline & Content */}
+            <div className="lg:col-span-7 space-y-6 text-left">
+              <span className="inline-block text-[11px] font-black uppercase tracking-widest text-[#00A896] bg-[#E6F8F5] px-3.5 py-1 rounded-full">
+                HOSPITAL-GRADE HEALTHCARE AT YOUR FINGERTIPS
+              </span>
 
-              {/* Exact 4-Line Headline Matching Reference */}
-              <h1 className="text-4xl sm:text-5xl lg:text-[58px] font-black tracking-tight leading-[1.08] select-none">
-                <span className="text-[#005A5B] block">
-                  Hospital-quality
-                </span>
-                <span className="text-[#F26522] block mt-1">
-                  HEALTHCARE partner
-                </span>
-                <span className="text-[#F26522] block mt-1">
-                  for
-                </span>
-                <span className="text-[#005A5B] block mt-1">
-                  your family
-                </span>
+              <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-extrabold text-[#0A1C35] leading-[1.12] tracking-tight">
+                Hospital-quality <br />
+                <span className="text-[#00A896]">Healthcare Partner</span> <br />
+                for your family
               </h1>
 
-              <p className="text-slate-600 text-base sm:text-lg leading-relaxed max-w-xl font-medium pt-1">
-                From licensed doctor consultations to certified nursing care and digital prescriptions, Curix provides comprehensive healthcare management designed for precision and patient convenience.
+              <p className="text-slate-500 text-sm sm:text-base leading-relaxed max-w-lg font-medium">
+                From licensed doctor consultations to certified nursing care and digital prescriptions, Curix provides comprehensive healthcare management designed for clinical precision and patient convenience.
               </p>
 
-              {/* Pill-Shaped CTA Buttons */}
+              {/* Action Buttons */}
               <div className="pt-2 flex flex-wrap items-center gap-4">
                 <button
-                  onClick={onOpenAuth}
-                  className="px-9 py-4 rounded-full bg-[#F26522] hover:bg-[#D95316] active:bg-[#C2460F] text-white font-extrabold text-sm sm:text-base tracking-wide shadow-lg shadow-[#F26522]/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+                  type="button"
+                  onClick={() => onOpenAuth?.()}
+                  className="px-7 py-3 rounded-full bg-[#00A896] hover:bg-[#079181] text-white font-bold text-xs tracking-wide shadow-lg shadow-[#00A896]/20 transition transform hover:-translate-y-0.5 cursor-pointer"
                 >
                   Find & Book Doctor
                 </button>
 
                 <a
                   href="#services"
-                  className="px-9 py-4 rounded-full bg-white hover:bg-slate-50 active:bg-slate-100 border-2 border-slate-300 hover:border-slate-400 text-slate-800 text-sm sm:text-base font-bold shadow-xs transition-all duration-200"
+                  className="px-7 py-3 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold shadow-xs transition"
                 >
                   Explore All Services
                 </a>
               </div>
 
-              {/* Trust Badges */}
-              <div className="pt-6 border-t border-slate-200 flex flex-wrap items-center gap-6 text-sm text-slate-700 font-bold">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 size={18} className="text-[#00A896]" />
+              {/* Verified Trust Badges */}
+              <div className="pt-6 border-t border-slate-200/70 flex flex-wrap items-center gap-6 text-xs text-slate-600 font-bold">
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle2 size={16} className="text-[#00A896]" />
                   <span>Zero Double Booking</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <ShieldCheck size={18} className="text-[#005A5B]" />
+                <div className="flex items-center gap-1.5">
+                  <ShieldCheck size={16} className="text-[#0A1C35]" />
                   <span>Stateless JWT Security</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Award size={18} className="text-[#F26522]" />
+                <div className="flex items-center gap-1.5">
+                  <Award size={16} className="text-[#00A896]" />
                   <span>Verified Medical Licenses</span>
                 </div>
               </div>
             </div>
 
-            {/* Right Column: Doctor Frame with Reference Peach Backdrop */}
-            <div className="lg:col-span-5 relative flex items-center justify-center min-h-[460px]">
-              <div className="absolute w-[360px] h-[360px] sm:w-[420px] sm:h-[420px] rounded-full bg-[#00A896]/15 blur-2xl pointer-events-none" />
-              <div className="absolute w-[320px] h-[320px] sm:w-[380px] sm:h-[380px] rounded-full bg-gradient-to-tr from-[#005A5B]/20 via-[#F26522]/15 to-transparent pointer-events-none animate-pulse" />
+            {/* Right Doctor Visual with Mint Aura & Badges */}
+            <div className="lg:col-span-5 relative flex items-center justify-center">
+              <div className="absolute w-[360px] h-[360px] sm:w-[440px] sm:h-[440px] rounded-full bg-[#00A896]/15 blur-2xl pointer-events-none" />
+              <div className="absolute w-[300px] h-[300px] sm:w-[380px] sm:h-[380px] rounded-full bg-[#E6F8F5] pointer-events-none" />
 
-              {/* Peach Rectangle Container Card */}
-              <div className="relative w-[300px] h-[360px] sm:w-[340px] sm:h-[410px] rounded-[36px] bg-[#f9dfd2] border border-[#f0cfbe] shadow-2xl shadow-slate-900/10 overflow-hidden flex items-end justify-center group z-10">
-                <img
-                  src={doctorImage}
-                  alt="Curix Specialist Doctor"
-                  className="w-full h-full object-cover object-top filter contrast-[1.02] transform transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-900/10 to-transparent pointer-events-none" />
-              </div>
+              <div className="relative z-10 w-full max-w-[340px] sm:max-w-[400px]">
+                {doctorImage ? (
+                  <img
+                    src={doctorImage}
+                    alt="Curix Attending Physician"
+                    className="w-full h-auto object-contain filter drop-shadow-xl"
+                  />
+                ) : (
+                  <div className="w-full h-[350px] bg-[#E6F8F5] rounded-3xl flex items-center justify-center text-[#00A896]">
+                    <Stethoscope size={64} />
+                  </div>
+                )}
 
-              {/* Floating Badge 1 */}
-              <div className="absolute -top-2 left-0 sm:left-2 bg-white/95 backdrop-blur-md border border-slate-200 p-3.5 rounded-2xl shadow-lg flex items-center gap-3 z-20">
-                <div className="w-10 h-10 rounded-xl bg-teal-50 border border-teal-200 flex items-center justify-center text-[#005A5B] shadow-xs">
-                  <Stethoscope size={20} />
+                {/* Floating Physician Badge */}
+                <div className="absolute top-2 left-0 bg-white/95 backdrop-blur-md border border-slate-100 p-3 rounded-2xl shadow-xl flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-[#E6F8F5] flex items-center justify-center text-[#00A896]">
+                    <Stethoscope size={18} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-extrabold text-[#0A1C35]">Dr. Sarah Jenkins</p>
+                    <p className="text-[10px] text-[#00A896] font-bold">Verified Attending Staff</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs font-black text-slate-900">Dr. Sarah Jenkins</p>
-                  <p className="text-xs text-[#F26522] font-extrabold">Verified Attending Staff</p>
-                </div>
-              </div>
 
-              {/* Floating Badge 2 */}
-              <div className="absolute -bottom-2 right-0 sm:right-2 bg-white/95 backdrop-blur-md border border-slate-200 p-3.5 rounded-2xl shadow-lg flex items-center gap-3 z-20">
-                <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-500 shadow-xs">
-                  <Heart size={20} className="fill-rose-500" />
-                </div>
-                <div>
-                  <p className="text-xs font-black text-slate-900">Live Vitals Sync</p>
-                  <p className="text-xs text-slate-600 font-bold flex items-center gap-1">
-                    <Activity size={14} className="text-[#00A896]" />
-                    72 BPM · Optimal
-                  </p>
+                {/* Floating Vitals Badge */}
+                <div className="absolute bottom-4 right-0 bg-white/95 backdrop-blur-md border border-slate-100 p-3 rounded-2xl shadow-xl flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-rose-50 flex items-center justify-center text-rose-500">
+                    <Heart size={18} className="fill-rose-500" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-extrabold text-[#0A1C35]">Live Vitals Sync</p>
+                    <p className="text-[10px] text-slate-500 font-semibold flex items-center gap-1">
+                      <Activity size={12} className="text-[#00A896]" />
+                      72 BPM · Optimal
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -198,95 +193,130 @@ export default function LandingPage({ onOpenAuth }) {
       </section>
 
       {/* 2. RAPID HEALTHCARE DISPATCH BAR */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-20">
-        <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-md grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
+        <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200/80 shadow-xl grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
           
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-orange-50 text-[#F26522] flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center shrink-0">
               <Clock size={24} />
             </div>
             <div>
-              <h4 className="text-base font-bold text-slate-900">Immediate Slot Booking</h4>
-              <p className="text-xs text-slate-500 font-medium">Verified calendar synchronization with zero booking collisions.</p>
+              <h4 className="text-sm font-bold text-[#0A1C35]">Immediate Slot Booking</h4>
+              <p className="text-xs text-slate-500 mt-0.5">Verified calendar synchronization with zero booking collisions.</p>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-teal-50 text-[#005A5B] flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center shrink-0">
               <ShieldCheck size={24} />
             </div>
             <div>
-              <h4 className="text-base font-bold text-slate-900">Licensed Clinical Experts</h4>
-              <p className="text-xs text-slate-500 font-medium">Every doctor and nurse undergoes administrative credential checks.</p>
+              <h4 className="text-sm font-bold text-[#0A1C35]">Licensed Clinical Experts</h4>
+              <p className="text-xs text-slate-500 mt-0.5">Every doctor and nurse undergoes administrative credential checks.</p>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center shrink-0">
               <FileText size={24} />
             </div>
             <div>
-              <h4 className="text-base font-bold text-slate-900">Printable Digital Rx</h4>
-              <p className="text-xs text-slate-500 font-medium">Download, store, and print official clinical prescription slips anytime.</p>
+              <h4 className="text-sm font-bold text-[#0A1C35]">Printable Digital Rx</h4>
+              <p className="text-xs text-slate-500 mt-0.5">Download, store, and print official clinical prescription slips anytime.</p>
             </div>
           </div>
 
         </div>
       </section>
 
-      {/* 3. HOW CURIX WORKS (EXACT PORTEA DEEP PINE & GLITTERY DOT MATRIX) */}
-      <section className="mt-16 py-20 bg-[#022b2c] text-white relative overflow-hidden">
-        
-        {/* Deep Vignette Radial Glow */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_#09494a_0%,_#022e2f_45%,_#011e1f_100%)] pointer-events-none" />
+      {/* 3. HOW CURIX WORKS (Bento Process Steps) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="text-center mb-14">
+          <span className="text-[11px] font-black tracking-widest uppercase text-[#00A896] block mb-1">
+            A SIMPLE, GUIDED PROCESS
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0A1C35]">
+            How Curix Works
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-md mx-auto">
+            From registration to verified prescriptions in four seamless clinical steps.
+          </p>
+        </div>
 
-        {/* Luminous Particle Grid Pattern (Glittery Dot Matrix) */}
-        <div 
-          className="absolute inset-0 pointer-events-none opacity-80"
-          style={{
-            backgroundImage: `radial-gradient(rgba(94, 234, 212, 0.45) 1.25px, transparent 1.25px)`,
-            backgroundSize: '24px 24px'
-          }}
-        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {processSteps.map((item) => (
+            <div 
+              key={item.step}
+              className="relative p-6 rounded-3xl bg-[#F4F8FB] border border-slate-100 hover:border-[#00A896]/30 transition group flex flex-col justify-between"
+            >
+              <span className="text-4xl font-extrabold text-slate-200 group-hover:text-[#00A896]/20 transition-colors block mb-4">
+                {item.step}
+              </span>
+              <div>
+                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center mb-4 shadow-xs">
+                  {item.icon}
+                </div>
+                <h3 className="text-sm font-bold text-[#0A1C35] mb-1.5">{item.title}</h3>
+                <p className="text-xs text-slate-500 leading-relaxed">{item.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
-        {/* Compact, Narrow Container */}
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      {/* 4. HOSPITAL & PATIENT CARE SERVICES (Navy Bento Background) */}
+      <section id="services" className="py-20 bg-[#0A1C35] text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          {/* Section Header */}
-          <div className="text-center mb-14">
-            <span className="text-[11px] font-black tracking-widest uppercase text-[#5eead4] block mb-2">
-              A SIMPLE, GUIDED PROCESS
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-serif font-black tracking-tight text-white">
-              How Curix Works
-            </h2>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-widest text-[#00A896] block mb-1">
+                COMPREHENSIVE MEDICAL SERVICES
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
+                Specialized Hospital & Patient Care
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-xl">
+                High-standard clinical disciplines modeled after modern home healthcare institutions to serve your entire health lifecycle.
+              </p>
+            </div>
+            <button 
+              type="button"
+              onClick={() => onOpenAuth?.()}
+              className="px-6 py-2.5 rounded-full border border-white/20 text-xs font-bold text-white hover:bg-white/10 transition self-start sm:self-auto cursor-pointer"
+            >
+              Explore All Units
+            </button>
           </div>
 
-          {/* 4 Cards: Compact Width & Transparent Glassmorphism */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-            {processSteps.map((item) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {clinicalServices.map((srv, idx) => (
               <div 
-                key={item.step}
-                className="relative rounded-2xl p-5 sm:p-6 bg-[#043a3b]/55 border border-teal-400/20 backdrop-blur-md flex flex-col justify-between overflow-hidden shadow-lg transition-transform duration-300 hover:-translate-y-1"
+                key={idx}
+                className="p-7 rounded-3xl bg-white/5 border border-white/10 hover:border-[#00A896]/40 transition group flex flex-col justify-between"
               >
-                {/* Large Ghost Step Number */}
-                <span className="absolute top-2 right-4 text-6xl font-serif font-black text-teal-100/[0.08] select-none pointer-events-none">
-                  {item.step}
-                </span>
-
                 <div>
-                  {/* Rounded Squircle Icon Badge */}
-                  <div className="w-10 h-10 rounded-xl bg-teal-400/10 border border-teal-300/25 flex items-center justify-center mb-5">
-                    {item.icon}
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform">
+                      {srv.icon}
+                    </div>
+                    <span className="px-3 py-1 rounded-full text-[10px] font-black bg-white/10 text-teal-300 uppercase">
+                      {srv.tag}
+                    </span>
                   </div>
+                  <h3 className="text-base font-bold text-white mb-2">{srv.title}</h3>
+                  <p className="text-xs text-slate-400 leading-relaxed">{srv.desc}</p>
+                </div>
 
-                  {/* Title & Description */}
-                  <h3 className="text-sm sm:text-base font-bold text-white mb-2 tracking-tight">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs text-slate-300 leading-relaxed font-normal">
-                    {item.desc}
-                  </p>
+                <div className="pt-5 mt-5 border-t border-white/10 flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => onOpenAuth?.()}
+                    className="text-xs font-bold text-[#00A896] hover:text-[#0bc2a8] flex items-center gap-1.5 transition cursor-pointer"
+                  >
+                    <span>Book Consultation</span>
+                    <ArrowRight size={13} />
+                  </button>
                 </div>
               </div>
             ))}
@@ -295,162 +325,147 @@ export default function LandingPage({ onOpenAuth }) {
         </div>
       </section>
 
-      {/* 4. HOSPITAL SERVICES SECTION */}
-      <section id="services" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="text-center mb-14">
-          <span className="text-xs font-black tracking-widest text-[#F26522] uppercase">
-            COMPREHENSIVE MEDICAL SERVICES
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-black text-[#005A5B] mt-1.5">
-            Specialized Hospital & Patient Care
-          </h2>
-          <p className="text-slate-600 text-base font-medium mt-2 max-w-2xl mx-auto">
-            High-standard clinical disciplines modeled after modern home healthcare institutions to serve your entire health lifecycle.
-          </p>
-        </div>
+      {/* 5. ABOUT CURIX HEALTHCARE */}
+      <section id="about" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          <div className="lg:col-span-6 space-y-6">
+            <span className="text-[11px] font-black tracking-widest text-[#00A896] uppercase block">
+              ABOUT CURIX HEALTHCARE
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0A1C35] leading-tight">
+              Pioneering Accessible, Real-Time Digital Healthcare
+            </h2>
+            <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+              Modeled after leading healthcare institutions, Curix was built to eliminate queues, eradicate booking collisions, and empower patients with direct access to licensed clinicians and digital medical records.
+            </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {clinicalServices.map((srv, idx) => (
-            <div 
-              key={idx}
-              className="p-8 rounded-3xl bg-white border border-slate-200 hover:border-[#F26522]/40 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between group"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-5">
-                  <div className="w-14 h-14 rounded-2xl bg-[#EBF5F5] border border-[#005A5B]/15 flex items-center justify-center group-hover:scale-105 group-hover:bg-orange-50 group-hover:text-[#F26522] transition-all">
-                    {srv.icon}
-                  </div>
-                  <span className="px-3 py-1 rounded-full text-xs font-black bg-slate-100 text-slate-700 uppercase">
-                    {srv.tag}
-                  </span>
-                </div>
-                <h3 className="text-xl font-bold text-[#005A5B] mb-2.5">{srv.title}</h3>
-                <p className="text-sm text-slate-600 leading-relaxed font-normal">{srv.desc}</p>
+            <div className="space-y-3 pt-2 text-xs sm:text-sm">
+              <div className="flex items-start gap-3">
+                <CheckCircle2 size={18} className="text-[#00A896] shrink-0 mt-0.5" />
+                <p className="text-slate-700">
+                  <strong className="text-[#0A1C35]">Hospital-Wide Coordination:</strong> Unites patients, doctors, and hospital administrators on an audit-backed infrastructure.
+                </p>
               </div>
 
-              <div className="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between">
-                <button
-                  onClick={onOpenAuth}
-                  className="text-xs font-black text-[#F26522] hover:text-[#D95316] flex items-center gap-1.5 group-hover:translate-x-1 transition-all cursor-pointer"
-                >
-                  <span>Book Consultation</span>
-                  <ArrowRight size={14} />
-                </button>
+              <div className="flex items-start gap-3">
+                <CheckCircle2 size={18} className="text-[#00A896] shrink-0 mt-0.5" />
+                <p className="text-slate-700">
+                  <strong className="text-[#0A1C35]">Transparent Pricing:</strong> Transparent consultation fees and department breakdowns with zero hidden costs.
+                </p>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <CheckCircle2 size={18} className="text-[#00A896] shrink-0 mt-0.5" />
+                <p className="text-slate-700">
+                  <strong className="text-[#0A1C35]">Compliant & Secure:</strong> Stateless JWT authentication adhering to patient health data privacy laws.
+                </p>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 5. ABOUT US SECTION */}
-      <section id="about" className="bg-white border-y border-slate-200 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            
-            <div className="lg:col-span-6 space-y-6">
-              <span className="text-xs font-black tracking-widest text-[#F26522] uppercase">
-                ABOUT CURIX HEALTHCARE
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-black text-[#005A5B] leading-tight">
-                Pioneering Accessible, Real-Time Digital Healthcare
-              </h2>
-              <p className="text-slate-600 text-base leading-relaxed font-medium">
-                Modeled after leading healthcare institutions, Curix was built to eliminate queues, eradicate booking collisions, and empower patients with direct access to licensed clinicians and digital medical records.
-              </p>
-              
-              <div className="space-y-3.5 pt-2">
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-teal-50 text-[#005A5B] flex items-center justify-center shrink-0 mt-0.5">
-                    <CheckCircle2 size={16} className="text-[#005A5B]" />
-                  </div>
-                  <p className="text-sm text-slate-700 font-semibold">
-                    <strong className="text-slate-900">Hospital-Wide Coordination:</strong> Unites patients, doctors, and hospital administrators on an audit-backed infrastructure.
-                  </p>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-teal-50 text-[#005A5B] flex items-center justify-center shrink-0 mt-0.5">
-                    <CheckCircle2 size={16} className="text-[#005A5B]" />
-                  </div>
-                  <p className="text-sm text-slate-700 font-semibold">
-                    <strong className="text-slate-900">Transparent Pricing:</strong> Transparent consultation fees and department breakdowns with zero hidden costs.
-                  </p>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-teal-50 text-[#005A5B] flex items-center justify-center shrink-0 mt-0.5">
-                    <CheckCircle2 size={16} className="text-[#005A5B]" />
-                  </div>
-                  <p className="text-sm text-slate-700 font-semibold">
-                    <strong className="text-slate-900">Compliant & Secure:</strong> State-of-the-art stateless JWT token security adhering to HIPAA and digital health protection laws.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="lg:col-span-6 grid grid-cols-2 gap-4">
-              <div className="p-6 rounded-2xl bg-[#F8FAFC] border border-slate-200 text-center">
-                <span className="text-4xl font-black text-[#005A5B] block font-mono">10,000+</span>
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1 block">Patients Treated</span>
-              </div>
-              <div className="p-6 rounded-2xl bg-[#F8FAFC] border border-slate-200 text-center">
-                <span className="text-4xl font-black text-[#F26522] block font-mono">150+</span>
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1 block">Physicians</span>
-              </div>
-              <div className="p-6 rounded-2xl bg-[#F8FAFC] border border-slate-200 text-center">
-                <span className="text-4xl font-black text-[#00A896] block font-mono">25+</span>
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1 block">Specialties</span>
-              </div>
-              <div className="p-6 rounded-2xl bg-[#F8FAFC] border border-slate-200 text-center">
-                <span className="text-4xl font-black text-slate-900 block font-mono">99.9%</span>
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1 block">Satisfaction</span>
-              </div>
-            </div>
-
           </div>
+
+          <div className="lg:col-span-6 grid grid-cols-2 gap-4">
+            <div className="p-6 rounded-3xl bg-[#F4F8FB] border border-slate-100 text-center">
+              <span className="text-3xl sm:text-4xl font-black text-[#00A896] block font-mono">10,000+</span>
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1 block">Patients Treated</span>
+            </div>
+            <div className="p-6 rounded-3xl bg-[#F4F8FB] border border-slate-100 text-center">
+              <span className="text-3xl sm:text-4xl font-black text-[#0A1C35] block font-mono">150+</span>
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1 block">Physicians</span>
+            </div>
+            <div className="p-6 rounded-3xl bg-[#F4F8FB] border border-slate-100 text-center">
+              <span className="text-3xl sm:text-4xl font-black text-[#00A896] block font-mono">25+</span>
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1 block">Specialties</span>
+            </div>
+            <div className="p-6 rounded-3xl bg-[#F4F8FB] border border-slate-100 text-center">
+              <span className="text-3xl sm:text-4xl font-black text-[#0A1C35] block font-mono">99.9%</span>
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1 block">Satisfaction</span>
+            </div>
+          </div>
+
         </div>
       </section>
 
-      {/* 6. QUICK EMERGENCY & CONSULTATION CALLOUT */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-[#005A5B] via-[#004849] to-[#002f30] text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl">
-          <div className="space-y-2 text-center md:text-left">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-[#FF9E6C]">
+      {/* 6. CALLOUT: NEED IMMEDIATE ASSISTANCE */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-[#0A1C35] via-[#071d38] to-[#0A1C35] text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+          <div className="space-y-1.5 text-center md:text-left">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#00A896]">
               PRIORITY MEDICAL SUPPORT
             </span>
-            <h3 className="text-2xl sm:text-3xl font-black">
+            <h3 className="text-xl sm:text-2xl font-extrabold">
               Need Immediate Medical Assistance or a Home Doctor Visit?
             </h3>
-            <p className="text-sm text-slate-200 max-w-xl font-medium">
+            <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
               Our clinical response team and certified physicians are available 24/7 to manage acute symptoms, consultations, and post-hospitalization recovery.
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
             <button
-              onClick={onOpenAuth}
-              className="px-8 py-3.5 rounded-full bg-[#F26522] hover:bg-[#D95316] text-white font-extrabold text-sm tracking-wide shadow-md transition-all cursor-pointer"
+              type="button"
+              onClick={() => onOpenAuth?.()}
+              className="px-6 py-3 rounded-full bg-[#00A896] hover:bg-[#079181] text-white font-bold text-xs tracking-wide shadow-md transition-all cursor-pointer"
             >
               Book Consultation Now
             </button>
             <a
               href="tel:18002874922"
-              className="px-8 py-3.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-sm border border-white/20 transition-all flex items-center gap-2"
+              className="px-6 py-3 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition-all flex items-center gap-2"
             >
-              <PhoneCall size={16} />
+              <PhoneCall size={14} />
               <span>Call Helpline</span>
             </a>
           </div>
         </div>
       </section>
 
-      {/* 7. TRUST & CERTIFICATIONS FOOTER */}
-      <footer id="security" className="border-t border-slate-200 pt-10 pb-8 text-center text-sm text-slate-500 font-medium">
-        <div className="flex items-center justify-center gap-2 mb-3">
-          <Lock size={16} className="text-[#F26522]" />
-          <span className="text-slate-800 font-bold">HIPAA & Digital Health Data Protection Aligned</span>
+      {/* 7. FOOTER */}
+      <footer id="security" className="bg-[#071524] border-t border-white/10 pt-16 pb-12 text-slate-400 text-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pb-12 border-b border-white/10">
+            <div className="md:col-span-5 space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-[#00A896] flex items-center justify-center text-white">
+                  <Heart size={18} className="fill-white/20" />
+                </div>
+                <span className="text-lg font-black text-white tracking-wide">CURIX</span>
+              </div>
+              <p className="text-slate-400 leading-relaxed max-w-sm">
+                Better care, healthier lives. Connecting patients with verified medical experts in an integrated digital ecosystem.
+              </p>
+            </div>
+
+            <div className="md:col-span-2 space-y-2">
+              <span className="text-white font-bold block mb-2">Platform</span>
+              <a href="#home" className="block hover:text-white">Home</a>
+              <a href="#services" className="block hover:text-white">Clinical Services</a>
+              <a href="#about" className="block hover:text-white">About Curix</a>
+            </div>
+
+            <div className="md:col-span-2 space-y-2">
+              <span className="text-white font-bold block mb-2">Support</span>
+              <a href="#home" className="block hover:text-white">24/7 Helpline</a>
+              <a href="#security" className="block hover:text-white">Security & Audit</a>
+              <a href="#home" className="block hover:text-white">Privacy Policy</a>
+            </div>
+
+            <div className="md:col-span-3 space-y-3">
+              <span className="text-white font-bold block">Patient Advisory</span>
+              <p className="text-slate-400 leading-relaxed">
+                Curix provides administrative coordination and scheduling for accredited outpatient medical facilities.
+              </p>
+            </div>
+          </div>
+
+          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left text-slate-500">
+            <p>© 2026 Curix Healthcare Systems. All rights reserved.</p>
+            <div className="flex items-center gap-2">
+              <Lock size={14} className="text-[#00A896]" />
+              <span>HIPAA Aligned & Encrypted Health Records</span>
+            </div>
+          </div>
         </div>
-        <p>© 2026 Curix Healthcare Systems.</p>
       </footer>
 
     </div>
