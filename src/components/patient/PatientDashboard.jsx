@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { patientApi, adminApi } from '../../services/api';
+import api, { patientApi, adminApi } from '../../services/api';
 import { 
   Heart, Calendar, Stethoscope, Clock, FileText, User, 
   Search, CheckCircle2, AlertCircle, X, ChevronRight, 
-  RefreshCw, Building2, DollarSign, Printer, ArrowUpRight, 
-  Sparkles, Check, MapPin, Phone
+  RefreshCw, Building2, DollarSign, Printer, Download, ArrowUpRight, 
+  Sparkles, Check, MapPin, Phone, Loader2 
 } from 'lucide-react';
 
 export default function PatientDashboard() {
@@ -44,6 +44,7 @@ export default function PatientDashboard() {
   // 4. Prescriptions State
   const [myPrescriptions, setMyPrescriptions] = useState([]);
   const [viewingRx, setViewingRx] = useState(null);
+  const [loadingRxDetails, setLoadingRxDetails] = useState(false);
 
   // 5. Profile State
   const [profile, setProfile] = useState({
@@ -140,7 +141,65 @@ export default function PatientDashboard() {
     }
   };
 
-  // Doctor & Slot Lookup
+  // Extract items array from any property name or serialized JSON string
+  const extractItems = (rx) => {
+    if (!rx) return [];
+    let raw = rx.items || rx.prescriptionItems || rx.medicines || rx.medicationItems || [];
+    if (typeof raw === 'string') {
+      try {
+        raw = JSON.parse(raw);
+      } catch (e) {
+        return raw.split(',').map((name) => ({ name: name.trim() }));
+      }
+    }
+    return Array.isArray(raw) ? raw : [];
+  };
+
+  // Comprehensive multi-property mapping for each medication row
+  const normalizeItem = (item, idx) => {
+    if (!item) return null;
+    if (typeof item === 'string') {
+      return {
+        name: item,
+        dosage: 'As directed',
+        frequency: '1-0-1',
+        duration: '5 days',
+        instructions: 'After meals'
+      };
+    }
+    return {
+      name: item.name || item.medicineName || item.medicationName || item.drugName || item.medicine?.name || `Medication #${idx + 1}`,
+      dosage: item.dosage || item.dose || item.strength || item.dosageAmount || item.mg || item.amount || 'As directed',
+      frequency: item.frequency || item.freq || item.timing || item.schedule || item.dosageFrequency || '1-0-1',
+      duration: item.duration || (item.durationDays ? `${item.durationDays} days` : '') || (item.days ? `${item.days} days` : '') || '5 days',
+      instructions: item.instructions || item.instruction || item.notes || item.specialInstructions || item.directions || 'After meals'
+    };
+  };
+
+  // View Slip & detail fetch fallback
+  const handleOpenViewingRx = async (rx) => {
+    setViewingRx(rx);
+    const existing = extractItems(rx);
+
+    if (rx.id && (!existing.length || !existing[0]?.dosage)) {
+      setLoadingRxDetails(true);
+      try {
+        const res = await api.get(`/prescriptions/${rx.id}`).catch(() =>
+          api.get(`/patient/prescriptions/${rx.id}`)
+        );
+        const data = res?.data?.data || res?.data;
+        if (data && typeof data === 'object') {
+          setViewingRx((prev) => ({ ...prev, ...data }));
+        }
+      } catch (err) {
+        console.warn("Prescription detail fetch fallback: using summary data", err);
+      } finally {
+        setLoadingRxDetails(false);
+      }
+    }
+  };
+
+  // Booking handlers
   const handleOpenBooking = (doc) => {
     setSelectedDoctor(doc);
     setBookingDate('');
@@ -194,7 +253,7 @@ export default function PatientDashboard() {
     }
   };
 
-  // Cancellation
+  // Cancellation handler
   const handleConfirmCancel = async () => {
     if (!cancellingAppt) return;
     setCancelSaving(true);
@@ -213,7 +272,7 @@ export default function PatientDashboard() {
     }
   };
 
-  // Profile Save
+  // Profile Save handler
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     setProfileSaving(true);
@@ -253,8 +312,282 @@ export default function PatientDashboard() {
     return nameMatch && deptMatch;
   });
 
+  // Direct File Download for Prescription Slip (HTML format)
+  const handleDownloadSlip = () => {
+    if (!viewingRx) return;
+    const activeItems = extractItems(viewingRx).map(normalizeItem).filter(Boolean);
+
+    const docName = 
+      viewingRx.doctorName || 
+      viewingRx.doctor?.fullName || 
+      (viewingRx.doctor?.firstName ? `Dr. ${viewingRx.doctor.firstName} ${viewingRx.doctor.lastName || ''}` : '') ||
+      'Dr. Attending Physician';
+
+    const patName = 
+      profile.firstName ? `${profile.firstName} ${profile.lastName}` : (viewingRx.patientName || `Patient #${viewingRx.patientId || 'Record'}`);
+
+    const deptName = 
+      viewingRx.departmentName || viewingRx.department?.name || viewingRx.doctorSpecialty || viewingRx.specialty || 'General Medicine';
+
+    const rowsHtml = activeItems.map((m, idx) => `
+      <tr style="border-bottom: 1px solid #e2e8f0;">
+        <td style="padding: 10px; font-weight: bold; color: #64748b;">${idx + 1}</td>
+        <td style="padding: 10px; font-weight: bold; color: #0f172a;">${m.name}</td>
+        <td style="padding: 10px; color: #005a5b; font-weight: bold;">${m.dosage}</td>
+        <td style="padding: 10px; color: #334155;">${m.frequency}</td>
+        <td style="padding: 10px; color: #334155;">${m.duration}</td>
+        <td style="padding: 10px; color: #475569; font-style: italic;">${m.instructions}</td>
+      </tr>
+    `).join('');
+
+    const slipDocument = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Curix-Prescription-Rx#${viewingRx.id || 'Slip'}</title>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; color: #1e293b; background: #fff; }
+          .header { border-bottom: 2px solid #005a5b; padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; }
+          .title { font-size: 24px; font-weight: 900; color: #005a5b; margin: 0; }
+          .box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 20px; display: flex; justify-content: space-between; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+          th { background: #f1f5f9; padding: 10px; text-align: left; font-size: 11px; text-transform: uppercase; color: #475569; }
+          .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; font-size: 12px; color: #64748b; }
+          .seal { border-bottom: 1px solid #94a3b8; width: 180px; text-align: center; padding-bottom: 4px; font-weight: bold; color: #0f172a; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <h1 class="title">CURIX HEALTHCARE SYSTEM</h1>
+            <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">Outpatient Department (OPD) · Official Clinical Prescription</p>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 14px; font-weight: bold; color: #005a5b;">Rx ID: #${viewingRx.id || 'N/A'}</div>
+            <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Date: ${viewingRx.createdAt ? new Date(viewingRx.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}</div>
+          </div>
+        </div>
+
+        <div class="box">
+          <div>
+            <span style="font-size: 10px; text-transform: uppercase; color: #94a3b8; font-weight: bold; display: block;">Patient Record</span>
+            <strong style="font-size: 15px; color: #0f172a;">${patName}</strong>
+            <div style="font-size: 12px; color: #64748b; margin-top: 2px;">
+              ${profile.bloodGroup ? `Blood: ${profile.bloodGroup} · ` : ''}
+              ${profile.age ? `Age: ${profile.age} yrs` : ''}
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <span style="font-size: 10px; text-transform: uppercase; color: #94a3b8; font-weight: bold; display: block;">Attending Physician</span>
+            <strong style="font-size: 15px; color: #0f172a;">${docName}</strong>
+            <div style="font-size: 12px; color: #005a5b; font-weight: 600;">${deptName}</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <span style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #64748b;">Clinical Diagnosis</span>
+          <div style="background: #fff; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 6px;">
+            ${viewingRx.diagnosis || 'Routine Clinical Consultation'}
+          </div>
+        </div>
+
+        <div>
+          <span style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #64748b;">℞ Prescribed Medications</span>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Medication</th>
+                <th>Dosage / Strength</th>
+                <th>Frequency</th>
+                <th>Duration</th>
+                <th>Instructions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        </div>
+
+        ${viewingRx.notes ? `
+          <div style="margin-top: 20px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px;">
+            <span style="font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase;">Doctor's Notes & Advice:</span>
+            <p style="margin: 4px 0 0; font-size: 12px; color: #334155;">${viewingRx.notes}</p>
+          </div>
+        ` : ''}
+
+        <div class="footer">
+          <span>This is an official system-generated electronic prescription.</span>
+          <div>
+            <div class="seal">Digitally Authorized</div>
+            <div style="font-size: 10px; text-transform: uppercase; text-align: center; margin-top: 4px;">Medical Officer Seal</div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob([slipDocument], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Curix-Prescription-Rx${viewingRx.id || 'Slip'}.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Dedicated Hidden IFrame Native Printing Engine
+  const handlePrint = () => {
+    if (!viewingRx) return;
+    const activeItems = extractItems(viewingRx).map(normalizeItem).filter(Boolean);
+
+    const docName = 
+      viewingRx.doctorName || 
+      viewingRx.doctor?.fullName || 
+      (viewingRx.doctor?.firstName ? `Dr. ${viewingRx.doctor.firstName} ${viewingRx.doctor.lastName || ''}` : '') ||
+      'Dr. Attending Physician';
+
+    const patName = 
+      profile.firstName ? `${profile.firstName} ${profile.lastName}` : (viewingRx.patientName || `Patient #${viewingRx.patientId || 'Record'}`);
+
+    const deptName = 
+      viewingRx.departmentName || viewingRx.department?.name || viewingRx.doctorSpecialty || viewingRx.specialty || 'General Medicine';
+
+    const rowsHtml = activeItems.map((m, idx) => `
+      <tr style="border-bottom: 1px solid #e2e8f0;">
+        <td style="padding: 10px; font-weight: bold; color: #64748b;">${idx + 1}</td>
+        <td style="padding: 10px; font-weight: bold; color: #0f172a;">${m.name}</td>
+        <td style="padding: 10px; color: #005a5b; font-weight: bold;">${m.dosage}</td>
+        <td style="padding: 10px; color: #334155;">${m.frequency}</td>
+        <td style="padding: 10px; color: #334155;">${m.duration}</td>
+        <td style="padding: 10px; color: #475569; font-style: italic;">${m.instructions}</td>
+      </tr>
+    `).join('');
+
+    const printDocument = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Curix-Prescription-Rx#${viewingRx.id || 'Slip'}</title>
+        <style>
+          @page { size: auto; margin: 15mm; }
+          body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            padding: 24px; 
+            color: #1e293b; 
+            background: #ffffff;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          .header { border-bottom: 2px solid #005a5b; padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; }
+          .title { font-size: 24px; font-weight: 900; color: #005a5b; margin: 0; }
+          .box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 20px; display: flex; justify-content: space-between; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+          th { background: #f1f5f9; padding: 10px; text-align: left; font-size: 11px; text-transform: uppercase; color: #475569; }
+          .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; font-size: 12px; color: #64748b; }
+          .seal { border-bottom: 1px solid #94a3b8; width: 180px; text-align: center; padding-bottom: 4px; font-weight: bold; color: #0f172a; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <h1 class="title">CURIX HEALTHCARE SYSTEM</h1>
+            <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">Outpatient Department (OPD) · Official Clinical Prescription</p>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 14px; font-weight: bold; color: #005a5b;">Rx ID: #${viewingRx.id || 'N/A'}</div>
+            <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Date: ${viewingRx.createdAt ? new Date(viewingRx.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}</div>
+          </div>
+        </div>
+
+        <div class="box">
+          <div>
+            <span style="font-size: 10px; text-transform: uppercase; color: #94a3b8; font-weight: bold; display: block;">Patient Record</span>
+            <strong style="font-size: 15px; color: #0f172a;">${patName}</strong>
+            <div style="font-size: 12px; color: #64748b; margin-top: 2px;">
+              ${profile.bloodGroup ? `Blood: ${profile.bloodGroup} · ` : ''}
+              ${profile.age ? `Age: ${profile.age} yrs` : ''}
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <span style="font-size: 10px; text-transform: uppercase; color: #94a3b8; font-weight: bold; display: block;">Attending Physician</span>
+            <strong style="font-size: 15px; color: #0f172a;">${docName}</strong>
+            <div style="font-size: 12px; color: #005a5b; font-weight: 600;">${deptName}</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <span style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #64748b;">Clinical Diagnosis</span>
+          <div style="background: #fff; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 6px;">
+            ${viewingRx.diagnosis || 'Routine Clinical Consultation'}
+          </div>
+        </div>
+
+        <div>
+          <span style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #64748b;">℞ Prescribed Medications</span>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Medication</th>
+                <th>Dosage / Strength</th>
+                <th>Frequency</th>
+                <th>Duration</th>
+                <th>Instructions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        </div>
+
+        ${viewingRx.notes ? `
+          <div style="margin-top: 20px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px;">
+            <span style="font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase;">Doctor's Notes & Advice:</span>
+            <p style="margin: 4px 0 0; font-size: 12px; color: #334155;">${viewingRx.notes}</p>
+          </div>
+        ` : ''}
+
+        <div class="footer">
+          <span>This is an official system-generated electronic prescription.</span>
+          <div>
+            <div class="seal">Digitally Authorized</div>
+            <div style="font-size: 10px; text-transform: uppercase; text-align: center; margin-top: 4px;">Medical Officer Seal</div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const printFrame = document.createElement('iframe');
+    printFrame.style.position = 'fixed';
+    printFrame.style.right = '0';
+    printFrame.style.bottom = '0';
+    printFrame.style.width = '0';
+    printFrame.style.height = '0';
+    printFrame.style.border = '0';
+    document.body.appendChild(printFrame);
+
+    const frameDoc = printFrame.contentWindow.document;
+    frameDoc.open();
+    frameDoc.write(printDocument);
+    frameDoc.close();
+
+    printFrame.contentWindow.focus();
+    setTimeout(() => {
+      printFrame.contentWindow.print();
+      document.body.removeChild(printFrame);
+    }, 250);
+  };
+
   return (
-    <div className="min-h-screen bg-[#F7FAF9] text-slate-800 flex pt-16">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex pt-16">
       
       {/* SIDEBAR NAVIGATION - PORTEA DEEP PINE THEME */}
       <aside className="w-72 border-r border-[#005A5B]/15 bg-gradient-to-b from-[#005A5B] via-[#004849] to-[#003839] hidden lg:flex flex-col justify-between fixed top-16 bottom-0 left-0 z-30 shadow-2xl text-slate-200">
@@ -264,13 +597,13 @@ export default function PatientDashboard() {
           {/* Node Status Indicator Card */}
           <div className="relative overflow-hidden p-3.5 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-md">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#F26522] to-[#FF7E47] text-white flex items-center justify-center shadow-lg shadow-[#F26522]/30 shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#00A896] to-[#5eead4] text-white flex items-center justify-center shadow-lg shrink-0">
                 <Heart size={18} className="fill-white/20" />
               </div>
               <div className="truncate">
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-xs shadow-emerald-400" />
-                  <span className="text-[10px] uppercase font-black tracking-widest text-[#FF9E6C] leading-none">Patient Portal</span>
+                  <span className="text-[10px] uppercase font-black tracking-widest text-[#5eead4] leading-none">Patient Portal</span>
                 </div>
                 <span className="text-xs font-black text-white tracking-wide truncate block mt-0.5">Care Management</span>
               </div>
@@ -286,17 +619,17 @@ export default function PatientDashboard() {
             {/* 1. Book Consultation */}
             <button
               onClick={() => setActiveTab('book')}
-              className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 ${
+              className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
                 activeTab === 'book'
-                  ? 'bg-gradient-to-r from-[#F26522]/25 via-[#F26522]/15 to-transparent text-white border-l-4 border-[#F26522] shadow-md shadow-black/20'
+                  ? 'bg-gradient-to-r from-teal-400/25 via-teal-400/15 to-transparent text-white border-l-4 border-[#5eead4] shadow-md'
                   : 'text-slate-300 hover:text-white hover:bg-white/5 border-l-4 border-transparent'
               }`}
             >
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
                   activeTab === 'book'
-                    ? 'bg-[#F26522] text-white shadow-md shadow-[#F26522]/30'
-                    : 'bg-white/10 text-slate-300 group-hover:text-[#F26522] group-hover:bg-white/15'
+                    ? 'bg-[#00A896] text-white shadow-md'
+                    : 'bg-white/10 text-slate-300 group-hover:text-[#5eead4] group-hover:bg-white/15'
                 }`}>
                   <Stethoscope size={16} />
                 </div>
@@ -307,17 +640,17 @@ export default function PatientDashboard() {
             {/* 2. My Appointments */}
             <button
               onClick={() => setActiveTab('appointments')}
-              className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 ${
+              className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
                 activeTab === 'appointments'
-                  ? 'bg-gradient-to-r from-[#F26522]/25 via-[#F26522]/15 to-transparent text-white border-l-4 border-[#F26522] shadow-md shadow-black/20'
+                  ? 'bg-gradient-to-r from-teal-400/25 via-teal-400/15 to-transparent text-white border-l-4 border-[#5eead4] shadow-md'
                   : 'text-slate-300 hover:text-white hover:bg-white/5 border-l-4 border-transparent'
               }`}
             >
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
                   activeTab === 'appointments'
-                    ? 'bg-[#F26522] text-white shadow-md shadow-[#F26522]/30'
-                    : 'bg-white/10 text-slate-300 group-hover:text-[#F26522] group-hover:bg-white/15'
+                    ? 'bg-[#00A896] text-white shadow-md'
+                    : 'bg-white/10 text-slate-300 group-hover:text-[#5eead4] group-hover:bg-white/15'
                 }`}>
                   <Calendar size={16} />
                 </div>
@@ -325,7 +658,7 @@ export default function PatientDashboard() {
               </div>
               <span className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-all ${
                 activeTab === 'appointments'
-                  ? 'bg-[#F26522]/30 text-white border border-[#F26522]/40'
+                  ? 'bg-teal-400/30 text-white border border-teal-400/40'
                   : 'bg-white/10 text-slate-300 group-hover:text-white'
               }`}>
                 {myAppointments.length}
@@ -335,17 +668,17 @@ export default function PatientDashboard() {
             {/* 3. My Prescriptions */}
             <button
               onClick={() => setActiveTab('prescriptions')}
-              className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 ${
+              className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
                 activeTab === 'prescriptions'
-                  ? 'bg-gradient-to-r from-[#F26522]/25 via-[#F26522]/15 to-transparent text-white border-l-4 border-[#F26522] shadow-md shadow-black/20'
+                  ? 'bg-gradient-to-r from-teal-400/25 via-teal-400/15 to-transparent text-white border-l-4 border-[#5eead4] shadow-md'
                   : 'text-slate-300 hover:text-white hover:bg-white/5 border-l-4 border-transparent'
               }`}
             >
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
                   activeTab === 'prescriptions'
-                    ? 'bg-[#F26522] text-white shadow-md shadow-[#F26522]/30'
-                    : 'bg-white/10 text-slate-300 group-hover:text-[#F26522] group-hover:bg-white/15'
+                    ? 'bg-[#00A896] text-white shadow-md'
+                    : 'bg-white/10 text-slate-300 group-hover:text-[#5eead4] group-hover:bg-white/15'
                 }`}>
                   <FileText size={16} />
                 </div>
@@ -353,7 +686,7 @@ export default function PatientDashboard() {
               </div>
               <span className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-all ${
                 activeTab === 'prescriptions'
-                  ? 'bg-[#F26522]/30 text-white border border-[#F26522]/40'
+                  ? 'bg-teal-400/30 text-white border border-teal-400/40'
                   : 'bg-white/10 text-slate-300 group-hover:text-white'
               }`}>
                 {myPrescriptions.length}
@@ -363,17 +696,17 @@ export default function PatientDashboard() {
             {/* 4. Health Profile */}
             <button
               onClick={() => setActiveTab('profile')}
-              className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 ${
+              className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
                 activeTab === 'profile'
-                  ? 'bg-gradient-to-r from-[#F26522]/25 via-[#F26522]/15 to-transparent text-white border-l-4 border-[#F26522] shadow-md shadow-black/20'
+                  ? 'bg-gradient-to-r from-teal-400/25 via-teal-400/15 to-transparent text-white border-l-4 border-[#5eead4] shadow-md'
                   : 'text-slate-300 hover:text-white hover:bg-white/5 border-l-4 border-transparent'
               }`}
             >
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
                   activeTab === 'profile'
-                    ? 'bg-[#F26522] text-white shadow-md shadow-[#F26522]/30'
-                    : 'bg-white/10 text-slate-300 group-hover:text-[#F26522] group-hover:bg-white/15'
+                    ? 'bg-[#00A896] text-white shadow-md'
+                    : 'bg-white/10 text-slate-300 group-hover:text-[#5eead4] group-hover:bg-white/15'
                 }`}>
                   <User size={16} />
                 </div>
@@ -398,7 +731,7 @@ export default function PatientDashboard() {
             <button
               onClick={logout}
               title="Sign Out"
-              className="text-slate-300 hover:text-rose-400 hover:bg-rose-500/10 p-2 rounded-xl border border-transparent transition-all"
+              className="text-slate-300 hover:text-rose-400 hover:bg-rose-500/10 p-2 rounded-xl transition-all cursor-pointer"
             >
               <ArrowUpRight size={16} />
             </button>
@@ -421,8 +754,8 @@ export default function PatientDashboard() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap ${
-                activeTab === tab.id ? 'bg-[#F26522] text-white' : 'bg-white border border-[#005A5B]/15 text-slate-600'
+              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer ${
+                activeTab === tab.id ? 'bg-[#00A896] text-white' : 'bg-white border border-[#005A5B]/15 text-slate-600'
               }`}
             >
               {tab.label}
@@ -432,24 +765,24 @@ export default function PatientDashboard() {
 
         {/* Notifications */}
         {successNotice && (
-          <div className="flex items-center justify-between p-4 mb-6 rounded-2xl bg-emerald-50/90 border border-emerald-200 text-emerald-800 text-xs font-bold shadow-xs">
+          <div className="flex items-center justify-between p-4 mb-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold shadow-xs">
             <div className="flex items-center gap-2.5">
               <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
               <span>{successNotice}</span>
             </div>
-            <button onClick={() => setSuccessNotice('')} className="text-emerald-700 hover:text-emerald-900">
+            <button onClick={() => setSuccessNotice('')} className="text-emerald-700 hover:text-emerald-900 cursor-pointer">
               <X size={14} />
             </button>
           </div>
         )}
 
         {errorNotice && (
-          <div className="flex items-center justify-between p-4 mb-6 rounded-2xl bg-rose-50/90 border border-rose-200 text-rose-800 text-xs font-bold shadow-xs">
+          <div className="flex items-center justify-between p-4 mb-6 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold shadow-xs">
             <div className="flex items-center gap-2.5">
               <AlertCircle size={16} className="text-rose-600 shrink-0" />
               <span>{errorNotice}</span>
             </div>
-            <button onClick={() => setErrorNotice('')} className="text-rose-700 hover:text-rose-900">
+            <button onClick={() => setErrorNotice('')} className="text-rose-700 hover:text-rose-900 cursor-pointer">
               <X size={14} />
             </button>
           </div>
@@ -478,9 +811,9 @@ export default function PatientDashboard() {
                 <button
                   onClick={loadAllPatientData}
                   disabled={isSyncing}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-[#005A5B]/20 hover:border-[#F26522] text-xs font-extrabold text-[#005A5B] hover:bg-[#EBF5F5]/30 shadow-xs transition disabled:opacity-60"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-[#005A5B]/20 hover:border-[#00A896] text-xs font-extrabold text-[#005A5B] hover:bg-[#EBF5F5]/30 shadow-xs transition disabled:opacity-60 cursor-pointer"
                 >
-                  <RefreshCw size={14} className={`text-[#F26522] ${isSyncing ? 'animate-spin' : ''}`} />
+                  <RefreshCw size={14} className={`text-[#00A896] ${isSyncing ? 'animate-spin' : ''}`} />
                   <span>{isSyncing ? 'Refreshing...' : 'Refresh Network'}</span>
                 </button>
               </div>
@@ -495,7 +828,7 @@ export default function PatientDashboard() {
                   placeholder="Search physician by name or clinical specialty..."
                   value={doctorSearch}
                   onChange={(e) => setDoctorSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#005A5B]/15 bg-white text-xs focus:outline-none focus:border-[#F26522]"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#005A5B]/15 bg-white text-xs focus:outline-none focus:border-[#00A896]"
                 />
               </div>
 
@@ -503,7 +836,7 @@ export default function PatientDashboard() {
                 <select
                   value={selectedDept}
                   onChange={(e) => setSelectedDept(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#005A5B]/15 bg-white text-xs font-bold text-[#005A5B] focus:outline-none focus:border-[#F26522]"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#005A5B]/15 bg-white text-xs font-bold text-[#005A5B] focus:outline-none focus:border-[#00A896]"
                 >
                   <option value="ALL">All Departments ({departments.length})</option>
                   {departments.map((d) => (
@@ -519,7 +852,7 @@ export default function PatientDashboard() {
                 {filteredDoctors.map((doc) => {
                   const docName = getDoctorName(doc);
                   return (
-                    <div key={doc.id} className="p-5 rounded-2xl bg-white border border-[#005A5B]/10 shadow-xs flex flex-col justify-between hover:border-[#F26522]/50 hover:shadow-md transition group">
+                    <div key={doc.id} className="p-5 rounded-2xl bg-white border border-[#005A5B]/10 shadow-xs flex flex-col justify-between hover:border-[#00A896]/50 hover:shadow-md transition group">
                       <div>
                         <div className="flex items-start justify-between mb-3">
                           <div className="w-11 h-11 rounded-2xl bg-[#EBF5F5] text-[#005A5B] flex items-center justify-center font-bold text-sm shrink-0">
@@ -530,7 +863,7 @@ export default function PatientDashboard() {
                           </span>
                         </div>
 
-                        <h4 className="text-sm font-black text-[#005A5B] group-hover:text-[#F26522] transition-colors">{docName}</h4>
+                        <h4 className="text-sm font-black text-[#005A5B] group-hover:text-[#00A896] transition-colors">{docName}</h4>
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#EBF5F5] text-[#005A5B] border border-[#005A5B]/15 uppercase inline-block mt-1">
                           {doc.specialty || 'Specialist'}
                         </span>
@@ -550,7 +883,7 @@ export default function PatientDashboard() {
 
                         <button
                           onClick={() => handleOpenBooking(doc)}
-                          className="px-5 py-2.5 rounded-xl bg-[#F26522] hover:bg-[#D95316] text-white text-xs font-bold transition shadow-md shadow-[#F26522]/20 flex items-center gap-1.5"
+                          className="px-5 py-2.5 rounded-xl bg-[#00A896] hover:bg-[#008476] text-white text-xs font-bold transition shadow-md shadow-[#00A896]/20 flex items-center gap-1.5 cursor-pointer"
                         >
                           <Calendar size={13} />
                           <span>Book Slot</span>
@@ -581,9 +914,9 @@ export default function PatientDashboard() {
               </div>
               <button
                 onClick={fetchMyAppointments}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-[#005A5B]/15 text-xs font-bold text-[#005A5B] hover:bg-[#EBF5F5]/30 shadow-2xs transition"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-[#005A5B]/15 text-xs font-bold text-[#005A5B] hover:bg-[#EBF5F5]/30 shadow-2xs transition cursor-pointer"
               >
-                <RefreshCw size={13} className="text-[#F26522]" />
+                <RefreshCw size={13} className="text-[#00A896]" />
                 <span>Refresh Visits</span>
               </button>
             </div>
@@ -615,7 +948,7 @@ export default function PatientDashboard() {
                             <h4 className="text-sm font-black text-[#005A5B]">{docName}</h4>
                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
                               isCompleted ? 'bg-emerald-100 text-emerald-800' :
-                              isCancelled ? 'bg-rose-100 text-rose-800' : 'bg-[#F26522]/10 text-[#F26522]'
+                              isCancelled ? 'bg-rose-100 text-rose-800' : 'bg-[#00A896]/10 text-[#00A896]'
                             }`}>
                               {appt.status}
                             </span>
@@ -644,7 +977,7 @@ export default function PatientDashboard() {
                         {isPending && (
                           <button
                             onClick={() => setCancellingAppt(appt)}
-                            className="px-3.5 py-2 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition"
+                            className="px-3.5 py-2 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition cursor-pointer"
                           >
                             Cancel
                           </button>
@@ -653,7 +986,7 @@ export default function PatientDashboard() {
                         {isCompleted && (
                           <button
                             onClick={() => setActiveTab('prescriptions')}
-                            className="px-4 py-2 rounded-xl bg-[#005A5B] hover:bg-[#004849] text-white text-xs font-bold transition shadow-xs"
+                            className="px-4 py-2 rounded-xl bg-[#005A5B] hover:bg-[#004849] text-white text-xs font-bold transition shadow-xs cursor-pointer"
                           >
                             View Prescription
                           </button>
@@ -683,47 +1016,50 @@ export default function PatientDashboard() {
               </div>
               <button
                 onClick={fetchMyPrescriptions}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-[#005A5B]/15 text-xs font-bold text-[#005A5B] hover:bg-[#EBF5F5]/30 shadow-2xs transition"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-[#005A5B]/15 text-xs font-bold text-[#005A5B] hover:bg-[#EBF5F5]/30 shadow-2xs transition cursor-pointer"
               >
-                <RefreshCw size={13} className="text-[#F26522]" />
+                <RefreshCw size={13} className="text-[#00A896]" />
                 <span>Refresh Vault</span>
               </button>
             </div>
 
             {myPrescriptions.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {myPrescriptions.map((rx) => (
-                  <div key={rx.id} className="p-5 rounded-2xl bg-white border border-[#005A5B]/10 shadow-xs flex flex-col justify-between hover:border-[#005A5B]/30 transition">
-                    <div>
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="w-10 h-10 rounded-xl bg-[#EBF5F5] text-[#005A5B] flex items-center justify-center font-bold">
-                          <FileText size={18} />
+                {myPrescriptions.map((rx) => {
+                  const itemsCount = extractItems(rx).length;
+                  return (
+                    <div key={rx.id} className="p-5 rounded-2xl bg-white border border-[#005A5B]/10 shadow-xs flex flex-col justify-between hover:border-[#005A5B]/30 transition">
+                      <div>
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="w-10 h-10 rounded-xl bg-[#EBF5F5] text-[#005A5B] flex items-center justify-center font-bold">
+                            <FileText size={18} />
+                          </div>
+                          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                            Rx-ID: #{rx.id}
+                          </span>
                         </div>
-                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
-                          Rx-ID: #{rx.id}
-                        </span>
+
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Clinical Diagnosis</span>
+                        <h4 className="text-sm font-black text-[#005A5B] mt-0.5">{rx.diagnosis || 'Clinical Consultation'}</h4>
+
+                        <p className="text-xs text-slate-500 mt-2 font-medium">
+                          {itemsCount} medication{itemsCount === 1 ? '' : 's'} prescribed · Issued {rx.createdAt ? new Date(rx.createdAt).toLocaleDateString() : 'Recent'}
+                        </p>
                       </div>
 
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Clinical Diagnosis</span>
-                      <h4 className="text-sm font-black text-[#005A5B] mt-0.5">{rx.diagnosis || 'Clinical Consultation'}</h4>
-
-                      <p className="text-xs text-slate-500 mt-2">
-                        {rx.medicines?.length || 0} medications prescribed · Issued {rx.createdAt ? new Date(rx.createdAt).toLocaleDateString() : 'Recent'}
-                      </p>
+                      <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
+                        <span className="text-xs text-slate-400">Official Record</span>
+                        <button
+                          onClick={() => handleOpenViewingRx(rx)}
+                          className="px-4 py-2 rounded-xl bg-[#00A896] hover:bg-[#008476] text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <FileText size={13} />
+                          <span>View / Download Slip</span>
+                        </button>
+                      </div>
                     </div>
-
-                    <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
-                      <span className="text-xs text-slate-400">Official Record</span>
-                      <button
-                        onClick={() => setViewingRx(rx)}
-                        className="px-4 py-2 rounded-xl bg-[#F26522] hover:bg-[#D95316] text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5"
-                      >
-                        <Printer size={13} />
-                        <span>View / Print Slip</span>
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="py-16 text-center bg-white rounded-2xl border border-[#005A5B]/10 shadow-xs">
@@ -753,7 +1089,7 @@ export default function PatientDashboard() {
                       required
                       value={profile.firstName}
                       onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-semibold text-[#1A2E35] focus:outline-none focus:border-[#F26522]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-semibold text-[#1A2E35] focus:outline-none focus:border-[#00A896]"
                     />
                   </div>
                   <div>
@@ -763,7 +1099,7 @@ export default function PatientDashboard() {
                       required
                       value={profile.lastName}
                       onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-semibold text-[#1A2E35] focus:outline-none focus:border-[#F26522]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-semibold text-[#1A2E35] focus:outline-none focus:border-[#00A896]"
                     />
                   </div>
                 </div>
@@ -776,7 +1112,7 @@ export default function PatientDashboard() {
                       placeholder="+1 (555) 000-0000"
                       value={profile.contactNumber}
                       onChange={(e) => setProfile({ ...profile, contactNumber: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs text-[#1A2E35] focus:outline-none focus:border-[#F26522]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs text-[#1A2E35] focus:outline-none focus:border-[#00A896]"
                     />
                   </div>
                   <div>
@@ -784,7 +1120,7 @@ export default function PatientDashboard() {
                     <select
                       value={profile.bloodGroup}
                       onChange={(e) => setProfile({ ...profile, bloodGroup: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-xl border border-stone-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#F26522]"
+                      className="w-full px-3 py-2.5 rounded-xl border border-stone-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#00A896]"
                     >
                       <option value="">-- Select Blood Group --</option>
                       {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((bg) => (
@@ -802,7 +1138,7 @@ export default function PatientDashboard() {
                       min={0}
                       value={profile.age}
                       onChange={(e) => setProfile({ ...profile, age: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs text-[#1A2E35] focus:outline-none focus:border-[#F26522]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs text-[#1A2E35] focus:outline-none focus:border-[#00A896]"
                     />
                   </div>
                   <div>
@@ -810,7 +1146,7 @@ export default function PatientDashboard() {
                     <select
                       value={profile.gender}
                       onChange={(e) => setProfile({ ...profile, gender: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-xl border border-stone-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#F26522]"
+                      className="w-full px-3 py-2.5 rounded-xl border border-stone-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#00A896]"
                     >
                       <option value="MALE">Male</option>
                       <option value="FEMALE">Female</option>
@@ -825,7 +1161,7 @@ export default function PatientDashboard() {
                     rows={2}
                     value={profile.address}
                     onChange={(e) => setProfile({ ...profile, address: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs text-[#1A2E35] focus:outline-none focus:border-[#F26522] resize-none"
+                    className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs text-[#1A2E35] focus:outline-none focus:border-[#00A896] resize-none"
                   />
                 </div>
 
@@ -833,7 +1169,7 @@ export default function PatientDashboard() {
                   <button
                     type="submit"
                     disabled={profileSaving}
-                    className="px-6 py-2.5 rounded-xl bg-[#F26522] hover:bg-[#D95316] text-white text-xs font-bold transition shadow-xs disabled:opacity-50"
+                    className="px-6 py-2.5 rounded-xl bg-[#00A896] hover:bg-[#008476] text-white text-xs font-bold transition shadow-xs disabled:opacity-50 cursor-pointer"
                   >
                     {profileSaving ? 'Saving...' : 'Update Health Chart'}
                   </button>
@@ -851,12 +1187,12 @@ export default function PatientDashboard() {
           <div className="relative w-full max-w-lg bg-white border border-[#005A5B]/15 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
             <button
               onClick={() => setSelectedDoctor(null)}
-              className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-100"
+              className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-100 cursor-pointer"
             >
               <X size={18} />
             </button>
 
-            <span className="text-[10px] font-black text-[#F26522] tracking-widest uppercase">SLOT RESERVATION</span>
+            <span className="text-[10px] font-black text-[#00A896] tracking-widest uppercase">SLOT RESERVATION</span>
             <h3 className="text-xl font-black text-[#005A5B] mt-0.5">Book with {getDoctorName(selectedDoctor)}</h3>
             <p className="text-xs text-slate-500 mb-5">{selectedDoctor.specialty} · Fee: ${selectedDoctor.consultationFee || '50.00'}</p>
 
@@ -869,7 +1205,7 @@ export default function PatientDashboard() {
                   min={new Date().toISOString().split('T')[0]}
                   value={bookingDate}
                   onChange={(e) => handleDateChange(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#F26522]"
+                  className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#00A896]"
                 />
               </div>
 
@@ -894,9 +1230,9 @@ export default function PatientDashboard() {
                             key={slotTime}
                             type="button"
                             onClick={() => setSelectedSlot(slotTime)}
-                            className={`py-2 px-2.5 rounded-xl text-xs font-mono font-bold transition-all ${
+                            className={`py-2 px-2.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
                               isSelected
-                                ? 'bg-[#F26522] text-white shadow-xs'
+                                ? 'bg-[#00A896] text-white shadow-xs'
                                 : 'bg-[#EBF5F5] border border-[#005A5B]/15 text-[#005A5B] hover:bg-[#005A5B]/10'
                             }`}
                           >
@@ -920,7 +1256,7 @@ export default function PatientDashboard() {
                   placeholder="Describe symptoms, concerns, or checkup reason..."
                   value={bookingReason}
                   onChange={(e) => setBookingReason(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs text-[#1A2E35] focus:outline-none focus:border-[#F26522] resize-none"
+                  className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs text-[#1A2E35] focus:outline-none focus:border-[#00A896] resize-none"
                 />
               </div>
 
@@ -928,14 +1264,14 @@ export default function PatientDashboard() {
                 <button
                   type="button"
                   onClick={() => setSelectedDoctor(null)}
-                  className="px-4 py-2 rounded-xl border border-stone-200 text-xs font-bold text-slate-600 hover:bg-stone-50"
+                  className="px-4 py-2 rounded-xl border border-stone-200 text-xs font-bold text-slate-600 hover:bg-stone-50 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={!selectedSlot || isBookingSubmitting}
-                  className="px-6 py-2.5 rounded-xl bg-[#F26522] hover:bg-[#D95316] text-white text-xs font-bold transition shadow-xs disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-xl bg-[#00A896] hover:bg-[#008476] text-white text-xs font-bold transition shadow-xs disabled:opacity-50 cursor-pointer"
                 >
                   {isBookingSubmitting ? 'Reserving...' : 'Confirm Consultation'}
                 </button>
@@ -981,7 +1317,7 @@ export default function PatientDashboard() {
                 <button
                   type="button"
                   onClick={() => setCancellingAppt(null)}
-                  className="px-4 py-2 rounded-xl border border-stone-200 text-xs font-bold text-slate-600 hover:bg-stone-50"
+                  className="px-4 py-2 rounded-xl border border-stone-200 text-xs font-bold text-slate-600 hover:bg-stone-50 cursor-pointer"
                 >
                   Keep Visit
                 </button>
@@ -989,7 +1325,7 @@ export default function PatientDashboard() {
                   type="button"
                   disabled={cancelSaving}
                   onClick={handleConfirmCancel}
-                  className="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition shadow-xs"
+                  className="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition shadow-xs cursor-pointer"
                 >
                   {cancelSaving ? 'Cancelling...' : 'Confirm Cancellation'}
                 </button>
@@ -999,14 +1335,14 @@ export default function PatientDashboard() {
         </div>
       )}
 
-      {/* MODAL 3: VIEW & PRINT DIGITAL PRESCRIPTION */}
+      {/* MODAL 3: VIEW & DOWNLOAD DIGITAL PRESCRIPTION */}
       {viewingRx && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#005A5B]/40 backdrop-blur-xs">
-          <div className="relative w-full max-w-2xl bg-white border border-[#005A5B]/15 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
+          <div className="relative w-full max-w-3xl bg-white border border-[#005A5B]/15 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
             
             <button
               onClick={() => setViewingRx(null)}
-              className="no-print absolute top-6 right-6 text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-100 transition"
+              className="no-print absolute top-6 right-6 text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-100 transition cursor-pointer"
             >
               <X size={18} />
             </button>
@@ -1033,7 +1369,7 @@ export default function PatientDashboard() {
                 <div>
                   <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Patient Identification</span>
                   <span className="text-sm font-black text-[#005A5B] block mt-0.5">
-                    {profile.firstName ? `${profile.firstName} ${profile.lastName}` : `Patient #${viewingRx.patientId || 'Record'}`}
+                    {profile.firstName ? `${profile.firstName} ${profile.lastName}` : (viewingRx.patientName || `Patient #${viewingRx.patientId || 'Record'}`)}
                   </span>
                   <span className="text-slate-600 font-medium">
                     {profile.bloodGroup ? `Blood: ${profile.bloodGroup} · ` : ''}
@@ -1045,10 +1381,10 @@ export default function PatientDashboard() {
                 <div className="text-right">
                   <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Attending Physician</span>
                   <span className="text-sm font-black text-[#005A5B] block mt-0.5">
-                    {viewingRx.doctorName || viewingRx.doctor?.name || 'Attending Physician'}
+                    {viewingRx.doctorName || viewingRx.doctor?.fullName || viewingRx.doctor?.name || 'Attending Physician'}
                   </span>
                   <span className="text-slate-600 font-medium">
-                    {viewingRx.departmentName || viewingRx.doctor?.specialty || 'General Medicine'}
+                    {viewingRx.departmentName || viewingRx.department?.name || viewingRx.doctor?.specialty || 'General Medicine'}
                   </span>
                 </div>
               </div>
@@ -1063,9 +1399,16 @@ export default function PatientDashboard() {
 
               {/* Prescribed Medications Table */}
               <div>
-                <span className="text-xs font-black uppercase tracking-wider text-[#005A5B] block mb-2.5">
-                  ℞ Prescribed Medications
-                </span>
+                <div className="flex items-center justify-between mb-2.5">
+                  <span className="text-xs font-black uppercase tracking-wider text-[#005A5B]">
+                    ℞ Prescribed Medications & Dosages
+                  </span>
+                  {loadingRxDetails && (
+                    <span className="flex items-center gap-1 text-[11px] text-[#00A896] font-semibold">
+                      <Loader2 size={12} className="animate-spin" /> Synchronizing full details...
+                    </span>
+                  )}
+                </div>
 
                 <div className="border border-stone-200 rounded-xl overflow-hidden">
                   <table className="w-full text-left border-collapse text-xs">
@@ -1079,28 +1422,34 @@ export default function PatientDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-stone-200 text-slate-800">
-                      {(viewingRx.medicines || []).map((m, idx) => {
-                        const medName = m.name || m.medicineName || 'Medication';
-                        const medDose = m.dosage || m.dose || m.strength || 'As directed';
-                        const medFreq = m.frequency || m.freq || m.timing || '1-0-1';
-                        const medDuration = m.duration || m.days || '5 days';
-                        const medInstructions = m.instructions || m.instruction || m.notes || 'After meals';
+                      {(() => {
+                        const items = extractItems(viewingRx).map(normalizeItem).filter(Boolean);
 
-                        return (
+                        if (items.length === 0) {
+                          return (
+                            <tr>
+                              <td colSpan="5" className="py-6 text-center text-slate-400">
+                                {loadingRxDetails ? 'Loading medication details...' : 'No line-item medications recorded.'}
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        return items.map((m, idx) => (
                           <tr key={idx} className="hover:bg-stone-50">
                             <td className="py-3 px-3 font-mono font-bold text-slate-400">{idx + 1}</td>
                             <td className="py-3 px-3">
-                              <span className="font-black text-[#005A5B] text-xs block">{medName}</span>
+                              <span className="font-black text-[#005A5B] text-xs block">{m.name}</span>
                             </td>
                             <td className="py-3 px-3">
-                              <span className="font-bold text-slate-900">{medDose}</span>
-                              <span className="text-[11px] text-[#F26522] block font-mono font-bold">({medFreq})</span>
+                              <span className="font-bold text-slate-900">{m.dosage}</span>
+                              <span className="text-[11px] text-[#00A896] block font-mono font-bold">({m.frequency})</span>
                             </td>
-                            <td className="py-3 px-3 font-semibold text-slate-700">{medDuration}</td>
-                            <td className="py-3 px-3 font-medium text-slate-700">{medInstructions}</td>
+                            <td className="py-3 px-3 font-semibold text-slate-700">{m.duration}</td>
+                            <td className="py-3 px-3 font-medium text-slate-700">{m.instructions}</td>
                           </tr>
-                        );
-                      })}
+                        ));
+                      })()}
                     </tbody>
                   </table>
                 </div>
@@ -1132,14 +1481,22 @@ export default function PatientDashboard() {
               <button
                 type="button"
                 onClick={() => setViewingRx(null)}
-                className="px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-bold text-slate-600 hover:bg-stone-50 transition"
+                className="px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-bold text-slate-600 hover:bg-stone-50 transition cursor-pointer"
               >
                 Close
               </button>
               <button
                 type="button"
-                onClick={() => window.print()}
-                className="px-6 py-2.5 rounded-xl bg-[#F26522] hover:bg-[#D95316] text-white text-xs font-bold shadow-xs transition flex items-center gap-2"
+                onClick={handleDownloadSlip}
+                className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-xs"
+              >
+                <Download size={14} className="text-[#005A5B]" />
+                <span>Download Slip</span>
+              </button>
+              <button
+                type="button"
+                onClick={handlePrint}
+                className="px-6 py-2.5 rounded-xl bg-[#005A5B] hover:bg-[#004849] text-white text-xs font-bold shadow-xs transition flex items-center gap-2 cursor-pointer"
               >
                 <Printer size={14} />
                 <span>Print Official Slip</span>

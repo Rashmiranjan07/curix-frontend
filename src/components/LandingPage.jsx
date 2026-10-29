@@ -47,7 +47,7 @@ export default function LandingPage({ onOpenAuth }) {
     }
   ];
 
-  // 4 Steps: How Curix Works (Faithful to Portea Guided Process)
+  // 4 Steps: How Curix Works
   const processSteps = [
     {
       step: '1',
@@ -88,24 +88,33 @@ export default function LandingPage({ onOpenAuth }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             
-            {/* Left Column */}
+            {/* Left Column: Exact Headline Layout & Colors */}
             <div className="lg:col-span-7 text-left space-y-6">
               
               <div className="inline-block">
-                <span className="text-xs sm:text-sm font-black tracking-widest text-[#005A5B] uppercase pb-1.5 border-b-2 border-[#F26522]">
+                <div className="w-12 h-1 bg-[#005A5B] mb-2.5 rounded-full" />
+                <span className="text-xs sm:text-sm font-black tracking-widest text-[#005A5B] uppercase block">
                   PORT-GRADE HEALTHCARE AT YOUR FINGERTIPS
                 </span>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#005A5B] tracking-tight leading-[1.18]">
-                Hospital-quality <br />
-                <span className="text-[#F26522]">
-                  HEALTHCARE partner for
-                </span> <br />
-                <span>your family</span>
+              {/* Exact 4-Line Headline Matching Reference */}
+              <h1 className="text-4xl sm:text-5xl lg:text-[58px] font-black tracking-tight leading-[1.08] select-none">
+                <span className="text-[#005A5B] block">
+                  Hospital-quality
+                </span>
+                <span className="text-[#F26522] block mt-1">
+                  HEALTHCARE partner
+                </span>
+                <span className="text-[#F26522] block mt-1">
+                  for
+                </span>
+                <span className="text-[#005A5B] block mt-1">
+                  your family
+                </span>
               </h1>
 
-              <p className="text-slate-600 text-base sm:text-lg leading-relaxed max-w-xl font-medium">
+              <p className="text-slate-600 text-base sm:text-lg leading-relaxed max-w-xl font-medium pt-1">
                 From licensed doctor consultations to certified nursing care and digital prescriptions, Curix provides comprehensive healthcare management designed for precision and patient convenience.
               </p>
 
@@ -113,7 +122,7 @@ export default function LandingPage({ onOpenAuth }) {
               <div className="pt-2 flex flex-wrap items-center gap-4">
                 <button
                   onClick={onOpenAuth}
-                  className="px-9 py-4 rounded-full bg-[#F26522] hover:bg-[#D95316] active:bg-[#C2460F] text-white font-extrabold text-sm sm:text-base tracking-wide shadow-lg shadow-[#F26522]/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                  className="px-9 py-4 rounded-full bg-[#F26522] hover:bg-[#D95316] active:bg-[#C2460F] text-white font-extrabold text-sm sm:text-base tracking-wide shadow-lg shadow-[#F26522]/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
                 >
                   Find & Book Doctor
                 </button>
@@ -143,12 +152,13 @@ export default function LandingPage({ onOpenAuth }) {
               </div>
             </div>
 
-            {/* Right Column: Doctor Frame with Floating Live Badges */}
+            {/* Right Column: Doctor Frame with Reference Peach Backdrop */}
             <div className="lg:col-span-5 relative flex items-center justify-center min-h-[460px]">
               <div className="absolute w-[360px] h-[360px] sm:w-[420px] sm:h-[420px] rounded-full bg-[#00A896]/15 blur-2xl pointer-events-none" />
               <div className="absolute w-[320px] h-[320px] sm:w-[380px] sm:h-[380px] rounded-full bg-gradient-to-tr from-[#005A5B]/20 via-[#F26522]/15 to-transparent pointer-events-none animate-pulse" />
 
-              <div className="relative w-[300px] h-[360px] sm:w-[340px] sm:h-[410px] rounded-[36px] bg-gradient-to-b from-slate-100 via-white to-white border-2 border-slate-200 shadow-2xl shadow-slate-900/10 overflow-hidden flex items-end justify-center group z-10">
+              {/* Peach Rectangle Container Card */}
+              <div className="relative w-[300px] h-[360px] sm:w-[340px] sm:h-[410px] rounded-[36px] bg-[#f9dfd2] border border-[#f0cfbe] shadow-2xl shadow-slate-900/10 overflow-hidden flex items-end justify-center group z-10">
                 <img
                   src={doctorImage}
                   alt="Curix Specialist Doctor"
@@ -321,7 +331,7 @@ export default function LandingPage({ onOpenAuth }) {
               <div className="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between">
                 <button
                   onClick={onOpenAuth}
-                  className="text-xs font-black text-[#F26522] hover:text-[#D95316] flex items-center gap-1.5 group-hover:translate-x-1 transition-all"
+                  className="text-xs font-black text-[#F26522] hover:text-[#D95316] flex items-center gap-1.5 group-hover:translate-x-1 transition-all cursor-pointer"
                 >
                   <span>Book Consultation</span>
                   <ArrowRight size={14} />
@@ -419,7 +429,7 @@ export default function LandingPage({ onOpenAuth }) {
           <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
             <button
               onClick={onOpenAuth}
-              className="px-8 py-3.5 rounded-full bg-[#F26522] hover:bg-[#D95316] text-white font-extrabold text-sm tracking-wide shadow-md transition-all"
+              className="px-8 py-3.5 rounded-full bg-[#F26522] hover:bg-[#D95316] text-white font-extrabold text-sm tracking-wide shadow-md transition-all cursor-pointer"
             >
               Book Consultation Now
             </button>
@@ -440,7 +450,7 @@ export default function LandingPage({ onOpenAuth }) {
           <Lock size={16} className="text-[#F26522]" />
           <span className="text-slate-800 font-bold">HIPAA & Digital Health Data Protection Aligned</span>
         </div>
-        <p>© 2026 Curix Healthcare Systems. Modeled after Portea Medical Standards for Consumer Care.</p>
+        <p>© 2026 Curix Healthcare Systems.</p>
       </footer>
 
     </div>
