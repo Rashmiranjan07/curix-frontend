@@ -5,7 +5,8 @@ import {
   Heart, Calendar, Stethoscope, Clock, FileText, User, 
   Search, CheckCircle2, AlertCircle, X, ChevronRight, 
   RefreshCw, Building2, DollarSign, Printer, Download, ArrowUpRight, 
-  Sparkles, Check, MapPin, Phone, Loader2 
+  Sparkles, Check, MapPin, Phone, Loader2, LogOut, LayoutDashboard,
+  Shield, ChevronLeft
 } from 'lucide-react';
 
 export default function PatientDashboard() {
@@ -16,6 +17,9 @@ export default function PatientDashboard() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [successNotice, setSuccessNotice] = useState('');
   const [errorNotice, setErrorNotice] = useState('');
+
+  // Calendar State
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   // 1. Booking State
   const [departments, setDepartments] = useState([]);
@@ -141,7 +145,6 @@ export default function PatientDashboard() {
     }
   };
 
-  // Extract items array from any property name or serialized JSON string
   const extractItems = (rx) => {
     if (!rx) return [];
     let raw = rx.items || rx.prescriptionItems || rx.medicines || rx.medicationItems || [];
@@ -155,7 +158,6 @@ export default function PatientDashboard() {
     return Array.isArray(raw) ? raw : [];
   };
 
-  // Comprehensive multi-property mapping for each medication row
   const normalizeItem = (item, idx) => {
     if (!item) return null;
     if (typeof item === 'string') {
@@ -176,7 +178,6 @@ export default function PatientDashboard() {
     };
   };
 
-  // View Slip & detail fetch fallback
   const handleOpenViewingRx = async (rx) => {
     setViewingRx(rx);
     const existing = extractItems(rx);
@@ -199,7 +200,6 @@ export default function PatientDashboard() {
     }
   };
 
-  // Booking handlers
   const handleOpenBooking = (doc) => {
     setSelectedDoctor(doc);
     setBookingDate('');
@@ -234,11 +234,13 @@ export default function PatientDashboard() {
     setErrorNotice('');
 
     try {
+      const formattedTime = selectedSlot.length === 5 ? `${selectedSlot}:00` : selectedSlot;
+
       const payload = {
-        doctorId: selectedDoctor.id,
+        doctorId: Number(selectedDoctor.id),
         appointmentDate: bookingDate,
-        appointmentTime: selectedSlot.length === 5 ? `${selectedSlot}:00` : selectedSlot,
-        reason: bookingReason.trim() || 'General Clinical Consultation'
+        startTime: formattedTime,
+        reasonForVisit: bookingReason.trim() || 'General Clinical Consultation'
       };
 
       await patientApi.bookAppointment(payload);
@@ -247,13 +249,13 @@ export default function PatientDashboard() {
       await fetchMyAppointments();
       setActiveTab('appointments');
     } catch (err) {
-      setErrorNotice(err.response?.data?.message || 'Failed to complete booking.');
+      const serverMsg = err.response?.data?.message || err.response?.data?.error || 'Input validation failed for one or more fields';
+      setErrorNotice(serverMsg);
     } finally {
       setIsBookingSubmitting(false);
     }
   };
 
-  // Cancellation handler
   const handleConfirmCancel = async () => {
     if (!cancellingAppt) return;
     setCancelSaving(true);
@@ -272,7 +274,6 @@ export default function PatientDashboard() {
     }
   };
 
-  // Profile Save handler
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     setProfileSaving(true);
@@ -297,43 +298,43 @@ export default function PatientDashboard() {
     }
   };
 
-  const getDoctorName = (doc) => {
-    if (!doc) return 'Specialist';
+  // Robust Doctor Name Resolver supporting all backend response formats
+  const getDoctorName = (input) => {
+    if (!input) return 'Attending Physician';
+    // If input is an appointment object containing a doctor reference
+    const doc = input.doctor || input.physician || input;
+
+    if (typeof doc === 'string') return doc.startsWith('Dr.') ? doc : `Dr. ${doc}`;
     if (doc.firstName && doc.lastName) return `Dr. ${doc.firstName} ${doc.lastName}`;
     if (doc.fullName) return doc.fullName.startsWith('Dr.') ? doc.fullName : `Dr. ${doc.fullName}`;
-    if (doc.doctorName) return doc.doctorName;
-    return `Doctor #${doc.id}`;
+    if (doc.doctorName) return doc.doctorName.startsWith('Dr.') ? doc.doctorName : `Dr. ${doc.doctorName}`;
+    if (doc.name) return doc.name.startsWith('Dr.') ? doc.name : `Dr. ${doc.name}`;
+    if (doc.user && doc.user.firstName) return `Dr. ${doc.user.firstName} ${doc.user.lastName || ''}`;
+    if (doc.email) return `Dr. ${doc.email.split('@')[0]}`;
+    
+    return `Doctor #${doc.id || input.doctorId || 'Specialist'}`;
   };
 
   const filteredDoctors = doctors.filter((doc) => {
     const nameMatch = getDoctorName(doc).toLowerCase().includes(doctorSearch.toLowerCase()) ||
-                      (doc.specialty || '').toLowerCase().includes(doctorSearch.toLowerCase());
+                    (doc.specialty || '').toLowerCase().includes(doctorSearch.toLowerCase());
     const deptMatch = selectedDept === 'ALL' || String(doc.departmentId || doc.department?.id) === String(selectedDept);
     return nameMatch && deptMatch;
   });
 
-  // Direct File Download for Prescription Slip (HTML format)
   const handleDownloadSlip = () => {
     if (!viewingRx) return;
     const activeItems = extractItems(viewingRx).map(normalizeItem).filter(Boolean);
 
-    const docName = 
-      viewingRx.doctorName || 
-      viewingRx.doctor?.fullName || 
-      (viewingRx.doctor?.firstName ? `Dr. ${viewingRx.doctor.firstName} ${viewingRx.doctor.lastName || ''}` : '') ||
-      'Dr. Attending Physician';
-
-    const patName = 
-      profile.firstName ? `${profile.firstName} ${profile.lastName}` : (viewingRx.patientName || `Patient #${viewingRx.patientId || 'Record'}`);
-
-    const deptName = 
-      viewingRx.departmentName || viewingRx.department?.name || viewingRx.doctorSpecialty || viewingRx.specialty || 'General Medicine';
+    const docName = getDoctorName(viewingRx);
+    const patName = profile.firstName ? `${profile.firstName} ${profile.lastName}` : (viewingRx.patientName || `Patient #${viewingRx.patientId || 'Record'}`);
+    const deptName = viewingRx.departmentName || viewingRx.department?.name || viewingRx.doctorSpecialty || viewingRx.specialty || 'General Medicine';
 
     const rowsHtml = activeItems.map((m, idx) => `
       <tr style="border-bottom: 1px solid #e2e8f0;">
         <td style="padding: 10px; font-weight: bold; color: #64748b;">${idx + 1}</td>
         <td style="padding: 10px; font-weight: bold; color: #0f172a;">${m.name}</td>
-        <td style="padding: 10px; color: #005a5b; font-weight: bold;">${m.dosage}</td>
+        <td style="padding: 10px; color: #00A896; font-weight: bold;">${m.dosage}</td>
         <td style="padding: 10px; color: #334155;">${m.frequency}</td>
         <td style="padding: 10px; color: #334155;">${m.duration}</td>
         <td style="padding: 10px; color: #475569; font-style: italic;">${m.instructions}</td>
@@ -348,8 +349,8 @@ export default function PatientDashboard() {
         <title>Curix-Prescription-Rx#${viewingRx.id || 'Slip'}</title>
         <style>
           body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; color: #1e293b; background: #fff; }
-          .header { border-bottom: 2px solid #005a5b; padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; }
-          .title { font-size: 24px; font-weight: 900; color: #005a5b; margin: 0; }
+          .header { border-bottom: 2px solid #00A896; padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; }
+          .title { font-size: 24px; font-weight: 900; color: #0A1C35; margin: 0; }
           .box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 20px; display: flex; justify-content: space-between; }
           table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
           th { background: #f1f5f9; padding: 10px; text-align: left; font-size: 11px; text-transform: uppercase; color: #475569; }
@@ -364,7 +365,7 @@ export default function PatientDashboard() {
             <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">Outpatient Department (OPD) · Official Clinical Prescription</p>
           </div>
           <div style="text-align: right;">
-            <div style="font-size: 14px; font-weight: bold; color: #005a5b;">Rx ID: #${viewingRx.id || 'N/A'}</div>
+            <div style="font-size: 14px; font-weight: bold; color: #00A896;">Rx ID: #${viewingRx.id || 'N/A'}</div>
             <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Date: ${viewingRx.createdAt ? new Date(viewingRx.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}</div>
           </div>
         </div>
@@ -381,7 +382,7 @@ export default function PatientDashboard() {
           <div style="text-align: right;">
             <span style="font-size: 10px; text-transform: uppercase; color: #94a3b8; font-weight: bold; display: block;">Attending Physician</span>
             <strong style="font-size: 15px; color: #0f172a;">${docName}</strong>
-            <div style="font-size: 12px; color: #005a5b; font-weight: 600;">${deptName}</div>
+            <div style="font-size: 12px; color: #00A896; font-weight: 600;">${deptName}</div>
           </div>
         </div>
 
@@ -440,28 +441,19 @@ export default function PatientDashboard() {
     URL.revokeObjectURL(url);
   };
 
-  // Dedicated Hidden IFrame Native Printing Engine
   const handlePrint = () => {
     if (!viewingRx) return;
     const activeItems = extractItems(viewingRx).map(normalizeItem).filter(Boolean);
 
-    const docName = 
-      viewingRx.doctorName || 
-      viewingRx.doctor?.fullName || 
-      (viewingRx.doctor?.firstName ? `Dr. ${viewingRx.doctor.firstName} ${viewingRx.doctor.lastName || ''}` : '') ||
-      'Dr. Attending Physician';
-
-    const patName = 
-      profile.firstName ? `${profile.firstName} ${profile.lastName}` : (viewingRx.patientName || `Patient #${viewingRx.patientId || 'Record'}`);
-
-    const deptName = 
-      viewingRx.departmentName || viewingRx.department?.name || viewingRx.doctorSpecialty || viewingRx.specialty || 'General Medicine';
+    const docName = getDoctorName(viewingRx);
+    const patName = profile.firstName ? `${profile.firstName} ${profile.lastName}` : (viewingRx.patientName || `Patient #${viewingRx.patientId || 'Record'}`);
+    const deptName = viewingRx.departmentName || viewingRx.department?.name || viewingRx.doctorSpecialty || viewingRx.specialty || 'General Medicine';
 
     const rowsHtml = activeItems.map((m, idx) => `
       <tr style="border-bottom: 1px solid #e2e8f0;">
         <td style="padding: 10px; font-weight: bold; color: #64748b;">${idx + 1}</td>
         <td style="padding: 10px; font-weight: bold; color: #0f172a;">${m.name}</td>
-        <td style="padding: 10px; color: #005a5b; font-weight: bold;">${m.dosage}</td>
+        <td style="padding: 10px; color: #00A896; font-weight: bold;">${m.dosage}</td>
         <td style="padding: 10px; color: #334155;">${m.frequency}</td>
         <td style="padding: 10px; color: #334155;">${m.duration}</td>
         <td style="padding: 10px; color: #475569; font-style: italic;">${m.instructions}</td>
@@ -484,8 +476,8 @@ export default function PatientDashboard() {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
-          .header { border-bottom: 2px solid #005a5b; padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; }
-          .title { font-size: 24px; font-weight: 900; color: #005a5b; margin: 0; }
+          .header { border-bottom: 2px solid #00A896; padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; }
+          .title { font-size: 24px; font-weight: 900; color: #0A1C35; margin: 0; }
           .box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 20px; display: flex; justify-content: space-between; }
           table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
           th { background: #f1f5f9; padding: 10px; text-align: left; font-size: 11px; text-transform: uppercase; color: #475569; }
@@ -500,7 +492,7 @@ export default function PatientDashboard() {
             <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">Outpatient Department (OPD) · Official Clinical Prescription</p>
           </div>
           <div style="text-align: right;">
-            <div style="font-size: 14px; font-weight: bold; color: #005a5b;">Rx ID: #${viewingRx.id || 'N/A'}</div>
+            <div style="font-size: 14px; font-weight: bold; color: #00A896;">Rx ID: #${viewingRx.id || 'N/A'}</div>
             <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Date: ${viewingRx.createdAt ? new Date(viewingRx.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}</div>
           </div>
         </div>
@@ -517,7 +509,7 @@ export default function PatientDashboard() {
           <div style="text-align: right;">
             <span style="font-size: 10px; text-transform: uppercase; color: #94a3b8; font-weight: bold; display: block;">Attending Physician</span>
             <strong style="font-size: 15px; color: #0f172a;">${docName}</strong>
-            <div style="font-size: 12px; color: #005a5b; font-weight: 600;">${deptName}</div>
+            <div style="font-size: 12px; color: #00A896; font-weight: 600;">${deptName}</div>
           </div>
         </div>
 
@@ -586,176 +578,129 @@ export default function PatientDashboard() {
     }, 250);
   };
 
+  // Calendar Helpers
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  const firstDayOfMonth = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+  const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
+  const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
+
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex pt-16">
+    <div className="min-h-screen bg-[#F4F8FB] text-[#0A1C35] flex font-sans">
       
-      {/* SIDEBAR NAVIGATION - PORTEA DEEP PINE THEME */}
-      <aside className="w-72 border-r border-[#005A5B]/15 bg-gradient-to-b from-[#005A5B] via-[#004849] to-[#003839] hidden lg:flex flex-col justify-between fixed top-16 bottom-0 left-0 z-30 shadow-2xl text-slate-200">
-        
-        <div className="p-5 space-y-6">
-          
-          {/* Node Status Indicator Card */}
-          <div className="relative overflow-hidden p-3.5 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-md">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#00A896] to-[#5eead4] text-white flex items-center justify-center shadow-lg shrink-0">
-                <Heart size={18} className="fill-white/20" />
-              </div>
-              <div className="truncate">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-xs shadow-emerald-400" />
-                  <span className="text-[10px] uppercase font-black tracking-widest text-[#5eead4] leading-none">Patient Portal</span>
-                </div>
-                <span className="text-xs font-black text-white tracking-wide truncate block mt-0.5">Care Management</span>
-              </div>
+      {/* 1. LEFT SIDEBAR */}
+      <aside className="w-64 bg-white border-r border-slate-200/80 hidden lg:flex flex-col justify-between shrink-0 select-none">
+        <div>
+          {/* Logo Header */}
+          <div className="h-20 px-6 flex items-center gap-3 border-b border-slate-100">
+            <div className="w-10 h-10 rounded-2xl bg-[#00A896] text-white flex items-center justify-center font-black shadow-md shadow-[#00A896]/20">
+              C
+            </div>
+            <div>
+              <span className="font-extrabold text-sm tracking-tight text-[#0A1C35] block">CURIX</span>
+              <span className="text-[10px] text-[#00A896] font-bold block">Patient Portal</span>
             </div>
           </div>
 
-          {/* Navigation Menu */}
-          <div className="space-y-1.5">
-            <span className="text-[11px] font-extrabold text-white/60 px-3 uppercase tracking-wider block mb-2">
-              Healthcare Services
+          {/* Navigation Menu Links */}
+          <div className="p-4 space-y-1.5">
+            <span className="text-[10px] uppercase font-black tracking-wider text-slate-400 px-3 block mb-2">Patient Services</span>
+            {[
+              { id: 'book', label: 'Find & Book', icon: Stethoscope },
+              { id: 'appointments', label: 'My Consultations', icon: Calendar, count: myAppointments.length },
+              { id: 'prescriptions', label: 'Digital Rx Vault', icon: FileText, count: myPrescriptions.length },
+              { id: 'profile', label: 'Health Chart', icon: User }
+            ].map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-[#00A896] text-white shadow-lg shadow-[#00A896]/25'
+                      : 'text-slate-600 hover:bg-[#E6F8F5] hover:text-[#00A896]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon size={16} />
+                    <span>{item.label}</span>
+                  </div>
+                  {item.count !== undefined && item.count > 0 && (
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${isActive ? 'bg-white/25 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                      {item.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Bottom Sign-out Action */}
+        <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
+          <div className="truncate mr-2">
+            <span className="text-xs font-bold text-[#0A1C35] block truncate">
+              {profile.firstName ? `${profile.firstName} ${profile.lastName}` : user?.email}
             </span>
-
-            {/* 1. Book Consultation */}
-            <button
-              onClick={() => setActiveTab('book')}
-              className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
-                activeTab === 'book'
-                  ? 'bg-gradient-to-r from-teal-400/25 via-teal-400/15 to-transparent text-white border-l-4 border-[#5eead4] shadow-md'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5 border-l-4 border-transparent'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-                  activeTab === 'book'
-                    ? 'bg-[#00A896] text-white shadow-md'
-                    : 'bg-white/10 text-slate-300 group-hover:text-[#5eead4] group-hover:bg-white/15'
-                }`}>
-                  <Stethoscope size={16} />
-                </div>
-                <span className="text-[13px] tracking-tight">Find & Book Doctor</span>
-              </div>
-            </button>
-
-            {/* 2. My Appointments */}
-            <button
-              onClick={() => setActiveTab('appointments')}
-              className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
-                activeTab === 'appointments'
-                  ? 'bg-gradient-to-r from-teal-400/25 via-teal-400/15 to-transparent text-white border-l-4 border-[#5eead4] shadow-md'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5 border-l-4 border-transparent'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-                  activeTab === 'appointments'
-                    ? 'bg-[#00A896] text-white shadow-md'
-                    : 'bg-white/10 text-slate-300 group-hover:text-[#5eead4] group-hover:bg-white/15'
-                }`}>
-                  <Calendar size={16} />
-                </div>
-                <span className="text-[13px] tracking-tight">My Consultations</span>
-              </div>
-              <span className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-all ${
-                activeTab === 'appointments'
-                  ? 'bg-teal-400/30 text-white border border-teal-400/40'
-                  : 'bg-white/10 text-slate-300 group-hover:text-white'
-              }`}>
-                {myAppointments.length}
-              </span>
-            </button>
-
-            {/* 3. My Prescriptions */}
-            <button
-              onClick={() => setActiveTab('prescriptions')}
-              className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
-                activeTab === 'prescriptions'
-                  ? 'bg-gradient-to-r from-teal-400/25 via-teal-400/15 to-transparent text-white border-l-4 border-[#5eead4] shadow-md'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5 border-l-4 border-transparent'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-                  activeTab === 'prescriptions'
-                    ? 'bg-[#00A896] text-white shadow-md'
-                    : 'bg-white/10 text-slate-300 group-hover:text-[#5eead4] group-hover:bg-white/15'
-                }`}>
-                  <FileText size={16} />
-                </div>
-                <span className="text-[13px] tracking-tight">Digital Rx Vault</span>
-              </div>
-              <span className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-all ${
-                activeTab === 'prescriptions'
-                  ? 'bg-teal-400/30 text-white border border-teal-400/40'
-                  : 'bg-white/10 text-slate-300 group-hover:text-white'
-              }`}>
-                {myPrescriptions.length}
-              </span>
-            </button>
-
-            {/* 4. Health Profile */}
-            <button
-              onClick={() => setActiveTab('profile')}
-              className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
-                activeTab === 'profile'
-                  ? 'bg-gradient-to-r from-teal-400/25 via-teal-400/15 to-transparent text-white border-l-4 border-[#5eead4] shadow-md'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5 border-l-4 border-transparent'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-                  activeTab === 'profile'
-                    ? 'bg-[#00A896] text-white shadow-md'
-                    : 'bg-white/10 text-slate-300 group-hover:text-[#5eead4] group-hover:bg-white/15'
-                }`}>
-                  <User size={16} />
-                </div>
-                <span className="text-[13px] tracking-tight">Health Chart</span>
-              </div>
-            </button>
+            <span className="text-[10px] text-emerald-600 font-bold block">Verified Patient</span>
           </div>
+          <button
+            onClick={logout}
+            title="Sign Out"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+          >
+            <LogOut size={15} />
+          </button>
         </div>
-
-        {/* User Card */}
-        <div className="p-4 border-t border-white/10 bg-[#003839]/60 backdrop-blur-xs">
-          <div className="p-3 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
-            <div className="truncate mr-2">
-              <span className="text-xs font-bold text-white block truncate">
-                {profile.firstName ? `${profile.firstName} ${profile.lastName}` : user?.email}
-              </span>
-              <span className="text-[10px] font-semibold text-emerald-300 flex items-center gap-1.5 mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Verified Patient
-              </span>
-            </div>
-            <button
-              onClick={logout}
-              title="Sign Out"
-              className="text-slate-300 hover:text-rose-400 hover:bg-rose-500/10 p-2 rounded-xl transition-all cursor-pointer"
-            >
-              <ArrowUpRight size={16} />
-            </button>
-          </div>
-        </div>
-
       </aside>
 
-      {/* MAIN CANVAS */}
-      <main className="flex-1 lg:ml-72 p-6 sm:p-10 max-w-7xl w-full mx-auto">
+      {/* 2. CENTER CONTENT & TOP HEADER BAR */}
+      <div className="flex-1 flex flex-col min-w-0">
         
+        {/* Top Header Bar */}
+        <header className="h-20 bg-white border-b border-slate-200/80 px-6 sm:px-8 flex items-center justify-between gap-4 sticky top-0 z-30 shadow-xs">
+          <div className="flex items-center gap-3 flex-1 max-w-lg">
+            <div className="relative w-full">
+              <Search size={16} className="absolute left-4 top-3.5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search physicians, departments, or records..."
+                className="w-full pl-11 pr-4 py-2.5 bg-[#F4F8FB] border border-slate-200 rounded-full text-xs focus:outline-none focus:bg-white focus:border-[#00A896] transition"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={loadAllPatientData}
+              disabled={isSyncing}
+              title="Sync Data"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#E6F8F5] hover:bg-[#d5f5ee] text-[#00A896] text-xs font-bold transition cursor-pointer"
+            >
+              <RefreshCw size={14} className={isSyncing ? 'animate-spin' : ''} />
+              <span>Sync Node</span>
+            </button>
+          </div>
+        </header>
+
         {/* MOBILE HORIZONTAL TABS */}
-        <div className="flex lg:hidden overflow-x-auto gap-2 pb-4 mb-4">
+        <div className="flex lg:hidden overflow-x-auto gap-2 p-4 bg-white border-b border-slate-200">
           {[
             { id: 'book', label: 'Find Doctors' },
-            { id: 'appointments', label: 'Appointments' },
-            { id: 'prescriptions', label: 'Prescriptions' },
-            { id: 'profile', label: 'My Chart' }
+            { id: 'appointments', label: 'Consultations' },
+            { id: 'prescriptions', label: 'Rx Vault' },
+            { id: 'profile', label: 'Health Chart' }
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer ${
-                activeTab === tab.id ? 'bg-[#00A896] text-white' : 'bg-white border border-[#005A5B]/15 text-slate-600'
+                activeTab === tab.id ? 'bg-[#00A896] text-white' : 'bg-slate-100 text-slate-600'
               }`}
             >
               {tab.label}
@@ -763,465 +708,498 @@ export default function PatientDashboard() {
           ))}
         </div>
 
-        {/* Notifications */}
-        {successNotice && (
-          <div className="flex items-center justify-between p-4 mb-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold shadow-xs">
-            <div className="flex items-center gap-2.5">
-              <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
-              <span>{successNotice}</span>
-            </div>
-            <button onClick={() => setSuccessNotice('')} className="text-emerald-700 hover:text-emerald-900 cursor-pointer">
-              <X size={14} />
-            </button>
-          </div>
-        )}
-
-        {errorNotice && (
-          <div className="flex items-center justify-between p-4 mb-6 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold shadow-xs">
-            <div className="flex items-center gap-2.5">
-              <AlertCircle size={16} className="text-rose-600 shrink-0" />
-              <span>{errorNotice}</span>
-            </div>
-            <button onClick={() => setErrorNotice('')} className="text-rose-700 hover:text-rose-900 cursor-pointer">
-              <X size={14} />
-            </button>
-          </div>
-        )}
-
-        {/* TAB 1: FIND & BOOK DOCTORS */}
-        {activeTab === 'book' && (
-          <div className="space-y-6">
+        {/* WORKSPACE CONTENT AREA WITH RIGHT-HAND WIDGETS */}
+        <div className="flex-1 p-6 sm:p-8 grid grid-cols-1 xl:grid-cols-4 gap-8 items-start">
+          
+          {/* Main Content Column (Span 3) */}
+          <div className="xl:col-span-3 space-y-6">
             
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-1">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[11px] font-black tracking-widest text-[#005A5B] uppercase">CURIX CLINICAL NETWORK</span>
-                  <span className="text-slate-300">·</span>
-                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#EBF5F5] border border-[#005A5B]/15 text-[10px] font-bold text-[#005A5B]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#00A896] animate-pulse" />
-                    Available Specialist Network
-                  </span>
+            {/* Notifications */}
+            {successNotice && (
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold shadow-xs">
+                <div className="flex items-center gap-2.5">
+                  <CheckCircle2 size={16} className="text-[#00A896] shrink-0" />
+                  <span>{successNotice}</span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-black text-[#005A5B] tracking-tight">Find & Book a Physician</h2>
-                <p className="text-xs sm:text-sm text-slate-500 mt-0.5 font-medium">Select a medical specialty, choose your preferred physician, and reserve an appointment slot.</p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={loadAllPatientData}
-                  disabled={isSyncing}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-[#005A5B]/20 hover:border-[#00A896] text-xs font-extrabold text-[#005A5B] hover:bg-[#EBF5F5]/30 shadow-xs transition disabled:opacity-60 cursor-pointer"
-                >
-                  <RefreshCw size={14} className={`text-[#00A896] ${isSyncing ? 'animate-spin' : ''}`} />
-                  <span>{isSyncing ? 'Refreshing...' : 'Refresh Network'}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Filter Toolbar */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="relative flex-1">
-                <Search size={15} className="absolute left-3.5 top-3 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Search physician by name or clinical specialty..."
-                  value={doctorSearch}
-                  onChange={(e) => setDoctorSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#005A5B]/15 bg-white text-xs focus:outline-none focus:border-[#00A896]"
-                />
-              </div>
-
-              <div className="sm:w-60">
-                <select
-                  value={selectedDept}
-                  onChange={(e) => setSelectedDept(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#005A5B]/15 bg-white text-xs font-bold text-[#005A5B] focus:outline-none focus:border-[#00A896]"
-                >
-                  <option value="ALL">All Departments ({departments.length})</option>
-                  {departments.map((d) => (
-                    <option key={d.id} value={d.id}>{d.name}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* DOCTORS GRID */}
-            {filteredDoctors.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredDoctors.map((doc) => {
-                  const docName = getDoctorName(doc);
-                  return (
-                    <div key={doc.id} className="p-5 rounded-2xl bg-white border border-[#005A5B]/10 shadow-xs flex flex-col justify-between hover:border-[#00A896]/50 hover:shadow-md transition group">
-                      <div>
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="w-11 h-11 rounded-2xl bg-[#EBF5F5] text-[#005A5B] flex items-center justify-center font-bold text-sm shrink-0">
-                            {docName.replace('Dr. ', '').charAt(0)}
-                          </div>
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
-                            Available
-                          </span>
-                        </div>
-
-                        <h4 className="text-sm font-black text-[#005A5B] group-hover:text-[#00A896] transition-colors">{docName}</h4>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#EBF5F5] text-[#005A5B] border border-[#005A5B]/15 uppercase inline-block mt-1">
-                          {doc.specialty || 'Specialist'}
-                        </span>
-
-                        <p className="text-xs text-slate-500 font-medium mt-2">
-                          {doc.qualification || 'Physician'} · {doc.experienceYears || 0} years practice
-                        </p>
-                      </div>
-
-                      <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
-                        <div>
-                          <span className="text-[10px] text-slate-400 uppercase font-bold block leading-none">Consultation Fee</span>
-                          <span className="text-base font-black text-[#005A5B] font-mono mt-1 block">
-                            ${doc.consultationFee !== undefined ? doc.consultationFee : '50.00'}
-                          </span>
-                        </div>
-
-                        <button
-                          onClick={() => handleOpenBooking(doc)}
-                          className="px-5 py-2.5 rounded-xl bg-[#00A896] hover:bg-[#008476] text-white text-xs font-bold transition shadow-md shadow-[#00A896]/20 flex items-center gap-1.5 cursor-pointer"
-                        >
-                          <Calendar size={13} />
-                          <span>Book Slot</span>
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="py-16 text-center bg-white rounded-2xl border border-[#005A5B]/10 shadow-xs">
-                <Stethoscope size={36} className="mx-auto text-slate-300 mb-2" />
-                <p className="text-sm font-bold text-[#005A5B]">No physicians match your filter</p>
-                <p className="text-xs text-slate-400 mt-1">Try selecting another department or clearing search parameters.</p>
+                <button onClick={() => setSuccessNotice('')} className="text-emerald-700 hover:text-emerald-900 cursor-pointer"><X size={14} /></button>
               </div>
             )}
 
-          </div>
-        )}
-
-        {/* TAB 2: MY APPOINTMENTS */}
-        {activeTab === 'appointments' && (
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-2xl font-black text-[#005A5B] tracking-tight">My Consultations</h2>
-                <p className="text-xs sm:text-sm text-slate-500 mt-0.5">History of booked hospital appointments and consultation status.</p>
-              </div>
-              <button
-                onClick={fetchMyAppointments}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-[#005A5B]/15 text-xs font-bold text-[#005A5B] hover:bg-[#EBF5F5]/30 shadow-2xs transition cursor-pointer"
-              >
-                <RefreshCw size={13} className="text-[#00A896]" />
-                <span>Refresh Visits</span>
-              </button>
-            </div>
-
-            {myAppointments.length > 0 ? (
-              <div className="space-y-3">
-                {myAppointments.map((appt) => {
-                  const doc = appt.doctor || {};
-                  const docName = getDoctorName(doc);
-                  const isCompleted = appt.status === 'COMPLETED';
-                  const isCancelled = appt.status === 'CANCELLED';
-                  const isPending = !isCompleted && !isCancelled;
-
-                  return (
-                    <div 
-                      key={appt.id} 
-                      className="p-5 rounded-2xl bg-white border border-[#005A5B]/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-[#005A5B]/30 transition"
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-sm shrink-0 ${
-                          isCompleted ? 'bg-emerald-100 text-emerald-800' :
-                          isCancelled ? 'bg-slate-100 text-slate-500' : 'bg-[#EBF5F5] text-[#005A5B]'
-                        }`}>
-                          <Stethoscope size={18} />
-                        </div>
-
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="text-sm font-black text-[#005A5B]">{docName}</h4>
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                              isCompleted ? 'bg-emerald-100 text-emerald-800' :
-                              isCancelled ? 'bg-rose-100 text-rose-800' : 'bg-[#00A896]/10 text-[#00A896]'
-                            }`}>
-                              {appt.status}
-                            </span>
-                          </div>
-
-                          <p className="text-xs text-slate-500 font-medium mt-1">
-                            {doc.specialty || 'Specialist'} · Fee: <strong className="font-mono text-[#005A5B]">${appt.consultationFee || doc.consultationFee || '50.00'}</strong>
-                          </p>
-
-                          {appt.reason && (
-                            <p className="text-xs text-slate-600 mt-1.5 italic">
-                              "{appt.reason}"
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <div className="sm:text-right pr-2">
-                          <span className="text-[10px] font-bold text-slate-400 block uppercase">Appointment Slot</span>
-                          <span className="text-xs font-black text-[#005A5B] font-mono block mt-0.5">
-                            {appt.appointmentDate} · {appt.appointmentTime?.slice(0, 5)}
-                          </span>
-                        </div>
-
-                        {isPending && (
-                          <button
-                            onClick={() => setCancellingAppt(appt)}
-                            className="px-3.5 py-2 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition cursor-pointer"
-                          >
-                            Cancel
-                          </button>
-                        )}
-
-                        {isCompleted && (
-                          <button
-                            onClick={() => setActiveTab('prescriptions')}
-                            className="px-4 py-2 rounded-xl bg-[#005A5B] hover:bg-[#004849] text-white text-xs font-bold transition shadow-xs cursor-pointer"
-                          >
-                            View Prescription
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="py-16 text-center bg-white rounded-2xl border border-[#005A5B]/10 shadow-xs">
-                <Calendar size={36} className="mx-auto text-slate-300 mb-2" />
-                <p className="text-sm font-bold text-[#005A5B]">No consultations booked</p>
-                <p className="text-xs text-slate-400 mt-1">Switch to "Find & Book Doctor" to reserve your first slot.</p>
+            {errorNotice && (
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold shadow-xs">
+                <div className="flex items-center gap-2.5">
+                  <AlertCircle size={16} className="text-rose-600 shrink-0" />
+                  <span>{errorNotice}</span>
+                </div>
+                <button onClick={() => setErrorNotice('')} className="text-rose-700 hover:text-rose-900 cursor-pointer"><X size={14} /></button>
               </div>
             )}
-          </div>
-        )}
 
-        {/* TAB 3: DIGITAL RX VAULT */}
-        {activeTab === 'prescriptions' && (
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-2xl font-black text-[#005A5B] tracking-tight">Digital Prescription Vault</h2>
-                <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Official medical prescriptions issued by your attending physicians.</p>
-              </div>
-              <button
-                onClick={fetchMyPrescriptions}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-[#005A5B]/15 text-xs font-bold text-[#005A5B] hover:bg-[#EBF5F5]/30 shadow-2xs transition cursor-pointer"
-              >
-                <RefreshCw size={13} className="text-[#00A896]" />
-                <span>Refresh Vault</span>
-              </button>
-            </div>
-
-            {myPrescriptions.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {myPrescriptions.map((rx) => {
-                  const itemsCount = extractItems(rx).length;
-                  return (
-                    <div key={rx.id} className="p-5 rounded-2xl bg-white border border-[#005A5B]/10 shadow-xs flex flex-col justify-between hover:border-[#005A5B]/30 transition">
-                      <div>
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="w-10 h-10 rounded-xl bg-[#EBF5F5] text-[#005A5B] flex items-center justify-center font-bold">
-                            <FileText size={18} />
-                          </div>
-                          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
-                            Rx-ID: #{rx.id}
-                          </span>
-                        </div>
-
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Clinical Diagnosis</span>
-                        <h4 className="text-sm font-black text-[#005A5B] mt-0.5">{rx.diagnosis || 'Clinical Consultation'}</h4>
-
-                        <p className="text-xs text-slate-500 mt-2 font-medium">
-                          {itemsCount} medication{itemsCount === 1 ? '' : 's'} prescribed · Issued {rx.createdAt ? new Date(rx.createdAt).toLocaleDateString() : 'Recent'}
-                        </p>
-                      </div>
-
-                      <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
-                        <span className="text-xs text-slate-400">Official Record</span>
-                        <button
-                          onClick={() => handleOpenViewingRx(rx)}
-                          className="px-4 py-2 rounded-xl bg-[#00A896] hover:bg-[#008476] text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer"
-                        >
-                          <FileText size={13} />
-                          <span>View / Download Slip</span>
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="py-16 text-center bg-white rounded-2xl border border-[#005A5B]/10 shadow-xs">
-                <FileText size={36} className="mx-auto text-slate-300 mb-2" />
-                <p className="text-sm font-bold text-[#005A5B]">No prescriptions found</p>
-                <p className="text-xs text-slate-400 mt-1">Prescriptions issued by doctors after consultations will appear here automatically.</p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* TAB 4: PERSONAL HEALTH CHART */}
-        {activeTab === 'profile' && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-black text-[#005A5B] tracking-tight">Personal Health Chart</h2>
-              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Maintain your emergency contact, blood group, and demographic vitals.</p>
-            </div>
-
-            <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#005A5B]/10 shadow-xs max-w-2xl">
-              <form onSubmit={handleSaveProfile} className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* TAB 1: FIND & BOOK DOCTORS */}
+            {activeTab === 'book' && (
+              <div className="space-y-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-[#005A5B] mb-1">First Name *</label>
-                    <input
-                      type="text"
-                      required
-                      value={profile.firstName}
-                      onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-semibold text-[#1A2E35] focus:outline-none focus:border-[#00A896]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[#005A5B] mb-1">Last Name *</label>
-                    <input
-                      type="text"
-                      required
-                      value={profile.lastName}
-                      onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-semibold text-[#1A2E35] focus:outline-none focus:border-[#00A896]"
-                    />
+                    <span className="text-[11px] font-black tracking-widest text-[#00A896] uppercase block mb-1">CURIX CLINICAL NETWORK</span>
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0A1C35] tracking-tight">Find & Book a Physician</h2>
+                    <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Select a medical specialty, choose your preferred physician, and reserve an appointment slot.</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-[#005A5B] mb-1">Phone Number</label>
+                {/* Filter Toolbar */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="relative flex-1">
+                    <Search size={15} className="absolute left-4 top-3.5 text-slate-400" />
                     <input
-                      type="tel"
-                      placeholder="+1 (555) 000-0000"
-                      value={profile.contactNumber}
-                      onChange={(e) => setProfile({ ...profile, contactNumber: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs text-[#1A2E35] focus:outline-none focus:border-[#00A896]"
+                      type="text"
+                      placeholder="Search physician by name or clinical specialty..."
+                      value={doctorSearch}
+                      onChange={(e) => setDoctorSearch(e.target.value)}
+                      className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200/85 rounded-2xl text-xs focus:outline-none focus:border-[#00A896] shadow-2xs"
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[#005A5B] mb-1">Blood Group</label>
+                  <div className="sm:w-60">
                     <select
-                      value={profile.bloodGroup}
-                      onChange={(e) => setProfile({ ...profile, bloodGroup: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-xl border border-stone-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#00A896]"
+                      value={selectedDept}
+                      onChange={(e) => setSelectedDept(e.target.value)}
+                      className="w-full px-4 py-3 bg-white border border-slate-200/85 rounded-2xl text-xs font-bold text-[#0A1C35] focus:outline-none focus:border-[#00A896] shadow-2xs"
                     >
-                      <option value="">-- Select Blood Group --</option>
-                      {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((bg) => (
-                        <option key={bg} value={bg}>{bg}</option>
+                      <option value="ALL">All Departments ({departments.length})</option>
+                      {departments.map((d) => (
+                        <option key={d.id} value={d.id}>{d.name}</option>
                       ))}
                     </select>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-[#005A5B] mb-1">Age</label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={profile.age}
-                      onChange={(e) => setProfile({ ...profile, age: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs text-[#1A2E35] focus:outline-none focus:border-[#00A896]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[#005A5B] mb-1">Gender</label>
-                    <select
-                      value={profile.gender}
-                      onChange={(e) => setProfile({ ...profile, gender: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-xl border border-stone-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#00A896]"
-                    >
-                      <option value="MALE">Male</option>
-                      <option value="FEMALE">Female</option>
-                      <option value="OTHER">Other</option>
-                    </select>
-                  </div>
-                </div>
+                {/* DOCTORS GRID */}
+                {filteredDoctors.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {filteredDoctors.map((doc) => {
+                      const docName = getDoctorName(doc);
+                      const initials = docName.replace('Dr. ', '').split(' ').map(n => n[0]).join('');
+                      return (
+                        <div key={doc.id} className="p-6 rounded-3xl bg-white border border-slate-200/85 shadow-sm hover:border-[#00A896]/40 transition flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="w-12 h-12 rounded-2xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center font-extrabold text-sm shadow-xs">
+                                {initials || 'DR'}
+                              </div>
+                              <span className="px-3 py-1 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
+                                Available
+                              </span>
+                            </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-[#005A5B] mb-1">Residential Address</label>
-                  <textarea
-                    rows={2}
-                    value={profile.address}
-                    onChange={(e) => setProfile({ ...profile, address: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs text-[#1A2E35] focus:outline-none focus:border-[#00A896] resize-none"
-                  />
-                </div>
+                            <h4 className="text-sm font-extrabold text-[#0A1C35]">{docName}</h4>
+                            <span className="text-[11px] text-[#00A896] font-bold block mt-0.5">{doc.specialty || 'General Practitioner'}</span>
 
-                <div className="pt-3 flex justify-end">
+                            <p className="text-xs text-slate-500 mt-3 font-medium">
+                              {doc.qualification || 'MBBS, MD'} · {doc.experienceYears || 3} years practice
+                            </p>
+                          </div>
+
+                          <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
+                            <div>
+                              <span className="text-[10px] text-slate-400 uppercase font-bold block">Fee</span>
+                              <span className="text-base font-black text-[#00A896] font-mono">${doc.consultationFee !== undefined ? doc.consultationFee : '50.00'}</span>
+                            </div>
+
+                            <button
+                              onClick={() => handleOpenBooking(doc)}
+                              className="px-4 py-2.5 rounded-xl bg-[#00A896] hover:bg-[#079181] text-white text-xs font-bold transition shadow-md shadow-[#00A896]/20 flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <Calendar size={13} />
+                              <span>Book Slot</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="py-16 text-center bg-white rounded-3xl border border-slate-200/85 shadow-sm">
+                    <Stethoscope size={36} className="mx-auto text-slate-300 mb-2" />
+                    <p className="text-sm font-bold text-[#0A1C35]">No physicians match your filter</p>
+                    <p className="text-xs text-slate-400 mt-1">Try selecting another department or clearing search parameters.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB 2: MY APPOINTMENTS */}
+            {activeTab === 'appointments' && (
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-2xl font-extrabold text-[#0A1C35] tracking-tight">My Consultations</h2>
+                    <p className="text-xs sm:text-sm text-slate-500 mt-0.5">History of booked hospital appointments and consultation status.</p>
+                  </div>
                   <button
-                    type="submit"
-                    disabled={profileSaving}
-                    className="px-6 py-2.5 rounded-xl bg-[#00A896] hover:bg-[#008476] text-white text-xs font-bold transition shadow-xs disabled:opacity-50 cursor-pointer"
+                    onClick={fetchMyAppointments}
+                    className="px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
                   >
-                    {profileSaving ? 'Saving...' : 'Update Health Chart'}
+                    Refresh Visits
                   </button>
                 </div>
-              </form>
-            </div>
-          </div>
-        )}
 
-      </main>
+                {myAppointments.length > 0 ? (
+                  <div className="space-y-4">
+                    {myAppointments.map((appt) => {
+                      const docName = getDoctorName(appt);
+                      const isCompleted = appt.status === 'COMPLETED';
+                      const isCancelled = appt.status === 'CANCELLED';
+                      const isPending = !isCompleted && !isCancelled;
+
+                      return (
+                        <div key={appt.id} className="p-6 rounded-3xl bg-white border border-slate-200/85 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          <div className="flex items-start gap-4">
+                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-sm shrink-0 ${
+                              isCompleted ? 'bg-emerald-50 text-emerald-700' :
+                              isCancelled ? 'bg-slate-100 text-slate-500' : 'bg-[#E6F8F5] text-[#00A896]'
+                            }`}>
+                              <Stethoscope size={18} />
+                            </div>
+
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h4 className="text-sm font-extrabold text-[#0A1C35]">{docName}</h4>
+                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                                  isCompleted ? 'bg-emerald-100 text-emerald-800' :
+                                  isCancelled ? 'bg-rose-100 text-rose-800' : 'bg-[#E6F8F5] text-[#00A896]'
+                                }`}>
+                                  {appt.status}
+                                </span>
+                              </div>
+
+                              <p className="text-xs text-slate-500 font-medium mt-1">
+                                {appt.doctor?.specialty || appt.specialty || 'Specialist'} · Fee: <strong className="font-mono text-[#0A1C35]">${appt.consultationFee || appt.doctor?.consultationFee || '50.00'}</strong>
+                              </p>
+
+                              {appt.reasonForVisit || appt.reason ? (
+                                <p className="text-xs text-slate-600 mt-1.5 italic">"{appt.reasonForVisit || appt.reason}"</p>
+                              ) : null}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-4">
+                            <div className="sm:text-right">
+                              <span className="text-[10px] font-bold text-slate-400 block uppercase">Appointment Slot</span>
+                              <span className="text-xs font-black text-[#0A1C35] font-mono block mt-0.5">
+                                {appt.appointmentDate} · {String(appt.startTime || appt.appointmentTime || '').slice(0, 5)}
+                              </span>
+                            </div>
+
+                            {isPending && (
+                              <button
+                                onClick={() => setCancellingAppt(appt)}
+                                className="px-4 py-2 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition cursor-pointer"
+                              >
+                                Cancel
+                              </button>
+                            )}
+
+                            {isCompleted && (
+                              <button
+                                onClick={() => setActiveTab('prescriptions')}
+                                className="px-4 py-2 rounded-xl bg-[#0A1C35] hover:bg-[#132d4e] text-white text-xs font-bold transition shadow-xs cursor-pointer"
+                              >
+                                View Prescription
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="py-16 text-center bg-white rounded-3xl border border-slate-200/85 shadow-sm">
+                    <Calendar size={36} className="mx-auto text-slate-300 mb-2" />
+                    <p className="text-sm font-bold text-[#0A1C35]">No consultations booked</p>
+                    <p className="text-xs text-slate-400 mt-1">Switch to "Find & Book Doctor" to reserve your first slot.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB 3: DIGITAL RX VAULT */}
+            {activeTab === 'prescriptions' && (
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-2xl font-extrabold text-[#0A1C35] tracking-tight">Digital Prescription Vault</h2>
+                    <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Official medical prescriptions issued by your attending physicians.</p>
+                  </div>
+                  <button
+                    onClick={fetchMyPrescriptions}
+                    className="px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                  >
+                    Refresh Vault
+                  </button>
+                </div>
+
+                {myPrescriptions.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {myPrescriptions.map((rx) => {
+                      const itemsCount = extractItems(rx).length;
+                      return (
+                        <div key={rx.id} className="p-6 rounded-3xl bg-white border border-slate-200/85 shadow-sm flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="w-10 h-10 rounded-2xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center font-bold">
+                                <FileText size={18} />
+                              </div>
+                              <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
+                                Rx-ID: #{rx.id}
+                              </span>
+                            </div>
+
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Clinical Diagnosis</span>
+                            <h4 className="text-sm font-extrabold text-[#0A1C35] mt-0.5">{rx.diagnosis || 'Clinical Consultation'}</h4>
+
+                            <p className="text-xs text-slate-500 mt-2 font-medium">
+                              {itemsCount} medication{itemsCount === 1 ? '' : 's'} prescribed · Issued {rx.createdAt ? new Date(rx.createdAt).toLocaleDateString() : 'Recent'}
+                            </p>
+                          </div>
+
+                          <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
+                            <span className="text-xs text-slate-400">Official Record</span>
+                            <button
+                              onClick={() => handleOpenViewingRx(rx)}
+                              className="px-4 py-2 rounded-xl bg-[#00A896] hover:bg-[#079181] text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <FileText size={13} />
+                              <span>View / Download Slip</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="py-16 text-center bg-white rounded-3xl border border-slate-200/85 shadow-sm">
+                    <FileText size={36} className="mx-auto text-slate-300 mb-2" />
+                    <p className="text-sm font-bold text-[#0A1C35]">No prescriptions found</p>
+                    <p className="text-xs text-slate-400 mt-1">Prescriptions issued by doctors after consultations will appear here automatically.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB 4: PERSONAL HEALTH CHART */}
+            {activeTab === 'profile' && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-extrabold text-[#0A1C35] tracking-tight">Personal Health Chart</h2>
+                  <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Maintain your emergency contact, blood group, and demographic vitals.</p>
+                </div>
+
+                <div className="p-8 rounded-3xl bg-white border border-slate-200/85 shadow-sm">
+                  <form onSubmit={handleSaveProfile} className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-[#0A1C35] mb-1">First Name *</label>
+                        <input
+                          type="text"
+                          required
+                          value={profile.firstName}
+                          onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
+                          className="w-full p-3 border border-slate-200 rounded-2xl text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-[#0A1C35] mb-1">Last Name *</label>
+                        <input
+                          type="text"
+                          required
+                          value={profile.lastName}
+                          onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
+                          className="w-full p-3 border border-slate-200 rounded-2xl text-xs"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-[#0A1C35] mb-1">Phone Number</label>
+                        <input
+                          type="tel"
+                          placeholder="+1 (555) 000-0000"
+                          value={profile.contactNumber}
+                          onChange={(e) => setProfile({ ...profile, contactNumber: e.target.value })}
+                          className="w-full p-3 border border-slate-200 rounded-2xl text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-[#0A1C35] mb-1">Blood Group</label>
+                        <select
+                          value={profile.bloodGroup}
+                          onChange={(e) => setProfile({ ...profile, bloodGroup: e.target.value })}
+                          className="w-full p-3 border border-slate-200 rounded-2xl text-xs font-bold"
+                        >
+                          <option value="">-- Select Blood Group --</option>
+                          {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((bg) => (
+                            <option key={bg} value={bg}>{bg}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-[#0A1C35] mb-1">Age</label>
+                        <input
+                          type="number"
+                          min={0}
+                          value={profile.age}
+                          onChange={(e) => setProfile({ ...profile, age: e.target.value })}
+                          className="w-full p-3 border border-slate-200 rounded-2xl text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-[#0A1C35] mb-1">Gender</label>
+                        <select
+                          value={profile.gender}
+                          onChange={(e) => setProfile({ ...profile, gender: e.target.value })}
+                          className="w-full p-3 border border-slate-200 rounded-2xl text-xs font-bold"
+                        >
+                          <option value="MALE">Male</option>
+                          <option value="FEMALE">Female</option>
+                          <option value="OTHER">Other</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-[#0A1C35] mb-1">Residential Address</label>
+                      <textarea
+                        rows={2}
+                        value={profile.address}
+                        onChange={(e) => setProfile({ ...profile, address: e.target.value })}
+                        className="w-full p-3 border border-slate-200 rounded-2xl text-xs resize-none"
+                      />
+                    </div>
+
+                    <div className="pt-4 flex justify-end">
+                      <button
+                        type="submit"
+                        disabled={profileSaving}
+                        className="px-6 py-2.5 bg-[#00A896] hover:bg-[#079181] text-white rounded-full text-xs font-bold shadow-md cursor-pointer disabled:opacity-50"
+                      >
+                        {profileSaving ? 'Saving...' : 'Update Health Chart'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+
+          </div>
+
+          {/* Right-Hand Column: Calendar & Available Physicians Widget */}
+          <div className="space-y-6">
+            
+            {/* Interactive Calendar Widget */}
+            <div className="bg-white rounded-3xl border border-slate-200/85 p-6 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-extrabold uppercase text-[#0A1C35] tracking-wider">
+                  {monthNames[month]} {year}
+                </h4>
+                <div className="flex items-center gap-1">
+                  <button onClick={prevMonth} className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-600 cursor-pointer"><ChevronLeft size={16} /></button>
+                  <button onClick={nextMonth} className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-600 cursor-pointer"><ChevronRight size={16} /></button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-400">
+                <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+              </div>
+
+              <div className="grid grid-cols-7 gap-1 text-center text-xs">
+                {Array.from({ length: firstDayOfMonth }).map((_, i) => (
+                  <div key={`empty-${i}`} />
+                ))}
+                {Array.from({ length: daysInMonth }).map((_, i) => {
+                  const dayNum = i + 1;
+                  const isToday = dayNum === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear();
+                  return (
+                    <div 
+                      key={`day-${dayNum}`}
+                      className={`h-8 w-8 mx-auto flex items-center justify-center rounded-xl font-bold text-xs ${
+                        isToday ? 'bg-[#00A896] text-white shadow-md shadow-[#00A896]/30' : 'text-slate-700 hover:bg-slate-100 cursor-pointer'
+                      }`}
+                    >
+                      {dayNum}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Available Physicians Widget */}
+            <div className="bg-white rounded-3xl border border-slate-200/85 p-6 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-extrabold uppercase text-[#0A1C35] tracking-wider">Available Physicians</h4>
+                <span className="text-[11px] text-[#00A896] font-bold cursor-pointer hover:underline" onClick={() => setActiveTab('book')}>Book</span>
+              </div>
+
+              <div className="space-y-3.5">
+                {doctors.slice(0, 4).map((doc, idx) => {
+                  const name = getDoctorName(doc);
+                  const initials = name.replace('Dr. ', '').split(' ').map(n => n[0]).join('');
+                  return (
+                    <div key={doc.id || idx} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-2xl bg-[#E6F8F5] text-[#00A896] font-bold text-xs flex items-center justify-center">
+                          {initials || 'DR'}
+                        </div>
+                        <div>
+                          <span className="text-xs font-bold text-[#0A1C35] block truncate max-w-[130px]">{name}</span>
+                          <span className="text-[10px] text-slate-400 block truncate max-w-[130px]">{doc.specialty || 'General Practitioner'}</span>
+                        </div>
+                      </div>
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs" title="Available" />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
 
       {/* MODAL 1: BOOKING & SLOT SELECTION */}
       {selectedDoctor && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#005A5B]/40 backdrop-blur-xs">
-          <div className="relative w-full max-w-lg bg-white border border-[#005A5B]/15 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
-            <button
-              onClick={() => setSelectedDoctor(null)}
-              className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-100 cursor-pointer"
-            >
-              <X size={18} />
-            </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A1C35]/50 backdrop-blur-xs">
+          <div className="relative w-full max-w-lg bg-white border border-slate-200 rounded-3xl p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
+            <button onClick={() => setSelectedDoctor(null)} className="absolute top-6 right-6 text-slate-400 hover:text-slate-600"><X size={18} /></button>
 
-            <span className="text-[10px] font-black text-[#00A896] tracking-widest uppercase">SLOT RESERVATION</span>
-            <h3 className="text-xl font-black text-[#005A5B] mt-0.5">Book with {getDoctorName(selectedDoctor)}</h3>
-            <p className="text-xs text-slate-500 mb-5">{selectedDoctor.specialty} · Fee: ${selectedDoctor.consultationFee || '50.00'}</p>
+            <span className="text-[10px] font-black text-[#00A896] tracking-widest uppercase block mb-1">SLOT RESERVATION</span>
+            <h3 className="text-xl font-black text-[#0A1C35] mb-1">Book with {getDoctorName(selectedDoctor)}</h3>
+            <p className="text-xs text-slate-500 mb-6">{selectedDoctor.specialty} · Fee: ${selectedDoctor.consultationFee || '50.00'}</p>
 
             <form onSubmit={handleConfirmBooking} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-[#005A5B] mb-1">Consultation Date *</label>
+                <label className="block text-xs font-bold text-[#0A1C35] mb-1">Consultation Date *</label>
                 <input
                   type="date"
                   required
                   min={new Date().toISOString().split('T')[0]}
                   value={bookingDate}
                   onChange={(e) => handleDateChange(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#00A896]"
+                  className="w-full p-3 border border-slate-200 rounded-2xl text-xs font-bold text-[#0A1C35]"
                 />
               </div>
 
-              {/* Slot Grid */}
               {bookingDate && (
                 <div>
-                  <label className="block text-xs font-bold text-[#005A5B] mb-1.5">
-                    Select Available Consultation Slot *
-                  </label>
-
+                  <label className="block text-xs font-bold text-[#0A1C35] mb-2">Select Available Consultation Slot *</label>
                   {slotsLoading ? (
-                    <div className="p-6 text-center text-slate-400 text-xs font-bold">
-                      Checking physician calendar slots...
-                    </div>
+                    <div className="p-6 text-center text-slate-400 text-xs font-bold">Checking physician calendar slots...</div>
                   ) : availableSlots.length > 0 ? (
-                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                    <div className="grid grid-cols-4 gap-2">
                       {availableSlots.map((slot) => {
                         const slotTime = typeof slot === 'string' ? slot : slot.time || slot.startTime;
                         const isSelected = selectedSlot === slotTime;
@@ -1230,10 +1208,10 @@ export default function PatientDashboard() {
                             key={slotTime}
                             type="button"
                             onClick={() => setSelectedSlot(slotTime)}
-                            className={`py-2 px-2.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+                            className={`py-2 px-2.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer ${
                               isSelected
-                                ? 'bg-[#00A896] text-white shadow-xs'
-                                : 'bg-[#EBF5F5] border border-[#005A5B]/15 text-[#005A5B] hover:bg-[#005A5B]/10'
+                                ? 'bg-[#00A896] text-white shadow-md'
+                                : 'bg-[#E6F8F5] text-[#00A896] hover:bg-[#d5f5ee]'
                             }`}
                           >
                             {slotTime?.slice(0, 5)}
@@ -1242,7 +1220,7 @@ export default function PatientDashboard() {
                       })}
                     </div>
                   ) : (
-                    <div className="p-4 rounded-xl bg-amber-50 text-amber-800 text-xs font-medium border border-amber-200">
+                    <div className="p-4 rounded-2xl bg-amber-50 text-amber-800 text-xs font-bold border border-amber-200">
                       No open slots on this date. Please pick another working day.
                     </div>
                   )}
@@ -1250,31 +1228,19 @@ export default function PatientDashboard() {
               )}
 
               <div>
-                <label className="block text-xs font-bold text-[#005A5B] mb-1">Reason for Visit / Symptoms</label>
+                <label className="block text-xs font-bold text-[#0A1C35] mb-1">Reason for Visit / Symptoms</label>
                 <textarea
                   rows={2}
                   placeholder="Describe symptoms, concerns, or checkup reason..."
                   value={bookingReason}
                   onChange={(e) => setBookingReason(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs text-[#1A2E35] focus:outline-none focus:border-[#00A896] resize-none"
+                  className="w-full p-3 border border-slate-200 rounded-2xl text-xs resize-none"
                 />
               </div>
 
-              <div className="pt-2 flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSelectedDoctor(null)}
-                  className="px-4 py-2 rounded-xl border border-stone-200 text-xs font-bold text-slate-600 hover:bg-stone-50 cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={!selectedSlot || isBookingSubmitting}
-                  className="px-6 py-2.5 rounded-xl bg-[#00A896] hover:bg-[#008476] text-white text-xs font-bold transition shadow-xs disabled:opacity-50 cursor-pointer"
-                >
-                  {isBookingSubmitting ? 'Reserving...' : 'Confirm Consultation'}
-                </button>
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" onClick={() => setSelectedDoctor(null)} className="px-5 py-2.5 border border-slate-200 rounded-full text-xs font-bold cursor-pointer">Cancel</button>
+                <button type="submit" disabled={!selectedSlot || isBookingSubmitting} className="px-6 py-2.5 bg-[#00A896] hover:bg-[#079181] text-white rounded-full text-xs font-bold shadow-md cursor-pointer disabled:opacity-50">Confirm Consultation</button>
               </div>
             </form>
           </div>
@@ -1283,18 +1249,18 @@ export default function PatientDashboard() {
 
       {/* MODAL 2: CANCEL APPOINTMENT */}
       {cancellingAppt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#005A5B]/40 backdrop-blur-xs">
-          <div className="relative w-full max-w-md bg-white border border-[#005A5B]/15 rounded-3xl p-6 sm:p-8 shadow-2xl">
-            <h3 className="text-lg font-black text-[#005A5B] mb-1">Cancel Consultation</h3>
-            <p className="text-xs text-slate-500 mb-4">Are you sure you want to cancel consultation #{cancellingAppt.id}?</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A1C35]/50 backdrop-blur-xs">
+          <div className="relative w-full max-w-md bg-white border border-slate-200 rounded-3xl p-8 shadow-2xl">
+            <h3 className="text-xl font-black text-[#0A1C35] mb-2">Cancel Consultation</h3>
+            <p className="text-xs text-slate-500 mb-6">Are you sure you want to cancel consultation #{cancellingAppt.id}?</p>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-[#005A5B] mb-1">Cancellation Reason</label>
+                <label className="block text-xs font-bold text-[#0A1C35] mb-1">Cancellation Reason</label>
                 <select
                   value={cancelReason}
                   onChange={(e) => setCancelReason(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs font-bold text-slate-800"
+                  className="w-full p-3 border border-slate-200 rounded-2xl text-xs font-bold"
                 >
                   <option value="Schedule Conflict">Schedule Conflict</option>
                   <option value="Feeling Better">Feeling Better / Resolved</option>
@@ -1309,26 +1275,13 @@ export default function PatientDashboard() {
                   placeholder="Enter reason..."
                   value={customCancelText}
                   onChange={(e) => setCustomCancelText(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs text-[#1A2E35]"
+                  className="w-full p-3 border border-slate-200 rounded-2xl text-xs"
                 />
               )}
 
-              <div className="pt-3 flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setCancellingAppt(null)}
-                  className="px-4 py-2 rounded-xl border border-stone-200 text-xs font-bold text-slate-600 hover:bg-stone-50 cursor-pointer"
-                >
-                  Keep Visit
-                </button>
-                <button
-                  type="button"
-                  disabled={cancelSaving}
-                  onClick={handleConfirmCancel}
-                  className="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition shadow-xs cursor-pointer"
-                >
-                  {cancelSaving ? 'Cancelling...' : 'Confirm Cancellation'}
-                </button>
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" onClick={() => setCancellingAppt(null)} className="px-5 py-2.5 border border-slate-200 rounded-full text-xs font-bold cursor-pointer">Keep Visit</button>
+                <button type="button" disabled={cancelSaving} onClick={handleConfirmCancel} className="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-full text-xs font-bold shadow-md cursor-pointer">Confirm Cancellation</button>
               </div>
             </div>
           </div>
@@ -1337,172 +1290,101 @@ export default function PatientDashboard() {
 
       {/* MODAL 3: VIEW & DOWNLOAD DIGITAL PRESCRIPTION */}
       {viewingRx && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#005A5B]/40 backdrop-blur-xs">
-          <div className="relative w-full max-w-3xl bg-white border border-[#005A5B]/15 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
-            
-            <button
-              onClick={() => setViewingRx(null)}
-              className="no-print absolute top-6 right-6 text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-100 transition cursor-pointer"
-            >
-              <X size={18} />
-            </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A1C35]/50 backdrop-blur-xs">
+          <div className="relative w-full max-w-3xl bg-white border border-slate-200 rounded-3xl p-8 shadow-2xl max-h-[92vh] overflow-y-auto space-y-6">
+            <button onClick={() => setViewingRx(null)} className="no-print absolute top-6 right-6 text-slate-400 hover:text-slate-600"><X size={18} /></button>
 
-            {/* PRINTABLE CONTAINER */}
-            <div id="printable-prescription-slip" className="space-y-6">
-              
-              {/* Slip Header */}
-              <div className="border-b-2 border-[#005A5B] pb-4 flex items-start justify-between">
-                <div>
-                  <span className="text-xl font-black text-[#005A5B] tracking-tight">CURIX HEALTHCARE SYSTEM</span>
-                  <p className="text-xs font-semibold text-slate-500 mt-0.5">Outpatient Department (OPD) · Clinical Prescription</p>
-                </div>
-                <div className="text-right">
-                  <span className="text-xs font-mono font-bold text-[#005A5B] block">Rx ID: #{viewingRx.id}</span>
-                  <span className="text-[11px] font-medium text-slate-500 block">
-                    Date: {viewingRx.createdAt ? new Date(viewingRx.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-
-              {/* Patient & Doctor Details */}
-              <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-[#EBF5F5] border border-[#005A5B]/15 text-xs text-slate-700">
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Patient Identification</span>
-                  <span className="text-sm font-black text-[#005A5B] block mt-0.5">
-                    {profile.firstName ? `${profile.firstName} ${profile.lastName}` : (viewingRx.patientName || `Patient #${viewingRx.patientId || 'Record'}`)}
-                  </span>
-                  <span className="text-slate-600 font-medium">
-                    {profile.bloodGroup ? `Blood: ${profile.bloodGroup} · ` : ''}
-                    {profile.age ? `Age: ${profile.age} yrs · ` : ''}
-                    {profile.gender || ''}
-                  </span>
-                </div>
-
-                <div className="text-right">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Attending Physician</span>
-                  <span className="text-sm font-black text-[#005A5B] block mt-0.5">
-                    {viewingRx.doctorName || viewingRx.doctor?.fullName || viewingRx.doctor?.name || 'Attending Physician'}
-                  </span>
-                  <span className="text-slate-600 font-medium">
-                    {viewingRx.departmentName || viewingRx.department?.name || viewingRx.doctor?.specialty || 'General Medicine'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Clinical Diagnosis */}
-              <div className="p-4 rounded-xl border border-stone-200 bg-white">
-                <span className="text-[10px] uppercase font-extrabold text-slate-400 tracking-wider block">Clinical Diagnosis</span>
-                <p className="text-sm font-black text-[#005A5B] mt-1">
-                  {viewingRx.diagnosis || 'Routine General Consultation'}
-                </p>
-              </div>
-
-              {/* Prescribed Medications Table */}
+            <div className="border-b-2 border-[#00A896] pb-4 flex justify-between items-start">
               <div>
-                <div className="flex items-center justify-between mb-2.5">
-                  <span className="text-xs font-black uppercase tracking-wider text-[#005A5B]">
-                    ℞ Prescribed Medications & Dosages
-                  </span>
-                  {loadingRxDetails && (
-                    <span className="flex items-center gap-1 text-[11px] text-[#00A896] font-semibold">
-                      <Loader2 size={12} className="animate-spin" /> Synchronizing full details...
-                    </span>
-                  )}
-                </div>
-
-                <div className="border border-stone-200 rounded-xl overflow-hidden">
-                  <table className="w-full text-left border-collapse text-xs">
-                    <thead>
-                      <tr className="bg-[#EBF5F5] border-b border-[#005A5B]/15 text-[10px] uppercase font-bold text-[#005A5B] tracking-wider">
-                        <th className="py-2.5 px-3">#</th>
-                        <th className="py-2.5 px-3">Medicine & Strength</th>
-                        <th className="py-2.5 px-3">Dosage / Frequency</th>
-                        <th className="py-2.5 px-3">Duration</th>
-                        <th className="py-2.5 px-3">Instructions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-stone-200 text-slate-800">
-                      {(() => {
-                        const items = extractItems(viewingRx).map(normalizeItem).filter(Boolean);
-
-                        if (items.length === 0) {
-                          return (
-                            <tr>
-                              <td colSpan="5" className="py-6 text-center text-slate-400">
-                                {loadingRxDetails ? 'Loading medication details...' : 'No line-item medications recorded.'}
-                              </td>
-                            </tr>
-                          );
-                        }
-
-                        return items.map((m, idx) => (
-                          <tr key={idx} className="hover:bg-stone-50">
-                            <td className="py-3 px-3 font-mono font-bold text-slate-400">{idx + 1}</td>
-                            <td className="py-3 px-3">
-                              <span className="font-black text-[#005A5B] text-xs block">{m.name}</span>
-                            </td>
-                            <td className="py-3 px-3">
-                              <span className="font-bold text-slate-900">{m.dosage}</span>
-                              <span className="text-[11px] text-[#00A896] block font-mono font-bold">({m.frequency})</span>
-                            </td>
-                            <td className="py-3 px-3 font-semibold text-slate-700">{m.duration}</td>
-                            <td className="py-3 px-3 font-medium text-slate-700">{m.instructions}</td>
-                          </tr>
-                        ));
-                      })()}
-                    </tbody>
-                  </table>
-                </div>
+                <h1 className="text-xl font-black text-[#0A1C35]">CURIX HEALTHCARE SYSTEM</h1>
+                <p className="text-xs text-slate-500">Outpatient Department (OPD) · Clinical Prescription</p>
               </div>
-
-              {/* Dietary & Clinical Advice */}
-              {viewingRx.notes && (
-                <div className="p-4 rounded-xl border border-stone-200 bg-stone-50/60">
-                  <span className="text-[10px] uppercase font-extrabold text-slate-400 tracking-wider block">Doctor's Dietary & Clinical Notes</span>
-                  <p className="text-xs font-semibold text-slate-800 mt-1 leading-relaxed">{viewingRx.notes}</p>
-                </div>
-              )}
-
-              {/* Official Stamp / Signature Line */}
-              <div className="pt-8 flex justify-between items-end border-t border-stone-200 text-xs">
-                <span className="text-[10px] text-slate-400 italic">This is an electronically generated and verified medical record.</span>
-                <div className="text-center">
-                  <div className="w-40 border-b border-[#005A5B] pb-1 font-mono text-[11px] font-bold text-[#005A5B]">
-                    Digitally Authorized
-                  </div>
-                  <span className="text-[10px] text-slate-500 uppercase tracking-wider block mt-1">Medical Officer Seal</span>
-                </div>
+              <div className="text-right">
+                <span className="text-xs font-mono font-bold text-[#00A896] block">Rx ID: #{viewingRx.id}</span>
+                <span className="text-xs text-slate-500">Date: {viewingRx.createdAt ? new Date(viewingRx.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}</span>
               </div>
-
             </div>
 
-            {/* Action Bar */}
-            <div className="no-print pt-6 mt-4 border-t border-slate-100 flex items-center justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setViewingRx(null)}
-                className="px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-bold text-slate-600 hover:bg-stone-50 transition cursor-pointer"
-              >
-                Close
-              </button>
-              <button
-                type="button"
-                onClick={handleDownloadSlip}
-                className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-xs"
-              >
-                <Download size={14} className="text-[#005A5B]" />
+            <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-[#E6F8F5] text-xs">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">Patient Record</span>
+                <strong className="text-sm font-extrabold text-[#0A1C35] block mt-0.5">
+                  {profile.firstName ? `${profile.firstName} ${profile.lastName}` : (viewingRx.patientName || `Patient #${viewingRx.patientId || 'Record'}`)}
+                </strong>
+                <span className="text-slate-600">{profile.bloodGroup ? `Blood: ${profile.bloodGroup} · ` : ''}{profile.age ? `Age: ${profile.age} yrs` : ''}</span>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">Attending Physician</span>
+                <strong className="text-sm font-extrabold text-[#0A1C35] block mt-0.5">
+                  {viewingRx.doctorName || viewingRx.doctor?.fullName || viewingRx.doctor?.name || 'Attending Physician'}
+                </strong>
+                <span className="text-[#00A896] font-bold">{viewingRx.departmentName || viewingRx.department?.name || viewingRx.doctor?.specialty || 'General Medicine'}</span>
+              </div>
+            </div>
+
+            <div>
+              <span className="text-[11px] font-bold uppercase text-slate-400 block mb-1">Clinical Diagnosis</span>
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-[#0A1C35]">
+                {viewingRx.diagnosis || 'Routine General Consultation'}
+              </div>
+            </div>
+
+            <div>
+              <span className="text-[11px] font-bold uppercase text-slate-400 block mb-2">℞ Prescribed Medications</span>
+              <div className="border border-slate-200 rounded-2xl overflow-hidden">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-200 text-[10px] uppercase font-bold text-slate-500">
+                      <th className="p-3">#</th>
+                      <th className="p-3">Medication</th>
+                      <th className="p-3">Dosage / Strength</th>
+                      <th className="p-3">Frequency</th>
+                      <th className="p-3">Duration</th>
+                      <th className="p-3">Instructions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {(() => {
+                      const items = extractItems(viewingRx).map(normalizeItem).filter(Boolean);
+                      if (items.length === 0) {
+                        return (
+                          <tr><td colSpan="5" className="p-6 text-center text-slate-400">{loadingRxDetails ? 'Loading medication details...' : 'No line-item medications recorded.'}</td></tr>
+                        );
+                      }
+                      return items.map((m, idx) => (
+                        <tr key={idx} className="hover:bg-slate-50">
+                          <td className="p-3 font-mono font-bold text-slate-400">{idx + 1}</td>
+                          <td className="p-3 font-extrabold text-[#0A1C35]">{m.name}</td>
+                          <td className="p-3 font-bold text-[#00A896]">{m.dosage}</td>
+                          <td className="p-3 text-slate-600">{m.frequency}</td>
+                          <td className="p-3 text-slate-600">{m.duration}</td>
+                          <td className="p-3 italic text-slate-500">{m.instructions}</td>
+                        </tr>
+                      ));
+                    })()}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {viewingRx.notes && (
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs">
+                <span className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Doctor's Notes & Advice</span>
+                <p className="font-medium text-slate-700">{viewingRx.notes}</p>
+              </div>
+            )}
+
+            <div className="no-print pt-4 border-t border-slate-200 flex items-center justify-end gap-3">
+              <button type="button" onClick={() => setViewingRx(null)} className="px-5 py-2.5 border border-slate-200 rounded-full text-xs font-bold cursor-pointer">Close</button>
+              <button type="button" onClick={handleDownloadSlip} className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-full text-xs font-bold flex items-center gap-2 cursor-pointer shadow-xs">
+                <Download size={14} className="text-[#00A896]" />
                 <span>Download Slip</span>
               </button>
-              <button
-                type="button"
-                onClick={handlePrint}
-                className="px-6 py-2.5 rounded-xl bg-[#005A5B] hover:bg-[#004849] text-white text-xs font-bold shadow-xs transition flex items-center gap-2 cursor-pointer"
-              >
+              <button type="button" onClick={handlePrint} className="px-6 py-2.5 bg-[#00A896] hover:bg-[#079181] text-white rounded-full text-xs font-bold shadow-md flex items-center gap-2 cursor-pointer">
                 <Printer size={14} />
                 <span>Print Official Slip</span>
               </button>
             </div>
-
           </div>
         </div>
       )}
