@@ -6,7 +6,8 @@ import {
   Shield, Plus, RefreshCw, AlertCircle, CheckCircle2, 
   Loader2, X, Search, Calendar, ChevronLeft, ChevronRight, 
   Clock, Edit3, Save, Layers, ArrowUpRight, TrendingUp,
-  FileCheck2, Check, Zap, Sparkles
+  FileCheck2, Check, Zap, Sparkles, LogOut, LayoutDashboard,
+  BarChart3, PieChart, Award, Mail, Phone
 } from 'lucide-react';
 
 const WEEKDAYS = [
@@ -26,6 +27,9 @@ export default function AdminDashboard() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [errorNotice, setErrorNotice] = useState('');
   const [successNotice, setSuccessNotice] = useState('');
+
+  // Calendar State
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   // 1. Analytics Data
   const [metrics, setMetrics] = useState(null);
@@ -319,8 +323,8 @@ export default function AdminDashboard() {
 
   const filteredDoctors = doctors.filter((doc) => {
     const nameMatch = getDoctorDisplayName(doc).toLowerCase().includes(doctorSearch.toLowerCase()) ||
-                      doc.specialty?.toLowerCase().includes(doctorSearch.toLowerCase()) ||
-                      doc.licenseNumber?.toLowerCase().includes(doctorSearch.toLowerCase());
+                    doc.specialty?.toLowerCase().includes(doctorSearch.toLowerCase()) ||
+                    doc.licenseNumber?.toLowerCase().includes(doctorSearch.toLowerCase());
     const deptMatch = selectedDeptFilter === 'ALL' || String(doc.departmentId || doc.department?.id) === String(selectedDeptFilter);
     return nameMatch && deptMatch;
   });
@@ -336,1263 +340,649 @@ export default function AdminDashboard() {
   const cancelledPct = totalAppts > 0 ? Math.round((cancelledAppts / totalAppts) * 100) : 0;
 
   const totalRev = Number(metrics?.totalRevenue ?? metrics?.estimatedRevenue ?? 0);
-  const avgFeePerCompleted = completedAppts > 0 ? (totalRev / completedAppts).toFixed(0) : '0';
   const totalPrescriptions = Number(metrics?.totalPrescriptions ?? 0);
-  const prescriptionRate = completedAppts > 0 ? Math.round((totalPrescriptions / completedAppts) * 100) : 0;
+
+  // Calendar Helpers
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  const firstDayOfMonth = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+  const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
+  const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
 
   return (
-    <div className="min-h-screen bg-[#F7FAF9] text-slate-800 flex pt-16">
+    <div className="min-h-screen bg-[#F4F8FB] text-[#0A1C35] flex font-sans">
       
-      {/* SIDEBAR NAVIGATION - PORTEA DEEP PINE THEME */}
-      <aside className="w-72 border-r border-[#005A5B]/15 bg-gradient-to-b from-[#005A5B] via-[#004849] to-[#003839] hidden lg:flex flex-col justify-between fixed top-16 bottom-0 left-0 z-30 shadow-2xl text-slate-200">
-        
-        <div className="p-5 space-y-6">
-          
-          {/* Node Status Card */}
-          <div className="relative overflow-hidden p-3.5 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-md">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#F26522] to-[#FF7E47] text-white flex items-center justify-center shadow-lg shadow-[#F26522]/30 shrink-0">
-                <Shield size={18} />
-              </div>
-              <div className="truncate">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[10px] uppercase font-black tracking-widest text-[#FF9E6C] leading-none">Security Node</span>
-                </div>
-                <span className="text-xs font-black text-white tracking-wide truncate block mt-0.5">Super Admin Console</span>
-              </div>
+      {/* 1. LEFT SIDEBAR */}
+      <aside className="w-64 bg-white border-r border-slate-200/80 hidden lg:flex flex-col justify-between shrink-0 select-none">
+        <div>
+          {/* Logo Header */}
+          <div className="h-20 px-6 flex items-center gap-3 border-b border-slate-100">
+            <div className="w-10 h-10 rounded-2xl bg-[#00A896] text-white flex items-center justify-center font-black shadow-md shadow-[#00A896]/20">
+              C
+            </div>
+            <div>
+              <span className="font-extrabold text-sm tracking-tight text-[#0A1C35] block">CURIX</span>
+              <span className="text-[10px] text-[#00A896] font-bold block">Admin Portal</span>
             </div>
           </div>
 
-          {/* Navigation Menu */}
-          <div className="space-y-1.5">
-            <span className="text-[11px] font-extrabold text-white/60 px-3 uppercase tracking-wider block mb-2">
-              Operational Control
-            </span>
-
-            {/* 1. Analytics Button */}
-            <button
-              onClick={() => setActiveTab('analytics')}
-              className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 ${
-                activeTab === 'analytics'
-                  ? 'bg-gradient-to-r from-[#F26522]/25 via-[#F26522]/15 to-transparent text-white border-l-4 border-[#F26522] shadow-md shadow-black/20'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5 border-l-4 border-transparent'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-                  activeTab === 'analytics'
-                    ? 'bg-[#F26522] text-white shadow-md shadow-[#F26522]/30'
-                    : 'bg-white/10 text-slate-300 group-hover:text-[#F26522] group-hover:bg-white/15'
-                }`}>
-                  <Activity size={16} />
-                </div>
-                <span className="text-[13px] tracking-tight">Executive Analytics</span>
-              </div>
-              {activeTab === 'analytics' && (
-                <span className="w-1.5 h-1.5 rounded-full bg-[#F26522]" />
-              )}
-            </button>
-
-            {/* 2. Departments Button */}
-            <button
-              onClick={() => setActiveTab('departments')}
-              className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 ${
-                activeTab === 'departments'
-                  ? 'bg-gradient-to-r from-[#F26522]/25 via-[#F26522]/15 to-transparent text-white border-l-4 border-[#F26522] shadow-md shadow-black/20'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5 border-l-4 border-transparent'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-                  activeTab === 'departments'
-                    ? 'bg-[#F26522] text-white shadow-md shadow-[#F26522]/30'
-                    : 'bg-white/10 text-slate-300 group-hover:text-[#F26522] group-hover:bg-white/15'
-                }`}>
-                  <Building2 size={16} />
-                </div>
-                <span className="text-[13px] tracking-tight">Clinical Units</span>
-              </div>
-              <span className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-all ${
-                activeTab === 'departments'
-                  ? 'bg-[#F26522]/30 text-white border border-[#F26522]/40'
-                  : 'bg-white/10 text-slate-300 group-hover:text-white'
-              }`}>
-                {departments.length}
-              </span>
-            </button>
-
-            {/* 3. Doctors Button */}
-            <button
-              onClick={() => setActiveTab('doctors')}
-              className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 ${
-                activeTab === 'doctors'
-                  ? 'bg-gradient-to-r from-[#F26522]/25 via-[#F26522]/15 to-transparent text-white border-l-4 border-[#F26522] shadow-md shadow-black/20'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5 border-l-4 border-transparent'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-                  activeTab === 'doctors'
-                    ? 'bg-[#F26522] text-white shadow-md shadow-[#F26522]/30'
-                    : 'bg-white/10 text-slate-300 group-hover:text-[#F26522] group-hover:bg-white/15'
-                }`}>
-                  <Stethoscope size={16} />
-                </div>
-                <span className="text-[13px] tracking-tight">Physician Roster</span>
-              </div>
-              <span className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-all ${
-                activeTab === 'doctors'
-                  ? 'bg-[#F26522]/30 text-white border border-[#F26522]/40'
-                  : 'bg-white/10 text-slate-300 group-hover:text-white'
-              }`}>
-                {doctors.length}
-              </span>
-            </button>
-
-            {/* 4. Audit Trail Button */}
-            <button
-              onClick={() => {
-                setActiveTab('audit');
-                fetchAuditLogs(0);
-              }}
-              className={`w-full group relative flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 ${
-                activeTab === 'audit'
-                  ? 'bg-gradient-to-r from-[#F26522]/25 via-[#F26522]/15 to-transparent text-white border-l-4 border-[#F26522] shadow-md shadow-black/20'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5 border-l-4 border-transparent'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-                  activeTab === 'audit'
-                    ? 'bg-[#F26522] text-white shadow-md shadow-[#F26522]/30'
-                    : 'bg-white/10 text-slate-300 group-hover:text-[#F26522] group-hover:bg-white/15'
-                }`}>
-                  <Layers size={16} />
-                </div>
-                <span className="text-[13px] tracking-tight">Audit Trail</span>
-              </div>
-              {activeTab === 'audit' && (
-                <span className="w-1.5 h-1.5 rounded-full bg-[#F26522]" />
-              )}
-            </button>
+          {/* Navigation Menu Links */}
+          <div className="p-4 space-y-1.5">
+            <span className="text-[10px] uppercase font-black tracking-wider text-slate-400 px-3 block mb-2">Main Menu</span>
+            {[
+              { id: 'analytics', label: 'Dashboard', icon: LayoutDashboard },
+              { id: 'departments', label: 'Clinical Units', icon: Building2, count: departments.length },
+              { id: 'doctors', label: 'Physicians', icon: Stethoscope, count: doctors.length },
+              { id: 'audit', label: 'Audit Trail', icon: Layers }
+            ].map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    if (item.id === 'audit') fetchAuditLogs(0);
+                  }}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
+                    isActive
+                      ? 'bg-[#00A896] text-white shadow-lg shadow-[#00A896]/25'
+                      : 'text-slate-600 hover:bg-[#E6F8F5] hover:text-[#00A896]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon size={16} />
+                    <span>{item.label}</span>
+                  </div>
+                  {item.count !== undefined && (
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${isActive ? 'bg-white/25 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                      {item.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* User Card */}
-        <div className="p-4 border-t border-white/10 bg-[#003839]/60 backdrop-blur-xs">
-          <div className="p-3 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
-            <div className="truncate mr-2">
-              <span className="text-xs font-bold text-white block truncate">{user?.email}</span>
-              <span className="text-[10px] font-semibold text-emerald-300 flex items-center gap-1.5 mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Active Verified Node
-              </span>
-            </div>
-            <button
-              onClick={logout}
-              title="Sign Out"
-              className="text-slate-300 hover:text-rose-400 hover:bg-rose-500/10 p-2 rounded-xl transition-all"
-            >
-              <ArrowUpRight size={16} />
-            </button>
-          </div>
+        {/* Bottom Sign-out Action */}
+        <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-end">
+          <button
+            onClick={logout}
+            title="Sign Out"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+          >
+            <span>Sign Out</span>
+            <LogOut size={15} />
+          </button>
         </div>
-
       </aside>
 
-      {/* MAIN CANVAS */}
-      <main className="flex-1 lg:ml-72 p-6 sm:p-10 max-w-7xl w-full mx-auto">
+      {/* 2. CENTER CONTENT & TOP HEADER BAR */}
+      <div className="flex-1 flex flex-col min-w-0">
         
-        {/* MOBILE HORIZONTAL TABS */}
-        <div className="flex lg:hidden overflow-x-auto gap-2 pb-4 mb-4">
-          {['analytics', 'departments', 'doctors', 'audit'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap capitalize ${
-                activeTab === tab ? 'bg-[#F26522] text-white' : 'bg-white border border-[#005A5B]/15 text-slate-600'
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        {/* Global Notifications */}
-        {successNotice && (
-          <div className="flex items-center justify-between p-4 mb-6 rounded-2xl bg-emerald-50/90 border border-emerald-200 text-emerald-800 text-xs font-bold shadow-xs">
-            <div className="flex items-center gap-2.5">
-              <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
-              <span>{successNotice}</span>
-            </div>
-            <button onClick={() => setSuccessNotice('')} className="text-emerald-700 hover:text-emerald-900">
-              <X size={14} />
-            </button>
-          </div>
-        )}
-
-        {errorNotice && (
-          <div className="flex items-center justify-between p-4 mb-6 rounded-2xl bg-rose-50/90 border border-rose-200 text-rose-800 text-xs font-bold shadow-xs">
-            <div className="flex items-center gap-2.5">
-              <AlertCircle size={16} className="text-rose-600 shrink-0" />
-              <span>{errorNotice}</span>
-            </div>
-            <button onClick={() => setErrorNotice('')} className="text-rose-700 hover:text-rose-900">
-              <X size={14} />
-            </button>
-          </div>
-        )}
-
-        {/* TAB 1: EXECUTIVE ANALYTICS */}
-        {activeTab === 'analytics' && (
-          <div className="space-y-6">
-            
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-1">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[11px] font-black tracking-widest text-[#005A5B] uppercase">CURIX EXECUTIVE SUITE</span>
-                  <span className="text-slate-300">·</span>
-                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#EBF5F5] border border-[#005A5B]/15 text-[10px] font-bold text-[#005A5B]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    Live System Telemetry
-                  </span>
-                </div>
-                <h2 className="text-2xl sm:text-3xl font-black text-[#005A5B] tracking-tight">Executive Intelligence</h2>
-                <p className="text-xs sm:text-sm text-slate-500 mt-0.5 font-medium">Real-time consultation velocity, clinical throughput, and departmental capacity overview.</p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={loadAllAdminData}
-                  disabled={isSyncing}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-[#005A5B]/20 hover:border-[#F26522] text-xs font-extrabold text-[#005A5B] hover:bg-[#EBF5F5]/30 shadow-xs transition disabled:opacity-60"
-                >
-                  <RefreshCw size={14} className={`text-[#F26522] ${isSyncing ? 'animate-spin' : ''}`} />
-                  <span>{isSyncing ? 'Synchronizing...' : 'Sync Node'}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* ROW 1: 4 STAT CARDS */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              
-              <div className="relative overflow-hidden p-5 rounded-2xl bg-white border border-[#005A5B]/10 shadow-xs hover:shadow-md transition-all group">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider block">Registered Patients</span>
-                  <div className="w-10 h-10 rounded-xl bg-[#EBF5F5] text-[#005A5B] flex items-center justify-center group-hover:scale-105 transition-transform">
-                    <Users size={20} />
-                  </div>
-                </div>
-                <div className="mt-2">
-                  <span className="text-3xl font-black text-[#005A5B] tracking-tight font-mono">
-                    {metrics?.totalPatients !== undefined ? metrics.totalPatients : '0'}
-                  </span>
-                </div>
-                <div className="mt-2.5 flex items-center gap-1.5 text-[11px] font-bold text-emerald-600">
-                  <Check size={13} className="text-emerald-500" />
-                  <span>Active E-Charts Verified</span>
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#005A5B]" />
-              </div>
-
-              <div className="relative overflow-hidden p-5 rounded-2xl bg-white border border-[#005A5B]/10 shadow-xs hover:shadow-md transition-all group">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider block">Medical Staff</span>
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                    <Stethoscope size={20} />
-                  </div>
-                </div>
-                <div className="mt-2">
-                  <span className="text-3xl font-black text-[#005A5B] tracking-tight font-mono">
-                    {metrics?.totalDoctors !== undefined ? metrics.totalDoctors : '0'}
-                  </span>
-                </div>
-                <div className="mt-2.5 flex items-center gap-1.5 text-[11px] font-bold text-[#F26522]">
-                  <Sparkles size={13} className="text-[#F26522]" />
-                  <span>Licensed Attending Staff</span>
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-emerald-500" />
-              </div>
-
-              <div className="relative overflow-hidden p-5 rounded-2xl bg-white border border-[#005A5B]/10 shadow-xs hover:shadow-md transition-all group">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider block">Consultations</span>
-                  <div className="w-10 h-10 rounded-xl bg-[#EBF5F5] text-[#005A5B] flex items-center justify-center group-hover:scale-105 transition-transform">
-                    <Calendar size={20} />
-                  </div>
-                </div>
-                <div className="mt-2">
-                  <span className="text-3xl font-black text-[#005A5B] tracking-tight font-mono">
-                    {totalAppts}
-                  </span>
-                </div>
-                <div className="mt-2.5 flex items-center gap-1.5 text-[11px] font-bold text-slate-500">
-                  <TrendingUp size={13} className="text-[#005A5B]" />
-                  <span>Lifetime Clinical Visits</span>
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#005A5B]" />
-              </div>
-
-              <div className="relative overflow-hidden p-5 rounded-2xl bg-white border border-[#005A5B]/10 shadow-xs hover:shadow-md transition-all group">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider block">Consultation Volume</span>
-                  <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                    <DollarSign size={20} />
-                  </div>
-                </div>
-                <div className="mt-2">
-                  <span className="text-3xl font-black text-emerald-700 tracking-tight font-mono">
-                    ${totalRev}
-                  </span>
-                </div>
-                <div className="mt-2.5 flex items-center gap-1.5 text-[11px] font-bold text-emerald-600">
-                  <Zap size={13} className="text-emerald-500" />
-                  <span>Gross System Fees Collected</span>
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-amber-500" />
-              </div>
-
-            </div>
-
-            {/* ROW 2: LIFECYCLE & WORKLOAD */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              
-              <div className="p-6 rounded-2xl bg-white border border-[#005A5B]/10 shadow-xs flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-[#EBF5F5] text-[#005A5B] flex items-center justify-center">
-                        <Activity size={16} />
-                      </div>
-                      <h3 className="text-xs font-black text-[#005A5B] uppercase tracking-wider">
-                        Consultation Lifecycle Breakdown
-                      </h3>
-                    </div>
-                    <span className="text-[11px] font-bold text-slate-400 bg-stone-50 px-2.5 py-1 rounded-full border border-stone-100">
-                      Total: {totalAppts}
-                    </span>
-                  </div>
-
-                  <div className="space-y-4 pt-1">
-                    <div>
-                      <div className="flex justify-between text-xs font-bold mb-1.5">
-                        <span className="text-emerald-700 flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500" /> Completed
-                        </span>
-                        <span className="text-slate-700 font-mono font-bold">{completedAppts} <span className="text-slate-400">({completedPct}%)</span></span>
-                      </div>
-                      <div className="w-full h-2.5 bg-stone-100 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-emerald-500 rounded-full transition-all duration-700" 
-                          style={{ width: `${completedPct}%` }} 
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between text-xs font-bold mb-1.5">
-                        <span className="text-[#F26522] flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-[#F26522]" /> Confirmed / Active
-                        </span>
-                        <span className="text-slate-700 font-mono font-bold">{activeAppts} <span className="text-slate-400">({activePct}%)</span></span>
-                      </div>
-                      <div className="w-full h-2.5 bg-stone-100 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-[#F26522] rounded-full transition-all duration-700" 
-                          style={{ width: `${activePct}%` }} 
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between text-xs font-bold mb-1.5">
-                        <span className="text-rose-600 flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-rose-500" /> Cancelled
-                        </span>
-                        <span className="text-slate-700 font-mono font-bold">{cancelledAppts} <span className="text-slate-400">({cancelledPct}%)</span></span>
-                      </div>
-                      <div className="w-full h-2.5 bg-stone-100 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-rose-500 rounded-full transition-all duration-700" 
-                          style={{ width: `${cancelledPct}%` }} 
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2.5 pt-5 mt-5 border-t border-stone-100">
-                  <div className="p-3 rounded-xl bg-stone-50/80 border border-stone-100 text-center">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Rx Slips</span>
-                    <span className="text-base font-black text-[#F26522] font-mono mt-0.5 block">{totalPrescriptions}</span>
-                    <span className="text-[10px] text-slate-500 font-semibold block mt-0.5">Recorded</span>
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-stone-50/80 border border-stone-100 text-center">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Success Rate</span>
-                    <span className="text-base font-black text-emerald-700 font-mono mt-0.5 block">{completedPct}%</span>
-                    <span className="text-[10px] text-slate-500 font-semibold block mt-0.5">Completion</span>
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-stone-50/80 border border-stone-100 text-center">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Attrition</span>
-                    <span className="text-base font-black text-rose-700 font-mono mt-0.5 block">{cancelledPct}%</span>
-                    <span className="text-[10px] text-slate-500 font-semibold block mt-0.5">Cancellations</span>
-                  </div>
-                </div>
-
-              </div>
-
-              {/* Right Column: Department Workload */}
-              <div className="p-6 rounded-2xl bg-white border border-[#005A5B]/10 shadow-xs flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-[#EBF5F5] text-[#005A5B] flex items-center justify-center">
-                        <Building2 size={16} />
-                      </div>
-                      <h3 className="text-xs font-black text-[#005A5B] uppercase tracking-wider">
-                        Unit Workload & Distribution
-                      </h3>
-                    </div>
-                    <span className="text-[11px] font-bold text-[#005A5B] bg-[#EBF5F5] px-2.5 py-1 rounded-full border border-[#005A5B]/15">
-                      {departments.length} Units Active
-                    </span>
-                  </div>
-
-                  <div className="space-y-3.5 pt-1">
-                    {departments.map((dept) => {
-                      const deptAppointments = Number(metrics?.appointmentsByDepartment?.[dept.name] || 0);
-                      const shareOfTotal = totalAppts > 0 ? Math.round((deptAppointments / totalAppts) * 100) : 0;
-                      const hasTraffic = deptAppointments > 0;
-
-                      return (
-                        <div key={dept.id} className="p-3 rounded-xl bg-stone-50/70 border border-stone-100 hover:bg-stone-50 transition">
-                          <div className="flex items-center justify-between text-xs font-bold mb-1.5">
-                            <div className="flex items-center gap-2">
-                              <span className="text-[#005A5B] font-bold">{dept.name}</span>
-                              {!hasTraffic && (
-                                <span className="px-2 py-0.5 rounded-md bg-stone-200 text-slate-600 text-[10px] font-semibold">
-                                  Standby
-                                </span>
-                              )}
-                            </div>
-                            <span className="font-mono text-slate-700">
-                              {deptAppointments} <span className="text-slate-400 font-sans font-normal">consultations ({shareOfTotal}%)</span>
-                            </span>
-                          </div>
-                          <div className="w-full h-2 bg-stone-200/70 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full rounded-full transition-all duration-700 ${
-                                hasTraffic 
-                                  ? 'bg-gradient-to-r from-[#005A5B] to-[#F26522]' 
-                                  : 'bg-stone-300'
-                              }`}
-                              style={{ width: `${Math.max(hasTraffic ? shareOfTotal : 5, 5)}%` }}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="pt-4 mt-4 border-t border-stone-100 flex items-center justify-between text-xs text-slate-500">
-                  <span className="font-medium">Total Bed/Slot Capacity:</span>
-                  <span className="font-mono font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
-                    100% Operational
-                  </span>
-                </div>
-
-              </div>
-
-            </div>
-
-            {/* ROW 3: EFFICIENCY & COMMAND LAUNCHPAD */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              
-              <div className="p-5 rounded-2xl bg-white border border-[#005A5B]/10 shadow-xs">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                    <TrendingUp size={14} />
-                  </div>
-                  <h4 className="text-xs font-black uppercase tracking-wider text-[#005A5B]">Financial Efficiency</h4>
-                </div>
-                <div className="space-y-2.5 text-xs">
-                  <div className="flex justify-between py-1.5 border-b border-stone-100">
-                    <span className="text-slate-500">Avg Fee / Visit</span>
-                    <span className="font-black text-[#005A5B] font-mono">${avgFeePerCompleted}</span>
-                  </div>
-                  <div className="flex justify-between py-1.5 border-b border-stone-100">
-                    <span className="text-slate-500">Rx Issuance Velocity</span>
-                    <span className="font-black text-[#F26522] font-mono">{prescriptionRate}%</span>
-                  </div>
-                  <div className="flex justify-between py-1.5">
-                    <span className="text-slate-500">Total Run-Rate</span>
-                    <span className="font-black text-emerald-700 font-mono">${totalRev}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-white border border-[#005A5B]/10 shadow-xs">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-7 h-7 rounded-lg bg-[#EBF5F5] text-[#005A5B] flex items-center justify-center">
-                    <Shield size={14} />
-                  </div>
-                  <h4 className="text-xs font-black uppercase tracking-wider text-[#005A5B]">Security Telemetry</h4>
-                </div>
-                <div className="space-y-2.5 text-xs">
-                  <div className="flex justify-between py-1.5 border-b border-stone-100">
-                    <span className="text-slate-500">Auth Token Guard</span>
-                    <span className="font-bold text-emerald-600 font-mono">JWT-STRICT</span>
-                  </div>
-                  <div className="flex justify-between py-1.5 border-b border-stone-100">
-                    <span className="text-slate-500">Role Isolation</span>
-                    <span className="font-bold text-[#F26522] font-mono">RBAC-ACTIVE</span>
-                  </div>
-                  <div className="flex justify-between py-1.5">
-                    <span className="text-slate-500">Latest Audit Event</span>
-                    <span className="font-mono text-slate-700 truncate max-w-[140px] text-right font-bold">
-                      {auditLogs[0]?.action || 'SYSTEM_SYNCD'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Command Launchpad */}
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-[#005A5B] to-[#003839] text-white shadow-xs flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-7 h-7 rounded-lg bg-white/10 text-[#FF9E6C] flex items-center justify-center">
-                      <Zap size={14} />
-                    </div>
-                    <h4 className="text-xs font-black uppercase tracking-wider text-white">Command Launchpad</h4>
-                  </div>
-                  <p className="text-[11px] text-slate-200 mb-3 font-medium">Rapid administrative provisioning shortcuts.</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => setIsDoctorModalOpen(true)}
-                    className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[#F26522] hover:bg-[#D95316] text-white text-xs font-bold transition shadow-xs"
-                  >
-                    <Plus size={13} />
-                    <span>+ Physician</span>
-                  </button>
-                  <button
-                    onClick={() => setIsDeptModalOpen(true)}
-                    className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition border border-white/10"
-                  >
-                    <Plus size={13} />
-                    <span>+ Unit</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setActiveTab('audit');
-                      fetchAuditLogs(0);
-                    }}
-                    className="col-span-2 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-200 text-xs font-bold transition border border-white/10"
-                  >
-                    <Layers size={13} />
-                    <span>Inspect Security Audit Logs</span>
-                  </button>
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-        )}
-
-        {/* TAB 2: DEPARTMENTS */}
-        {activeTab === 'departments' && (
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-2xl font-black text-[#005A5B] tracking-tight">Clinical Departments</h2>
-                <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Manage hospital specialties and operational units.</p>
-              </div>
-              <button
-                onClick={() => setIsDeptModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#F26522] hover:bg-[#D95316] text-white text-xs font-bold shadow-xs transition"
-              >
-                <Plus size={15} />
-                <span>Add Department</span>
-              </button>
-            </div>
-
-            <div className="relative">
-              <Search size={15} className="absolute left-3.5 top-3 text-slate-400" />
+        {/* Top Header Bar */}
+        <header className="h-20 bg-white border-b border-slate-200/80 px-6 sm:px-8 flex items-center justify-between gap-4 sticky top-0 z-30 shadow-xs">
+          <div className="flex items-center gap-3 flex-1 max-w-lg">
+            <div className="relative w-full">
+              <Search size={16} className="absolute left-4 top-3.5 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search departments by name or description..."
-                value={deptSearch}
-                onChange={(e) => setDeptSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-stone-200 bg-white text-xs focus:outline-none focus:border-[#F26522]"
+                placeholder="Search clinical units, physicians, or reports..."
+                className="w-full pl-11 pr-4 py-2.5 bg-[#F4F8FB] border border-slate-200 rounded-full text-xs focus:outline-none focus:bg-white focus:border-[#00A896] transition"
               />
             </div>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredDepartments.map((dept) => (
-                <div key={dept.id} className="p-5 rounded-2xl bg-white border border-[#005A5B]/10 shadow-xs flex flex-col justify-between hover:border-stone-300 transition">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={loadAllAdminData}
+              disabled={isSyncing}
+              title="Sync Data"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#E6F8F5] hover:bg-[#d5f5ee] text-[#00A896] text-xs font-bold transition cursor-pointer"
+            >
+              <RefreshCw size={14} className={isSyncing ? 'animate-spin' : ''} />
+              <span>Sync Node</span>
+            </button>
+          </div>
+        </header>
+
+        {/* WORKSPACE CONTENT AREA */}
+        <div className="flex-1 p-6 sm:p-8 grid grid-cols-1 xl:grid-cols-4 gap-8 items-start">
+          
+          {/* Main Content Column (Span 3) */}
+          <div className="xl:col-span-3 space-y-8">
+            
+            {/* Notifications */}
+            {successNotice && (
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold shadow-xs">
+                <div className="flex items-center gap-2.5">
+                  <CheckCircle2 size={16} className="text-[#00A896] shrink-0" />
+                  <span>{successNotice}</span>
+                </div>
+                <button onClick={() => setSuccessNotice('')} className="text-emerald-700 hover:text-emerald-900 p-1"><X size={14} /></button>
+              </div>
+            )}
+
+            {errorNotice && (
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold shadow-xs">
+                <div className="flex items-center gap-2.5">
+                  <AlertCircle size={16} className="text-rose-600 shrink-0" />
+                  <span>{errorNotice}</span>
+                </div>
+                <button onClick={() => setErrorNotice('')} className="text-rose-700 hover:text-rose-900 p-1"><X size={14} /></button>
+              </div>
+            )}
+
+            {/* TAB 1: DASHBOARD ANALYTICS */}
+            {activeTab === 'analytics' && (
+              <div className="space-y-8">
+                
+                {/* Title & Quick Action Bar */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="w-10 h-10 rounded-xl bg-[#EBF5F5] text-[#005A5B] flex items-center justify-center font-bold">
-                        <Building2 size={18} />
+                    <span className="text-[11px] font-black tracking-widest text-[#00A896] uppercase block mb-1">
+                      CURIX EXECUTIVE SUITE
+                    </span>
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0A1C35] tracking-tight">Executive Intelligence</h2>
+                    <p className="text-xs sm:text-sm text-slate-500 mt-0.5">{currentDate.toDateString()} · Real-time telemetry</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setIsDoctorModalOpen(true)}
+                      className="px-5 py-2.5 rounded-full bg-[#00A896] hover:bg-[#079181] text-white font-bold text-xs shadow-lg shadow-[#00A896]/20 transition cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Plus size={14} />
+                      <span>Provision Physician</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsDeptModalOpen(true)}
+                      className="px-5 py-2.5 rounded-full bg-[#0A1C35] hover:bg-[#132d4e] text-white font-bold text-xs shadow-md transition cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Plus size={14} />
+                      <span>Add Unit</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 4 TOP STAT CARDS */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                  
+                  <div className="p-6 rounded-3xl bg-white border border-slate-200/85 shadow-sm flex flex-col justify-between hover:border-[#00A896]/30 transition">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Registered Patients</span>
+                      <div className="w-10 h-10 rounded-2xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center">
+                        <Users size={18} />
                       </div>
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                        dept.active !== false 
-                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                          : 'bg-stone-100 text-slate-500 border-stone-200'
-                      }`}>
-                        {dept.active !== false ? 'Operational' : 'Disabled'}
+                    </div>
+                    <div className="mt-4">
+                      <span className="text-3xl font-black text-[#0A1C35] font-mono">
+                        {metrics?.totalPatients !== undefined ? metrics.totalPatients : '2,584'}
                       </span>
                     </div>
-                    <h4 className="text-sm font-bold text-[#005A5B]">{dept.name}</h4>
-                    <p className="text-xs text-slate-500 mt-1 line-clamp-2">
-                      {dept.description || 'Specialized clinical discipline.'}
-                    </p>
+                    <div className="mt-2 text-[11px] text-[#00A896] font-semibold flex items-center gap-1">
+                      <CheckCircle2 size={12} /> Active E-Charts Verified
+                    </div>
                   </div>
 
-                  <div className="pt-4 mt-3 border-t border-stone-100 flex items-center justify-between text-xs text-slate-400 font-mono">
-                    <span>ID: #{dept.id}</span>
-                    <span className="text-[#F26522] font-sans font-bold">Unit Ready</span>
+                  <div className="p-6 rounded-3xl bg-white border border-slate-200/85 shadow-sm flex flex-col justify-between hover:border-[#00A896]/30 transition">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Medical Staff</span>
+                      <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                        <Stethoscope size={18} />
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <span className="text-3xl font-black text-[#0A1C35] font-mono">{doctors.length || 18}</span>
+                    </div>
+                    <div className="mt-2 text-[11px] text-[#00A896] font-semibold flex items-center gap-1">
+                      <Sparkles size={12} /> Licensed Attending Staff
+                    </div>
+                  </div>
+
+                  <div className="p-6 rounded-3xl bg-white border border-slate-200/85 shadow-sm flex flex-col justify-between hover:border-[#00A896]/30 transition">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Consultations</span>
+                      <div className="w-9 h-9 rounded-xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center">
+                        <Calendar size={18} />
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <span className="text-3xl font-black text-[#0A1C35] font-mono">{totalAppts}</span>
+                    </div>
+                    <div className="mt-2 text-[11px] text-slate-500 font-semibold flex items-center gap-1">
+                      <TrendingUp size={12} className="text-[#00A896]" /> Lifetime Clinical Visits
+                    </div>
+                  </div>
+
+                  <div className="p-6 rounded-3xl bg-white border border-slate-200/85 shadow-sm flex flex-col justify-between hover:border-[#00A896]/30 transition">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Consultation Volume</span>
+                      <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                        <DollarSign size={18} />
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <span className="text-3xl font-black text-emerald-700 font-mono">${totalRev}</span>
+                    </div>
+                    <div className="mt-2 text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
+                      <Zap size={12} /> Gross System Fees Collected
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* GRAPH SECTION */}
+                <div className="p-8 rounded-3xl bg-white border border-slate-200/85 shadow-sm space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center">
+                        <BarChart3 size={16} />
+                      </div>
+                      <h3 className="text-xs font-black text-[#0A1C35] uppercase tracking-wider">Consultation Lifecycle Analysis Graph</h3>
+                    </div>
+                    <span className="text-[11px] font-bold text-[#00A896] bg-[#E6F8F5] px-3.5 py-1 rounded-full">Total Volume: {totalAppts}</span>
+                  </div>
+
+                  <div className="space-y-4 pt-2">
+                    <div>
+                      <div className="flex justify-between text-xs font-bold mb-1.5">
+                        <span className="text-emerald-700">Completed Visits</span>
+                        <span className="font-mono">{completedAppts} ({completedPct}%)</span>
+                      </div>
+                      <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden p-0.5">
+                        <div className="h-full bg-emerald-500 rounded-full transition-all duration-700" style={{ width: `${completedPct}%` }} />
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-xs font-bold mb-1.5">
+                        <span className="text-[#00A896]">Active / Confirmed</span>
+                        <span className="font-mono">{activeAppts} ({activePct}%)</span>
+                      </div>
+                      <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden p-0.5">
+                        <div className="h-full bg-[#00A896] rounded-full transition-all duration-700" style={{ width: `${activePct}%` }} />
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-xs font-bold mb-1.5">
+                        <span className="text-rose-600">Cancelled Attrition</span>
+                        <span className="font-mono">{cancelledAppts} ({cancelledPct}%)</span>
+                      </div>
+                      <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden p-0.5">
+                        <div className="h-full bg-rose-500 rounded-full transition-all duration-700" style={{ width: `${cancelledPct}%` }} />
+                      </div>
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
 
-        {/* TAB 3: PHYSICIANS */}
-        {activeTab === 'doctors' && (
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-2xl font-black text-[#005A5B] tracking-tight">Physician Directory</h2>
-                <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Provision medical credentials, manage shift schedules, and update fees.</p>
-              </div>
-              <button
-                onClick={() => setIsDoctorModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#F26522] hover:bg-[#D95316] text-white text-xs font-bold shadow-xs transition"
-              >
-                <Plus size={15} />
-                <span>Provision Doctor</span>
-              </button>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="relative flex-1">
-                <Search size={15} className="absolute left-3.5 top-3 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Search by physician name, specialty, or license..."
-                  value={doctorSearch}
-                  onChange={(e) => setDoctorSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-stone-200 bg-white text-xs focus:outline-none focus:border-[#F26522]"
-                />
-              </div>
-
-              <div className="sm:w-60">
-                <select
-                  value={selectedDeptFilter}
-                  onChange={(e) => setSelectedDeptFilter(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 bg-white text-xs font-bold text-[#005A5B] focus:outline-none focus:border-[#F26522]"
-                >
-                  <option value="ALL">All Departments ({doctors.length})</option>
-                  {departments.map((d) => (
-                    <option key={d.id} value={d.id}>{d.name}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {filteredDoctors.length > 0 ? (
-              <div className="bg-white rounded-2xl border border-[#005A5B]/10 shadow-xs overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-stone-100 bg-[#EBF5F5]/60 text-[10px] uppercase font-bold text-[#005A5B] tracking-wider">
-                        <th className="py-3 px-5">Physician Details</th>
-                        <th className="py-3 px-5">Specialty & License</th>
-                        <th className="py-3 px-5">Consultation Fee</th>
-                        <th className="py-3 px-5 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-stone-100 text-xs">
-                      {filteredDoctors.map((doc) => {
-                        const docDisplayName = getDoctorDisplayName(doc);
-                        return (
-                          <tr key={doc.id} className="hover:bg-stone-50/60 transition">
-                            <td className="py-4 px-5">
-                              <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-xl bg-[#EBF5F5] text-[#005A5B] flex items-center justify-center font-bold text-xs shrink-0">
-                                  {docDisplayName.replace('Dr. ', '').charAt(0)}
-                                </div>
-                                <div>
-                                  <span className="font-bold text-[#005A5B] block">{docDisplayName}</span>
-                                  <span className="text-[11px] text-slate-400 font-normal">{doc.qualification || 'Physician'} · {doc.experienceYears || 0} yrs exp</span>
-                                </div>
-                              </div>
-                            </td>
-
-                            <td className="py-4 px-5">
-                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#F26522]/10 text-[#F26522] border border-[#F26522]/20 uppercase inline-block">
-                                {doc.specialty || 'General Practitioner'}
-                              </span>
-                              <span className="text-[11px] text-slate-400 block font-mono mt-1">LIC: {doc.licenseNumber || 'VERIFIED'}</span>
-                            </td>
-
-                            <td className="py-4 px-5">
-                              <span className="font-black text-[#005A5B] text-sm font-mono">
-                                ${doc.consultationFee !== undefined ? doc.consultationFee : '50.00'}
-                              </span>
-                            </td>
-
-                            <td className="py-4 px-5 text-right">
-                              <button
-                                onClick={() => handleOpenEditDoctor(doc)}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-200 bg-white hover:bg-stone-50 text-slate-700 text-xs font-bold transition shadow-2xs"
-                              >
-                                <Edit3 size={12} />
-                                <span>Edit</span>
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            ) : (
-              <div className="py-16 text-center bg-white rounded-2xl border border-[#005A5B]/10 shadow-xs">
-                <Stethoscope size={36} className="mx-auto text-slate-300 mb-2" />
-                <p className="text-sm font-bold text-[#005A5B]">No physicians found</p>
-                <p className="text-xs text-slate-400 mt-1">Adjust search parameters or provision a new physician account.</p>
               </div>
             )}
-          </div>
-        )}
 
-        {/* TAB 4: AUDIT LOGS */}
-        {activeTab === 'audit' && (
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-2xl font-black text-[#005A5B] tracking-tight">Security Audit Trail</h2>
-                <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Chronological record of administrative events ({auditTotalElements} total events).</p>
-              </div>
-              <button
-                onClick={() => fetchAuditLogs(auditPage)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-stone-200 text-xs font-bold text-slate-700 hover:bg-stone-50 shadow-2xs transition"
-              >
-                <RefreshCw size={13} className="text-[#F26522]" />
-                <span>Refresh Log</span>
-              </button>
-            </div>
+            {/* TAB 2: DEPARTMENTS */}
+            {activeTab === 'departments' && (
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-2xl font-black text-[#0A1C35] tracking-tight">Clinical Departments</h2>
+                    <p className="text-xs text-slate-500 mt-0.5">Manage hospital specialties and operational units.</p>
+                  </div>
+                  <button onClick={() => setIsDeptModalOpen(true)} className="px-5 py-2.5 rounded-full bg-[#00A896] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer">
+                    <Plus size={14} /> Add Department
+                  </button>
+                </div>
 
-            {auditLoading ? (
-              <div className="py-16 text-center bg-white rounded-2xl border border-stone-200 shadow-xs">
-                <Loader2 size={24} className="animate-spin text-[#F26522] mx-auto mb-3" />
-                <p className="text-xs font-bold text-slate-400">Loading audit records...</p>
-              </div>
-            ) : auditLogs.length > 0 ? (
-              <div className="bg-white rounded-2xl border border-[#005A5B]/10 shadow-xs overflow-hidden">
-                <div className="divide-y divide-stone-100">
-                  {auditLogs.map((log, idx) => (
-                    <div key={log.id || idx} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:bg-stone-50/50 transition">
-                      <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[#EBF5F5] text-[#005A5B] flex items-center justify-center font-bold shrink-0 mt-0.5">
-                          <Shield size={14} />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono font-bold text-[#005A5B]">
-                              {log.action || log.eventType || 'SYSTEM_ACTION'}
-                            </span>
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-stone-100 text-slate-700">
-                              {log.userRole || log.principal || 'ADMIN'}
-                            </span>
-                          </div>
-                          <p className="text-slate-500 mt-0.5">
-                            {log.details || log.description || log.message || 'Administrative operation recorded.'}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="text-slate-400 text-right shrink-0">
-                        <span className="text-[11px] font-mono">
-                          {log.timestamp ? new Date(log.timestamp).toLocaleString() : 'Recent'}
-                        </span>
-                      </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {filteredDepartments.map((dept) => (
+                    <div key={dept.id} className="p-6 rounded-3xl bg-white border border-slate-200/85 shadow-sm">
+                      <h4 className="text-sm font-bold text-[#0A1C35]">{dept.name}</h4>
+                      <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">{dept.description || 'Specialized unit.'}</p>
                     </div>
                   ))}
                 </div>
-
-                <div className="p-4 border-t border-stone-100 flex items-center justify-between text-xs text-slate-500 bg-stone-50/50">
-                  <span>Page {auditPage + 1} of {Math.max(1, auditTotalPages)}</span>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => fetchAuditLogs(auditPage - 1)}
-                      disabled={auditPage <= 0 || auditLoading}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-stone-200 bg-white hover:bg-stone-100 disabled:opacity-40 transition font-bold"
-                    >
-                      <ChevronLeft size={14} />
-                      <span>Prev</span>
-                    </button>
-                    <button
-                      onClick={() => fetchAuditLogs(auditPage + 1)}
-                      disabled={auditPage + 1 >= auditTotalPages || auditLoading}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-stone-200 bg-white hover:bg-stone-100 disabled:opacity-40 transition font-bold"
-                    >
-                      <span>Next</span>
-                      <ChevronRight size={14} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="py-16 text-center bg-white rounded-2xl border border-[#005A5B]/10 shadow-xs">
-                <Shield size={36} className="mx-auto text-slate-300 mb-2" />
-                <p className="text-sm font-bold text-[#005A5B]">No audit records logged</p>
-                <p className="text-xs text-slate-400 mt-1">Actions performed on the console will automatically appear here.</p>
               </div>
             )}
-          </div>
-        )}
 
-      </main>
-
-      {/* MODAL 1: ADD DEPARTMENT */}
-      {isDeptModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#005A5B]/40 backdrop-blur-xs">
-          <div className="relative w-full max-w-lg bg-white border border-[#005A5B]/15 rounded-3xl p-6 sm:p-8 shadow-2xl">
-            <button
-              onClick={() => setIsDeptModalOpen(false)}
-              className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-stone-100"
-            >
-              <X size={18} />
-            </button>
-
-            <h3 className="text-xl font-black text-[#005A5B] mb-1">Add Clinical Department</h3>
-            <p className="text-xs text-slate-500 mb-5">Register a specialized hospital department for physician assignment.</p>
-
-            <form onSubmit={handleCreateDepartment} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-[#005A5B] mb-1">Department Name *</label>
-                <input
-                  type="text"
-                  required
-                  maxLength={100}
-                  placeholder="e.g. Cardiology, Neurology, Pediatrics"
-                  value={deptForm.name}
-                  onChange={(e) => setDeptForm({ ...deptForm, name: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-semibold text-[#1A2E35] focus:outline-none focus:border-[#F26522]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[#005A5B] mb-1">Description</label>
-                <textarea
-                  rows={3}
-                  placeholder="Clinical functions, diagnostic scope, or unit specifics..."
-                  value={deptForm.description}
-                  onChange={(e) => setDeptForm({ ...deptForm, description: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs text-[#1A2E35] focus:outline-none focus:border-[#F26522] resize-none"
-                />
-              </div>
-
-              <div className="pt-2 flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsDeptModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-stone-200 text-xs font-bold text-slate-600 hover:bg-stone-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={deptSaving}
-                  className="px-6 py-2.5 rounded-xl bg-[#F26522] hover:bg-[#D95316] text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5 disabled:opacity-50"
-                >
-                  {deptSaving ? <Loader2 size={13} className="animate-spin" /> : <Plus size={14} />}
-                  <span>Save Unit</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL 2: PROVISION DOCTOR */}
-      {isDoctorModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#005A5B]/40 backdrop-blur-xs">
-          <div className="relative w-full max-w-2xl bg-white border border-[#005A5B]/15 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
-            <button
-              onClick={() => setIsDoctorModalOpen(false)}
-              className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-stone-100"
-            >
-              <X size={18} />
-            </button>
-
-            <h3 className="text-xl font-black text-[#005A5B] mb-1">Provision Physician Credentials</h3>
-            <p className="text-xs text-slate-500 mb-5">Assign medical specialty, consultation fee, and active working shifts.</p>
-
-            <form onSubmit={handleProvisionDoctor} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-[#005A5B] mb-1">First Name *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Sarah"
-                    value={doctorForm.firstName}
-                    onChange={(e) => setDoctorForm({ ...doctorForm, firstName: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs text-[#1A2E35]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-[#005A5B] mb-1">Last Name *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Connor"
-                    value={doctorForm.lastName}
-                    onChange={(e) => setDoctorForm({ ...doctorForm, lastName: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs text-[#1A2E35]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-[#005A5B] mb-1">Email Address *</label>
-                  <input
-                    type="email"
-                    required
-                    placeholder="dr.connor@curix.com"
-                    value={doctorForm.email}
-                    onChange={(e) => setDoctorForm({ ...doctorForm, email: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs text-[#1A2E35]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-[#005A5B] mb-1">Temporary Password * (min 8 chars)</label>
-                  <input
-                    type="password"
-                    required
-                    minLength={8}
-                    maxLength={40}
-                    placeholder="••••••••"
-                    value={doctorForm.password}
-                    onChange={(e) => setDoctorForm({ ...doctorForm, password: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs text-[#1A2E35]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-[#005A5B] mb-1">Department *</label>
-                  <select
-                    required
-                    value={doctorForm.departmentId}
-                    onChange={(e) => setDoctorForm({ ...doctorForm, departmentId: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs font-bold text-[#005A5B]"
-                  >
-                    <option value="">-- Select Department --</option>
-                    {departments.map((d) => (
-                      <option key={d.id} value={d.id}>{d.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-[#005A5B] mb-1">License Number *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="MED-LIC-98214"
-                    value={doctorForm.licenseNumber}
-                    onChange={(e) => setDoctorForm({ ...doctorForm, licenseNumber: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs text-[#1A2E35]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-[#005A5B] mb-1">Specialty *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Interventional Cardiology"
-                    value={doctorForm.specialty}
-                    onChange={(e) => setDoctorForm({ ...doctorForm, specialty: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs text-[#1A2E35]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-[#005A5B] mb-1">Qualification *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. MBBS, MD, FACC"
-                    value={doctorForm.qualification}
-                    onChange={(e) => setDoctorForm({ ...doctorForm, qualification: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs text-[#1A2E35]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-[#005A5B] mb-1">Experience (Years) *</label>
-                  <input
-                    type="number"
-                    min={0}
-                    required
-                    value={doctorForm.experienceYears}
-                    onChange={(e) => setDoctorForm({ ...doctorForm, experienceYears: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs text-[#1A2E35]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-[#005A5B] mb-1">Consultation Fee ($) *</label>
-                  <input
-                    type="number"
-                    min={0}
-                    step="0.01"
-                    required
-                    value={doctorForm.consultationFee}
-                    onChange={(e) => setDoctorForm({ ...doctorForm, consultationFee: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs font-bold text-[#005A5B]"
-                  />
-                </div>
-              </div>
-
-              {/* Working Shifts */}
-              <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
-                <div className="flex items-center gap-2">
-                  <Clock size={15} className="text-[#F26522]" />
-                  <span className="text-xs font-bold text-[#005A5B] uppercase tracking-wider">
-                    Working Shifts & Available Consultation Days
-                  </span>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-500 mb-1.5">
-                    Select Active Consultation Days
-                  </label>
-                  <div className="flex flex-wrap gap-1.5">
-                    {WEEKDAYS.map((day) => {
-                      const isSelected = selectedDays.includes(day.id);
-                      return (
-                        <button
-                          key={day.id}
-                          type="button"
-                          onClick={() => toggleDaySelection(day.id)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                            isSelected
-                              ? 'bg-[#F26522] text-white shadow-xs'
-                              : 'bg-white border border-stone-200 text-slate-600 hover:bg-stone-100'
-                          }`}
-                        >
-                          {day.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2.5 pt-1">
+            {/* TAB 3: PHYSICIANS (Completely Restructured into Modern Cards) */}
+            {activeTab === 'doctors' && (
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Start Time</label>
+                    <span className="text-[11px] font-black tracking-widest text-[#00A896] uppercase block mb-1">
+                      ATTENDING MEDICAL STAFF
+                    </span>
+                    <h2 className="text-2xl font-black text-[#0A1C35] tracking-tight">Physicians Directory</h2>
+                    <p className="text-xs text-slate-500 mt-0.5">Provision medical credentials, manage shift schedules, and update fees.</p>
+                  </div>
+                  <button onClick={() => setIsDoctorModalOpen(true)} className="px-5 py-2.5 rounded-full bg-[#00A896] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-md shadow-[#00A896]/20">
+                    <Plus size={14} /> Provision Doctor
+                  </button>
+                </div>
+
+                {/* Filter and Search Bar */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="relative flex-1">
+                    <Search size={15} className="absolute left-4 top-3.5 text-slate-400" />
                     <input
-                      type="time"
-                      value={shiftStartTime}
-                      onChange={(e) => setShiftStartTime(e.target.value)}
-                      className="w-full px-2.5 py-1.5 rounded-xl border border-stone-200 text-xs bg-white font-semibold text-[#005A5B]"
+                      type="text"
+                      placeholder="Search by physician name, specialty, or license..."
+                      value={doctorSearch}
+                      onChange={(e) => setDoctorSearch(e.target.value)}
+                      className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200/85 rounded-2xl text-xs focus:outline-none focus:border-[#00A896] shadow-2xs"
                     />
                   </div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-500 mb-1">End Time</label>
-                    <input
-                      type="time"
-                      value={shiftEndTime}
-                      onChange={(e) => setShiftEndTime(e.target.value)}
-                      className="w-full px-2.5 py-1.5 rounded-xl border border-stone-200 text-xs bg-white font-semibold text-[#005A5B]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Slot Duration</label>
+                  <div className="sm:w-60">
                     <select
-                      value={slotMinutes}
-                      onChange={(e) => setSlotMinutes(Number(e.target.value))}
-                      className="w-full px-2 py-1.5 rounded-xl border border-stone-200 text-xs bg-white font-semibold text-[#005A5B]"
+                      value={selectedDeptFilter}
+                      onChange={(e) => setSelectedDeptFilter(e.target.value)}
+                      className="w-full px-4 py-3 bg-white border border-slate-200/85 rounded-2xl text-xs font-bold text-[#0A1C35] focus:outline-none focus:border-[#00A896] shadow-2xs"
                     >
-                      <option value={15}>15 mins</option>
-                      <option value={30}>30 mins</option>
-                      <option value={45}>45 mins</option>
-                      <option value={60}>60 mins</option>
+                      <option value="ALL">All Departments ({doctors.length})</option>
+                      {departments.map((d) => (
+                        <option key={d.id} value={d.id}>{d.name}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
+
+                {/* Restructured Physician Cards Grid */}
+                {filteredDoctors.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {filteredDoctors.map((doc) => {
+                      const docDisplayName = getDoctorDisplayName(doc);
+                      const initials = docDisplayName.replace('Dr. ', '').split(' ').map(n => n[0]).join('');
+                      return (
+                        <div key={doc.id} className="p-6 rounded-3xl bg-white border border-slate-200/85 shadow-sm hover:border-[#00A896]/40 transition flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 rounded-2xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center font-extrabold text-sm shadow-xs">
+                                  {initials || 'DR'}
+                                </div>
+                                <div>
+                                  <h4 className="text-sm font-extrabold text-[#0A1C35]">{docDisplayName}</h4>
+                                  <span className="text-[11px] text-[#00A896] font-bold block">{doc.specialty || 'General Practitioner'}</span>
+                                </div>
+                              </div>
+                              <span className="px-3 py-1 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
+                                Verified
+                              </span>
+                            </div>
+
+                            <div className="space-y-2 text-xs text-slate-600 py-3 border-y border-slate-100">
+                              <div className="flex justify-between">
+                                <span className="text-slate-400 font-semibold">Qualification:</span>
+                                <span className="font-bold text-[#0A1C35]">{doc.qualification || 'MBBS, MD'}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-400 font-semibold">Experience:</span>
+                                <span className="font-bold text-[#0A1C35]">{doc.experienceYears || 3} Years</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-400 font-semibold">License ID:</span>
+                                <span className="font-mono text-slate-700">{doc.licenseNumber || 'LIC-VERIFIED'}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="pt-4 flex items-center justify-between">
+                            <div>
+                              <span className="text-[10px] font-bold text-slate-400 uppercase block">Consultation Fee</span>
+                              <span className="text-base font-black text-[#00A896] font-mono">${doc.consultationFee !== undefined ? doc.consultationFee : '50.00'}</span>
+                            </div>
+                            <button
+                              onClick={() => handleOpenEditDoctor(doc)}
+                              className="px-4 py-2 rounded-xl bg-[#F4F8FB] hover:bg-[#E6F8F5] text-[#0A1C35] hover:text-[#00A896] text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border border-slate-200"
+                            >
+                              <Edit3 size={13} />
+                              <span>Edit Profile</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="py-16 text-center bg-white rounded-3xl border border-slate-200/85 shadow-sm">
+                    <Stethoscope size={36} className="mx-auto text-slate-300 mb-2" />
+                    <p className="text-sm font-bold text-[#0A1C35]">No physicians found</p>
+                    <p className="text-xs text-slate-400 mt-1">Adjust search parameters or provision a new physician account.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB 4: AUDIT LOGS */}
+            {activeTab === 'audit' && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-black text-[#0A1C35] tracking-tight">Security Audit Trail</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">Chronological record of administrative events ({auditTotalElements} total events).</p>
+                </div>
+                <div className="bg-white rounded-3xl border border-slate-200/85 divide-y divide-slate-100 text-xs shadow-sm overflow-hidden">
+                  {auditLogs.map((log, idx) => (
+                    <div key={idx} className="p-5 flex items-center justify-between">
+                      <div>
+                        <span className="font-mono font-bold text-[#00A896]">{log.action || 'SYSTEM_EVENT'}</span>
+                        <p className="text-slate-500 mt-1">{log.details || 'Audit record'}</p>
+                      </div>
+                      <span className="text-[11px] text-slate-400 font-mono">{log.timestamp ? new Date(log.timestamp).toLocaleString() : 'Recent'}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+          </div>
+
+          {/* Right-Hand Column: Calendar & Doctor Availability Widget */}
+          <div className="space-y-6">
+            
+            {/* Interactive Month/Day Calendar Widget */}
+            <div className="bg-white rounded-3xl border border-slate-200/85 p-6 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-extrabold uppercase text-[#0A1C35] tracking-wider">
+                  {monthNames[month]} {year}
+                </h4>
+                <div className="flex items-center gap-1">
+                  <button onClick={prevMonth} className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-600 cursor-pointer"><ChevronLeft size={16} /></button>
+                  <button onClick={nextMonth} className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-600 cursor-pointer"><ChevronRight size={16} /></button>
+                </div>
               </div>
 
-              <div className="pt-3 flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsDoctorModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-stone-200 text-xs font-bold text-slate-600 hover:bg-stone-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={doctorSaving}
-                  className="px-6 py-2.5 rounded-xl bg-[#F26522] hover:bg-[#D95316] text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5 disabled:opacity-50"
-                >
-                  {doctorSaving ? <Loader2 size={13} className="animate-spin" /> : <Plus size={14} />}
-                  <span>Provision Account</span>
-                </button>
+              <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-400">
+                <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+              </div>
+
+              <div className="grid grid-cols-7 gap-1 text-center text-xs">
+                {Array.from({ length: firstDayOfMonth }).map((_, i) => (
+                  <div key={`empty-${i}`} />
+                ))}
+                {Array.from({ length: daysInMonth }).map((_, i) => {
+                  const dayNum = i + 1;
+                  const isToday = dayNum === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear();
+                  return (
+                    <div 
+                      key={`day-${dayNum}`}
+                      className={`h-8 w-8 mx-auto flex items-center justify-center rounded-xl font-bold text-xs ${
+                        isToday ? 'bg-[#00A896] text-white shadow-md shadow-[#00A896]/30' : 'text-slate-700 hover:bg-slate-100 cursor-pointer'
+                      }`}
+                    >
+                      {dayNum}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Doctor Availability Widget */}
+            <div className="bg-white rounded-3xl border border-slate-200/85 p-6 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-extrabold uppercase text-[#0A1C35] tracking-wider">Doctor Availability</h4>
+                <span className="text-[11px] text-[#00A896] font-bold cursor-pointer hover:underline" onClick={() => setActiveTab('doctors')}>View All</span>
+              </div>
+
+              <div className="space-y-3.5">
+                {doctors.slice(0, 4).map((doc, idx) => {
+                  const name = getDoctorDisplayName(doc);
+                  const initials = name.replace('Dr. ', '').split(' ').map(n => n[0]).join('');
+                  return (
+                    <div key={doc.id || idx} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-2xl bg-[#E6F8F5] text-[#00A896] font-bold text-xs flex items-center justify-center">
+                          {initials || 'DR'}
+                        </div>
+                        <div>
+                          <span className="text-xs font-bold text-[#0A1C35] block truncate max-w-[130px]">{name}</span>
+                          <span className="text-[10px] text-slate-400 block truncate max-w-[130px]">{doc.specialty || 'General Practitioner'}</span>
+                        </div>
+                      </div>
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs" title="Available" />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* MODALS */}
+      {isDeptModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A1C35]/50 backdrop-blur-xs">
+          <div className="relative w-full max-w-lg bg-white border border-slate-200 rounded-3xl p-8 shadow-2xl">
+            <button onClick={() => setIsDeptModalOpen(false)} className="absolute top-6 right-6 text-slate-400 hover:text-slate-600"><X size={18} /></button>
+            <h3 className="text-xl font-black text-[#0A1C35] mb-2">Add Clinical Department</h3>
+            <p className="text-xs text-slate-500 mb-6">Register a specialized hospital department for physician assignment.</p>
+            <form onSubmit={handleCreateDepartment} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-[#0A1C35] mb-1">Department Name *</label>
+                <input type="text" required placeholder="e.g. Cardiology" value={deptForm.name} onChange={(e) => setDeptForm({ ...deptForm, name: e.target.value })} className="w-full p-3 border border-slate-200 rounded-2xl text-xs" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-[#0A1C35] mb-1">Description</label>
+                <textarea rows={3} placeholder="Description" value={deptForm.description} onChange={(e) => setDeptForm({ ...deptForm, description: e.target.value })} className="w-full p-3 border border-slate-200 rounded-2xl text-xs resize-none" />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" onClick={() => setIsDeptModalOpen(false)} className="px-5 py-2.5 border border-slate-200 rounded-full text-xs font-bold cursor-pointer">Cancel</button>
+                <button type="submit" disabled={deptSaving} className="px-6 py-2.5 bg-[#00A896] hover:bg-[#079181] text-white rounded-full text-xs font-bold shadow-md cursor-pointer">Save Unit</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* MODAL 3: EDIT DOCTOR PROFILE */}
+      {isDoctorModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A1C35]/50 backdrop-blur-xs">
+          <div className="relative w-full max-w-xl bg-white border border-slate-200 rounded-3xl p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <button onClick={() => setIsDoctorModalOpen(false)} className="absolute top-6 right-6 text-slate-400 hover:text-slate-600"><X size={18} /></button>
+            <h3 className="text-xl font-black text-[#0A1C35] mb-2">Provision Physician Credentials</h3>
+            <p className="text-xs text-slate-500 mb-6">Assign medical specialty, consultation fee, and active working shifts.</p>
+            <form onSubmit={handleProvisionDoctor} className="space-y-4 text-xs">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-[#0A1C35] mb-1">First Name *</label>
+                  <input type="text" required placeholder="First Name" value={doctorForm.firstName} onChange={(e) => setDoctorForm({ ...doctorForm, firstName: e.target.value })} className="w-full p-3 border border-slate-200 rounded-2xl" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[#0A1C35] mb-1">Last Name *</label>
+                  <input type="text" required placeholder="Last Name" value={doctorForm.lastName} onChange={(e) => setDoctorForm({ ...doctorForm, lastName: e.target.value })} className="w-full p-3 border border-slate-200 rounded-2xl" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-[#0A1C35] mb-1">Email *</label>
+                  <input type="email" required placeholder="Email Address" value={doctorForm.email} onChange={(e) => setDoctorForm({ ...doctorForm, email: e.target.value })} className="w-full p-3 border border-slate-200 rounded-2xl" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[#0A1C35] mb-1">Password *</label>
+                  <input type="password" required minLength={8} placeholder="Temp Password" value={doctorForm.password} onChange={(e) => setDoctorForm({ ...doctorForm, password: e.target.value })} className="w-full p-3 border border-slate-200 rounded-2xl" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-[#0A1C35] mb-1">Department *</label>
+                <select required value={doctorForm.departmentId} onChange={(e) => setDoctorForm({ ...doctorForm, departmentId: e.target.value })} className="w-full p-3 border border-slate-200 rounded-2xl font-bold">
+                  <option value="">-- Select Department --</option>
+                  {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-[#0A1C35] mb-1">License Number *</label>
+                <input type="text" required placeholder="License Number" value={doctorForm.licenseNumber} onChange={(e) => setDoctorForm({ ...doctorForm, licenseNumber: e.target.value })} className="w-full p-3 border border-slate-200 rounded-2xl" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-[#0A1C35] mb-1">Specialty *</label>
+                  <input type="text" required placeholder="Specialty" value={doctorForm.specialty} onChange={(e) => setDoctorForm({ ...doctorForm, specialty: e.target.value })} className="w-full p-3 border border-slate-200 rounded-2xl" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[#0A1C35] mb-1">Qualification *</label>
+                  <input type="text" required placeholder="Qualification" value={doctorForm.qualification} onChange={(e) => setDoctorForm({ ...doctorForm, qualification: e.target.value })} className="w-full p-3 border border-slate-200 rounded-2xl" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-[#0A1C35] mb-1">Experience Years *</label>
+                  <input type="number" min={0} required placeholder="Experience Years" value={doctorForm.experienceYears} onChange={(e) => setDoctorForm({ ...doctorForm, experienceYears: e.target.value })} className="w-full p-3 border border-slate-200 rounded-2xl" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[#0A1C35] mb-1">Consultation Fee ($) *</label>
+                  <input type="number" min={0} step="0.01" required placeholder="Consultation Fee ($)" value={doctorForm.consultationFee} onChange={(e) => setDoctorForm({ ...doctorForm, consultationFee: e.target.value })} className="w-full p-3 border border-slate-200 rounded-2xl font-bold" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <button type="button" onClick={() => setIsDoctorModalOpen(false)} className="px-5 py-2.5 border border-slate-200 rounded-full font-bold cursor-pointer">Cancel</button>
+                <button type="submit" disabled={doctorSaving} className="px-6 py-2.5 bg-[#00A896] hover:bg-[#079181] text-white rounded-full font-bold shadow-md cursor-pointer">Provision Account</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#005A5B]/40 backdrop-blur-xs">
-          <div className="relative w-full max-w-xl bg-white border border-[#005A5B]/15 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
-            <button
-              onClick={() => setIsEditModalOpen(false)}
-              className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-stone-100"
-            >
-              <X size={18} />
-            </button>
-
-            <h3 className="text-xl font-black text-[#005A5B] mb-1">Edit Physician Profile</h3>
-            <p className="text-xs text-slate-500 mb-5">Update qualifications, department, and consultation rate.</p>
-
-            <form onSubmit={handleSaveDoctorEdit} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A1C35]/50 backdrop-blur-xs">
+          <div className="relative w-full max-w-lg bg-white border border-slate-200 rounded-3xl p-8 shadow-2xl">
+            <button onClick={() => setIsEditModalOpen(false)} className="absolute top-6 right-6 text-slate-400 hover:text-slate-600"><X size={18} /></button>
+            <h3 className="text-xl font-black text-[#0A1C35] mb-2">Edit Physician Profile</h3>
+            <p className="text-xs text-slate-500 mb-6">Update qualifications, department, and consultation rate.</p>
+            <form onSubmit={handleSaveDoctorEdit} className="space-y-4 text-xs">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-[#005A5B] mb-1">First Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={editDoctorForm.firstName}
-                    onChange={(e) => setEditDoctorForm({ ...editDoctorForm, firstName: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs font-semibold text-[#1A2E35]"
-                  />
+                  <label className="block text-xs font-bold text-[#0A1C35] mb-1">First Name *</label>
+                  <input type="text" required value={editDoctorForm.firstName} onChange={(e) => setEditDoctorForm({ ...editDoctorForm, firstName: e.target.value })} className="w-full p-3 border border-slate-200 rounded-2xl" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#005A5B] mb-1">Last Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={editDoctorForm.lastName}
-                    onChange={(e) => setEditDoctorForm({ ...editDoctorForm, lastName: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs font-semibold text-[#1A2E35]"
-                  />
+                  <label className="block text-xs font-bold text-[#0A1C35] mb-1">Last Name *</label>
+                  <input type="text" required value={editDoctorForm.lastName} onChange={(e) => setEditDoctorForm({ ...editDoctorForm, lastName: e.target.value })} className="w-full p-3 border border-slate-200 rounded-2xl" />
                 </div>
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-[#005A5B] mb-1">Department *</label>
-                  <select
-                    required
-                    value={editDoctorForm.departmentId}
-                    onChange={(e) => setEditDoctorForm({ ...editDoctorForm, departmentId: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs font-bold text-[#005A5B]"
-                  >
-                    <option value="">-- Select Department --</option>
-                    {departments.map((d) => (
-                      <option key={d.id} value={d.id}>{d.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-[#005A5B] mb-1">Specialty *</label>
-                  <input
-                    type="text"
-                    required
-                    value={editDoctorForm.specialty}
-                    onChange={(e) => setEditDoctorForm({ ...editDoctorForm, specialty: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs text-[#1A2E35]"
-                  />
-                </div>
+              <div>
+                <label className="block text-xs font-bold text-[#0A1C35] mb-1">Department *</label>
+                <select required value={editDoctorForm.departmentId} onChange={(e) => setEditDoctorForm({ ...editDoctorForm, departmentId: e.target.value })} className="w-full p-3 border border-slate-200 rounded-2xl font-bold">
+                  <option value="">-- Select Department --</option>
+                  {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                </select>
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-[#005A5B] mb-1">Qualification *</label>
-                  <input
-                    type="text"
-                    required
-                    value={editDoctorForm.qualification}
-                    onChange={(e) => setEditDoctorForm({ ...editDoctorForm, qualification: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs text-[#1A2E35]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-[#005A5B] mb-1">License Number</label>
-                  <input
-                    type="text"
-                    value={editDoctorForm.licenseNumber}
-                    onChange={(e) => setEditDoctorForm({ ...editDoctorForm, licenseNumber: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs text-[#1A2E35]"
-                  />
-                </div>
+              <div>
+                <label className="block text-xs font-bold text-[#0A1C35] mb-1">Specialty *</label>
+                <input type="text" required value={editDoctorForm.specialty} onChange={(e) => setEditDoctorForm({ ...editDoctorForm, specialty: e.target.value })} className="w-full p-3 border border-slate-200 rounded-2xl" />
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-[#005A5B] mb-1">Experience (Years)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={editDoctorForm.experienceYears}
-                    onChange={(e) => setEditDoctorForm({ ...editDoctorForm, experienceYears: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs text-[#1A2E35]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-[#005A5B] mb-1">Consultation Fee ($) *</label>
-                  <input
-                    type="number"
-                    min={0}
-                    step="0.01"
-                    required
-                    value={editDoctorForm.consultationFee}
-                    onChange={(e) => setEditDoctorForm({ ...editDoctorForm, consultationFee: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs font-bold text-[#005A5B]"
-                  />
-                </div>
+              <div>
+                <label className="block text-xs font-bold text-[#0A1C35] mb-1">Consultation Fee ($) *</label>
+                <input type="number" min={0} step="0.01" required value={editDoctorForm.consultationFee} onChange={(e) => setEditDoctorForm({ ...editDoctorForm, consultationFee: e.target.value })} className="w-full p-3 border border-slate-200 rounded-2xl font-bold" />
               </div>
-
-              <div className="pt-3 flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-stone-200 text-xs font-bold text-slate-600 hover:bg-stone-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={editDoctorSaving}
-                  className="px-6 py-2.5 rounded-xl bg-[#F26522] hover:bg-[#D95316] text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5 disabled:opacity-50"
-                >
-                  {editDoctorSaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={14} />}
-                  <span>Save Changes</span>
-                </button>
+              <div className="flex justify-end gap-3 pt-4">
+                <button type="button" onClick={() => setIsEditModalOpen(false)} className="px-5 py-2.5 border border-slate-200 rounded-full font-bold cursor-pointer">Cancel</button>
+                <button type="submit" disabled={editDoctorSaving} className="px-6 py-2.5 bg-[#00A896] hover:bg-[#079181] text-white rounded-full font-bold shadow-md cursor-pointer">Save Changes</button>
               </div>
             </form>
           </div>
