@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import doctorImage from '../assets/doctor.png';
+import { 
+  cancerImage, orthoImage, cardiacImage, gastroImage, 
+  neuroImage, renalImage, transplantImage, motherChildImage, emergencyImage 
+} from '../assets/centresImages';
 import { patientApi, adminApi } from '../services/api';
 import { 
   Calendar, Stethoscope, ShieldCheck, CheckCircle2, 
@@ -97,6 +101,143 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
     return matchesSearch && matchesDept;
   });
+
+  // 9 Centres of Excellence (Dito specification from medical centres)
+  const centresOfExcellence = [
+    {
+      id: 'cancer',
+      title: 'Utkal Cancer Institute',
+      specialties: [
+        'Medical Oncology',
+        'Surgical Oncology',
+        'Radiation Oncology',
+        'Nuclear Medicine'
+      ],
+      image: cancerImage,
+      bgGradient: 'from-[#E3F2FB] via-[#E8F4FC] to-[#D0E7F7]',
+      border: 'border-[#BDDDF4]/70'
+    },
+    {
+      id: 'ortho',
+      title: 'Institute of Orthopaedics & Joint Replacement',
+      specialties: [
+        'Orthopaedics'
+      ],
+      image: orthoImage,
+      bgGradient: 'from-[#E3F6EF] via-[#EAF8F3] to-[#CDEFE4]',
+      border: 'border-[#BCE7D8]/70'
+    },
+    {
+      id: 'cardiac',
+      title: 'Institute of Cardiac Sciences',
+      specialties: [
+        'Cardiology',
+        'CTVS'
+      ],
+      image: cardiacImage,
+      bgGradient: 'from-[#FDECEC] via-[#FDF1F0] to-[#FCE0D4]',
+      border: 'border-[#F8D4C8]/70'
+    },
+    {
+      id: 'gastro',
+      title: 'Institute of Gastrosciences',
+      specialties: [
+        'Gastroenterology',
+        'HPB & GI Surgery'
+      ],
+      image: gastroImage,
+      bgGradient: 'from-[#E8F1FB] via-[#EDF5FC] to-[#D6E9F7]',
+      border: 'border-[#C2E0F5]/70'
+    },
+    {
+      id: 'neuro',
+      title: 'Institute of Neurosciences',
+      specialties: [
+        'Neurology',
+        'Neurosurgery',
+        'Interventional Neurology',
+        'Spine Surgery'
+      ],
+      image: neuroImage,
+      bgGradient: 'from-[#E6F3FC] via-[#ECF6FD] to-[#CEE7F8]',
+      border: 'border-[#BFE0F7]/70'
+    },
+    {
+      id: 'renal',
+      title: 'Institute of Renal Sciences',
+      specialties: [
+        'Nephrology',
+        'Urology'
+      ],
+      image: renalImage,
+      bgGradient: 'from-[#F3EDFB] via-[#F6F1FD] to-[#E3D9F8]',
+      border: 'border-[#D9CAF4]/70'
+    },
+    {
+      id: 'transplant',
+      title: 'Institute of Transplant',
+      specialties: [
+        'Liver Transplant',
+        'Liver & Multi-Organ Transplant',
+        'Dedicated Post-Transplant ICU',
+        'Bone Marrow Transplant'
+      ],
+      image: transplantImage,
+      bgGradient: 'from-[#E9F4FA] via-[#EEF7FB] to-[#D6EBF6]',
+      border: 'border-[#C2E3F4]/70'
+    },
+    {
+      id: 'mother-child',
+      title: 'Institute of Mother & Child',
+      specialties: [
+        'Obstetrics and Gynaecology',
+        'Pediatrics & Neonatology'
+      ],
+      image: motherChildImage,
+      bgGradient: 'from-[#FDEFF3] via-[#FEF3F6] to-[#FCDCE6]',
+      border: 'border-[#F8CCD9]/70'
+    },
+    {
+      id: 'emergency',
+      title: 'Institute of Emergency & Critical Care',
+      specialties: [
+        'Emergency Medicine',
+        'Critical Care'
+      ],
+      image: emergencyImage,
+      bgGradient: 'from-[#ECF7F6] via-[#EFF9F8] to-[#D6EEEB]',
+      border: 'border-[#C1E6E1]/70'
+    }
+  ];
+
+  const handleCentreClick = (centre) => {
+    const deptMap = {
+      cancer: 'Oncology',
+      ortho: 'Orthopaedics',
+      cardiac: 'Cardiology',
+      gastro: 'Gastroenterology',
+      neuro: 'Neurology',
+      renal: 'Nephrology',
+      transplant: 'Surgery',
+      'mother-child': 'Pediatrics',
+      emergency: 'Emergency'
+    };
+    const targetDept = deptMap[centre.id];
+    if (targetDept) {
+      const match = departments.find(d => 
+        (d.name || d.departmentName || '').toLowerCase().includes(targetDept.toLowerCase())
+      );
+      if (match) {
+        setSelectedDeptFilter(match.id || match.name);
+      } else {
+        setDoctorSearchTerm(targetDept);
+      }
+    }
+    const el = document.getElementById('specialties');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   // 6 Primary Curix Clinical Services
   const clinicalServices = [
@@ -526,6 +667,52 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
             </div>
           </div>
 
+        </div>
+      </section>
+
+      {/* CENTRES OF EXCELLENCE (DITO FROM MEDICAL SPECIFICATION) */}
+      <section id="centres-of-excellence" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-6">
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-xl sm:text-2xl lg:text-[26px] font-black tracking-wide text-[#65A30D] uppercase font-display">
+            CENTRES OF EXCELLENCE
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+          {centresOfExcellence.map((centre) => (
+            <div
+              key={centre.id}
+              onClick={() => handleCentreClick(centre)}
+              className={`relative overflow-hidden rounded-[22px] border ${centre.border} bg-gradient-to-r ${centre.bgGradient} flex justify-between min-h-[144px] sm:min-h-[150px] shadow-xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 cursor-pointer group`}
+            >
+              {/* Left Content (Title & Bullet points) */}
+              <div className="p-4 sm:p-5 flex-1 z-10 flex flex-col justify-between max-w-[62%]">
+                <div>
+                  <h3 className="text-sm sm:text-[14.5px] font-bold text-[#0A1C35] leading-snug mb-2.5 group-hover:text-[#00A896] transition-colors">
+                    {centre.title}
+                  </h3>
+                  <ul className="space-y-1">
+                    {centre.specialties.map((item, sIdx) => (
+                      <li key={sIdx} className="flex items-start gap-1 text-[11.5px] sm:text-xs text-slate-700 font-medium leading-tight">
+                        <ChevronRight size={13} className="text-[#65A30D] shrink-0 mt-0.5 stroke-[3]" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Right Illustration */}
+              <div className="w-[38%] sm:w-[42%] h-full relative shrink-0 overflow-hidden rounded-r-[22px] flex items-center justify-end">
+                <img 
+                  src={centre.image} 
+                  alt={centre.title} 
+                  className="w-full h-full object-cover object-right pointer-events-none select-none transition-transform duration-500 group-hover:scale-105" 
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
