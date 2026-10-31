@@ -1136,7 +1136,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
       </section>
 
       {/* 2. ABOUT US SECTION (UN-SQUEEZED, SPACIOUS & FULL-WIDTH ARCHITECTURE) */}
-      <section id="about" className="scroll-mt-20 w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 pt-12 sm:pt-16 pb-4 sm:pb-6 relative overflow-hidden">
+      <section id="about" className="scroll-mt-20 w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 pt-12 sm:pt-16 pb-12 sm:pb-16 relative overflow-hidden">
         {/* Subtle Ambient Background Watermark */}
         <div className="absolute top-1/3 left-0 w-80 h-80 rounded-full bg-[#00A896]/10 blur-3xl pointer-events-none -translate-y-1/2" />
         <div className="absolute bottom-10 right-0 w-96 h-96 rounded-full bg-sky-400/10 blur-3xl pointer-events-none" />
@@ -1398,35 +1398,27 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
       
 
       {/* CENTRES OF EXCELLENCE & SPECIALIZED HOSPITAL CARE (MERGED FLAGSHIP SECTION) */}
-      <section id="centres-of-excellence" className="scroll-mt-20 w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 pt-8 sm:pt-10 pb-14 sm:pb-16 lg:pb-20 relative border-t border-slate-100/80">
+      <section id="centres-of-excellence" className="scroll-mt-20 w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 pt-16 sm:pt-20 pb-14 sm:pb-16 lg:pb-20 relative border-t border-slate-100/80">
         <span id="services" className="scroll-mt-24 absolute -top-10" />
 
-        {/* Curix UI Themed Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-10 gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-[11px] font-black tracking-widest uppercase text-[#00A896] bg-[#E6F8F5] px-3.5 py-1 rounded-full border border-[#00A896]/20 shadow-2xs">
-                TERTIARY HUBS & SPECIALIZED CARE
-              </span>
-              <span className="text-[10px] font-extrabold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
-                Hospital Grade Care
-              </span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#0A1C35] tracking-tight">
-              Centres of <span className="text-[#00A896]">Excellence</span> & Specialized Care
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-3xl font-medium">
-              World-class tertiary clinical institutes and specialized hospital care disciplines equipped with next-gen robotic systems, precision diagnostics, and 24/7 intensive monitoring.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 self-start md:self-auto">
-            <span className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200/90 text-xs font-bold text-slate-700 shadow-2xs flex items-center gap-1.5">
+        {/* Centered Curix UI Section Header */}
+        <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-14">
+          <div className="inline-flex flex-wrap items-center justify-center gap-2 mb-3">
+            <span className="text-[11px] font-black tracking-widest uppercase text-[#00A896] bg-[#E6F8F5] px-4 py-1.5 rounded-full border border-[#00A896]/20 shadow-2xs">
+              TERTIARY HUBS & SPECIALIZED CARE
+            </span>
+            <span className="text-[10.5px] font-extrabold text-slate-500 bg-slate-100 px-3.5 py-1.5 rounded-full flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <Award size={14} className="text-[#00A896]" />
+              <Award size={13} className="text-[#00A896]" />
               <span>9 Tertiary Institutes</span>
             </span>
           </div>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0A1C35] tracking-tight mb-3">
+            Centres of <span className="text-[#00A896]">Excellence</span> & Specialized Care
+          </h2>
+          <p className="text-sm sm:text-base text-slate-600 font-medium leading-relaxed max-w-2xl mx-auto">
+            World-class tertiary clinical institutes and specialized hospital care disciplines equipped with next-gen robotic systems, precision diagnostics, and 24/7 intensive monitoring.
+          </p>
         </div>
 
         {/* 3x3 Equal Height Grid (Combined Design: Clean, Balanced, 3D Animated Equipment) */}
