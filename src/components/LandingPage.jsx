@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import doctorImage from '../assets/doctor.png';
+import heart3dImage from '../assets/heart3d.jpg';
 import { 
   cancerImage, orthoImage, cardiacImage, gastroImage, 
   neuroImage, renalImage, transplantImage, motherChildImage, emergencyImage 
@@ -916,6 +917,27 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
           stroke-dasharray: 40;
           animation: scanWave 2.2s linear infinite;
         }
+        @keyframes heartPulse3d {
+          0%, 100% {
+            transform: scale(1.02);
+          }
+          14% {
+            transform: scale(1.08);
+          }
+          28% {
+            transform: scale(1.02);
+          }
+          42% {
+            transform: scale(1.12);
+          }
+          70% {
+            transform: scale(1.02);
+          }
+        }
+        .anim-heart-pulse-3d {
+          animation: heartPulse3d 2.2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+          transform-origin: center center;
+        }
       `}</style>
 
       {/* 1. HERO SECTION (With High-Tech Animated Aura & Doctor Image Fitted on Rounding Bracket) */}
@@ -1240,7 +1262,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
             </div>
           </div>
 
-          {/* Right Column: 3D Hospital Medical Campus Structure (Spacious Floating Portal) */}
+          {/* Right Column: High-Definition 3D Cardiac Medical Portal */}
           <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
             <div className="relative w-full max-w-[400px] sm:max-w-[440px] flex flex-col items-center">
               
@@ -1248,132 +1270,64 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
               <div className="relative w-[350px] h-[350px] sm:w-[420px] sm:h-[420px] anim-doctor-float flex items-center justify-center z-10">
                 
                 {/* Ambient Soft Glow Behind the Portal */}
-                <div className="absolute -inset-6 sm:-inset-8 rounded-full bg-gradient-to-tr from-[#00A896]/30 via-[#0BC2A8]/20 to-sky-400/20 blur-3xl pointer-events-none anim-pulse-glow" />
+                <div className="absolute -inset-6 sm:-inset-8 rounded-full bg-gradient-to-tr from-rose-500/25 via-[#00A896]/25 to-cyan-400/20 blur-3xl pointer-events-none anim-pulse-glow" />
 
                 {/* Concentric Dashed Orbit Ring with Orbiting Glowing Markers */}
                 <div className="absolute -inset-4 sm:-inset-5 rounded-full border-2 border-dashed border-[#00A896]/50 pointer-events-none anim-orbit-spin flex items-center justify-between p-2">
-                  <span className="w-3.5 h-3.5 rounded-full bg-[#00A896] shadow-[0_0_12px_#00A896]" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#0BC2A8] shadow-[0_0_10px_#0BC2A8]" />
+                  <span className="w-3.5 h-3.5 rounded-full bg-rose-500 shadow-[0_0_12px_#F43F5E]" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#00A896] shadow-[0_0_10px_#00A896]" />
                 </div>
 
                 {/* The Round Shape: Gradient Rim + Bevel Border + Mask (Matching Doctor Portal) */}
                 <div className="w-full h-full rounded-full p-2.5 sm:p-3 bg-gradient-to-b from-[#00A896] via-[#0BC2A8] to-slate-200/60 shadow-[0_20px_50px_rgba(10,28,53,0.22)] ring-8 ring-[#00A896]/15 flex items-center justify-center relative group overflow-hidden">
                   
-                  {/* Inner Circular Portal Framing 3D Hospital Structure */}
-                  <div className="w-full h-full rounded-full overflow-hidden border-[5px] sm:border-[6px] border-white shadow-inner bg-gradient-to-b from-[#F0F9FF] via-[#E0F2FE] to-[#CCFBF1] relative flex items-center justify-center p-4">
+                  {/* Inner Circular Portal Framing 3D Anatomical Heart */}
+                  <div className="w-full h-full rounded-full overflow-hidden border-[5px] sm:border-[6px] border-white shadow-inner bg-gradient-to-b from-[#0F172A] via-[#0A1C35] to-[#020617] relative flex items-center justify-center">
                     
-                    {/* High-Definition 3D Hospital Campus Architecture Vector */}
-                    <svg className="w-full h-full relative z-10 select-none pointer-events-none transition-transform duration-500 group-hover:scale-105" viewBox="0 0 500 500" fill="none">
-                      <defs>
-                        <linearGradient id="hospTowerFront2" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#38BDF8"/>
-                          <stop offset="50%" stopColor="#0284C7"/>
-                          <stop offset="100%" stopColor="#0369A1"/>
-                        </linearGradient>
-                        <linearGradient id="hospTowerSide2" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#0284C7"/>
-                          <stop offset="100%" stopColor="#0F172A"/>
-                        </linearGradient>
-                        <linearGradient id="hospWingFront2" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#2DD4BF"/>
-                          <stop offset="100%" stopColor="#0F766E"/>
-                        </linearGradient>
-                        <linearGradient id="hospWingSide2" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#0D9488"/>
-                          <stop offset="100%" stopColor="#134E4A"/>
-                        </linearGradient>
-                      </defs>
+                    {/* Glowing Heartbeat Telemetry Grid Background */}
+                    <div className="absolute inset-0 bg-[radial-gradient(#00A896_1px,transparent_1px)] [background-size:18px_18px] opacity-20 pointer-events-none" />
 
-                      {/* Campus Ground Shadow Base */}
-                      <ellipse cx="250" cy="420" rx="180" ry="40" fill="#94A3B8" opacity="0.3" />
-                      <path d="M100 365 L250 435 L400 365 L250 295 Z" fill="#F1F5F9" stroke="#CBD5E1" strokeWidth="1.5" />
-                      
-                      {/* Healing Garden Courtyard */}
-                      <path d="M130 360 L250 420 L210 440 L90 380 Z" fill="#A7F3D0" opacity="0.8" />
-                      <path d="M290 420 L370 380 L410 400 L330 440 Z" fill="#A7F3D0" opacity="0.8" />
+                    {/* High-Definition 3D Human Heart Image with Realistic Heartbeat Pulse */}
+                    <img
+                      src={heart3dImage}
+                      alt="Curix 3D Clinical Cardiac Model"
+                      className="w-full h-full object-cover object-center select-none pointer-events-none anim-heart-pulse-3d transition-transform duration-700 group-hover:scale-110"
+                    />
 
-                      {/* Main 6-Story Hospital Tower (Isometric Center) */}
-                      <g>
-                        <path d="M205 130 L250 152 L250 365 L205 342 Z" fill="url(#hospTowerFront2)" stroke="#7DD3FC" strokeWidth="1.5" />
-                        <path d="M250 152 L295 130 L295 342 L250 365 Z" fill="url(#hospTowerSide2)" stroke="#0284C7" strokeWidth="1.5" />
-                        
-                        {/* Rooftop Helipad Platform */}
-                        <path d="M205 130 L250 108 L295 130 L250 152 Z" fill="#1E293B" stroke="#64748B" strokeWidth="2" />
-                        <ellipse cx="250" cy="130" rx="30" ry="15" stroke="#FACC15" strokeWidth="2.5" fill="#0F172A" />
-                        <ellipse cx="250" cy="130" rx="24" ry="12" stroke="#FACC15" strokeWidth="1" strokeDasharray="3 2" />
-                        <text x="250" y="135" fill="#FFFFFF" fontSize="14" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">H</text>
-
-                        {/* Tower Window Rows & Spandrels */}
-                        {[175, 210, 245, 280, 315].map((y, idx) => (
-                          <g key={idx}>
-                            <line x1="205" y1={y - 12} x2="250" y2={y + 10} stroke="#BAE6FD" strokeWidth="1.5" opacity="0.7" />
-                            <line x1="250" y1={y + 10} x2="295" y2={y - 12} stroke="#38BDF8" strokeWidth="1.5" opacity="0.5" />
-                            <circle cx="220" cy={y - 2} r="2.5" fill="#FEF08A" opacity="0.9" />
-                            <circle cx="238" cy={y + 7} r="2.5" fill="#FFFFFF" opacity="0.9" />
-                          </g>
-                        ))}
-
-                        {/* Rooftop Medical Radar & Antenna */}
-                        <line x1="250" y1="108" x2="250" y2="72" stroke="#00A896" strokeWidth="3" strokeLinecap="round" />
-                        <circle cx="250" cy="72" r="5" fill="#00A896" className="drop-shadow-[0_0_10px_#00A896]" />
-                        <circle cx="250" cy="72" r="2.5" fill="#FFFFFF" />
-                        <circle cx="250" cy="72" r="14" stroke="#00A896" strokeWidth="1.5" strokeDasharray="3 3" opacity="0.6" className="anim-radar-sweep" />
-                      </g>
-
-                      {/* West Surgical Pavilion Wing (Left) */}
-                      <g>
-                        <path d="M135 230 L205 265 L205 372 L135 338 Z" fill="url(#hospWingFront2)" stroke="#5EEAD4" strokeWidth="1.5" />
-                        <path d="M135 230 L170 212 L240 247 L205 265 Z" fill="#0F766E" stroke="#14B8A6" strokeWidth="1" />
-                        {[275, 305, 335].map((y, idx) => (
-                          <line key={idx} x1="140" y1={y - 8} x2="200" y2={y + 22} stroke="#CCFBF1" strokeWidth="1.5" opacity="0.7" />
-                        ))}
-                        <rect x="162" y="270" width="12" height="4" rx="1" fill="#FFFFFF" />
-                        <rect x="166" y="266" width="4" height="12" rx="1" fill="#FFFFFF" />
-                      </g>
-
-                      {/* East Diagnostic Wing (Right) */}
-                      <g>
-                        <path d="M295 265 L365 230 L365 338 L295 372 Z" fill="url(#hospWingSide2)" stroke="#0D9488" strokeWidth="1.5" />
-                        <path d="M260 247 L330 212 L365 230 L295 265 Z" fill="#0F766E" stroke="#14B8A6" strokeWidth="1" />
-                        {[275, 305, 335].map((y, idx) => (
-                          <line key={idx} x1="300" y1={y + 22} x2="360" y2={y - 8} stroke="#99F6E4" strokeWidth="1.5" opacity="0.5" />
-                        ))}
-                      </g>
-
-                      {/* Ground Emergency Ambulance Bay & Entrance */}
-                      <g>
-                        <path d="M195 348 L250 376 L305 348 L250 320 Z" fill="#0A1C35" stroke="#EF4444" strokeWidth="2" />
-                        <rect x="246" y="340" width="8" height="16" rx="2" fill="#EF4444" className="drop-shadow-[0_0_8px_#EF4444] animate-pulse" />
-                        <rect x="242" y="344" width="16" height="8" rx="2" fill="#EF4444" className="drop-shadow-[0_0_8px_#EF4444] animate-pulse" />
-                        <path d="M218 390 L246 404 L246 420 L218 406 Z" fill="#FFFFFF" stroke="#0A1C35" strokeWidth="1.2" />
-                        <path d="M246 404 L264 395 L264 411 L246 420 Z" fill="#E2E8F0" stroke="#0A1C35" strokeWidth="1.2" />
-                        <path d="M218 390 L236 381 L264 395 L246 404 Z" fill="#F8FAFC" />
-                        <circle cx="232" cy="385" r="3" fill="#EF4444" className="animate-ping" />
-                        <circle cx="232" cy="385" r="2" fill="#EF4444" />
-                        <circle cx="227" cy="409" r="3" fill="#0F172A" />
-                        <circle cx="243" cy="416" r="3" fill="#0F172A" />
-                      </g>
+                    {/* Dynamic ECG Cardiac Waveform Across Lower Portal */}
+                    <svg className="absolute bottom-6 left-0 right-0 w-full h-10 px-8 z-10 pointer-events-none opacity-85" viewBox="0 0 300 40" fill="none">
+                      <path
+                        d="M0 20 L70 20 L80 10 L90 32 L100 6 L110 26 L120 20 L160 20 L170 10 L180 32 L190 6 L200 26 L210 20 L300 20"
+                        stroke="#00A896"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="anim-scan-wave drop-shadow-[0_0_8px_#00A896]"
+                      />
                     </svg>
 
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-t from-[#0A1C35]/15 via-transparent to-white/10 pointer-events-none" />
+                    {/* Vignette & Soft Specular Lighting Reflection */}
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-t from-slate-950/40 via-transparent to-white/10 pointer-events-none" />
                   </div>
                 </div>
 
-                {/* Floating Telemetry Status Chips Anchored Around the Hospital Structure */}
+                {/* Floating Telemetry Status Chips Anchored Around the 3D Heart Portal */}
                 <div className="absolute -top-1 -right-2 sm:-right-4 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-2">
                   <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
                   </span>
+                  <Activity size={12} className="text-rose-500" />
                   <span className="text-[10px] sm:text-[11px] font-black text-[#0A1C35]">
-                    24/7 Level-1 Trauma
+                    72 BPM · Sinus Rhythm
                   </span>
                 </div>
 
                 <div className="absolute bottom-2 right-0 sm:-right-2 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <Heart size={12} className="text-[#00A896] fill-[#00A896]/20" />
                   <span className="text-[10px] sm:text-[11px] font-black text-[#0A1C35]">
-                    500+ Bed Smart Campus
+                    99.8% Cardiac Vitality
                   </span>
                 </div>
 
@@ -1415,11 +1369,9 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
             <span>9 Tertiary Institutes</span>
           </span>
 
-          {/* 3. Main Heading - Single Line with Vibrant Font Color */}
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[42px] xl:text-[46px] font-black tracking-tight mb-3 sm:whitespace-nowrap">
-            <span className="bg-gradient-to-r from-[#00A896] via-[#0BC2A8] to-sky-600 bg-clip-text text-transparent">
-              Centres of Excellence & Specialized Care
-            </span>
+          {/* 3. Main Heading - Single Line with Black & Curix Teal Accent */}
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[42px] xl:text-[46px] font-black text-[#0A1C35] tracking-tight mb-3 sm:whitespace-nowrap">
+            Centres of <span className="text-[#00A896]">Excellence</span> & Specialized Care
           </h2>
 
           {/* 4. Subtitle */}
