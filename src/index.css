@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,16 +7,15 @@
 @layer base {
   :root {
     --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-serif: 'Playfair Display', Georgia, serif;
+    --font-display: 'Outfit', 'Plus Jakarta Sans', sans-serif;
     
-    /* Antixor Tokens */
+    /* Curix Medical Design Tokens */
     --color-navy: #0A1C35;
     --color-navy-dark: #071524;
     --color-teal: #00A896;
     --color-teal-light: #0BC2A8;
     --color-teal-bg: #E6F8F5;
     --color-bg-tint: #F4F8FB;
-    --color-coral: #F26522;
   }
 
   html {
@@ -30,57 +29,113 @@
     font-size: 15px;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
     color: #0A1C35;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
     font-weight: 700;
+  }
+
+  /* Sleek custom scrollbars */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #F1F5F9;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8;
   }
 }
 
-/* Antixor Soft Radiance & Auras */
-.bg-antixor-hero {
-  background: radial-gradient(circle at 75% 20%, rgba(11, 194, 168, 0.12) 0%, rgba(244, 248, 251, 0.8) 50%, #FFFFFF 100%);
+/* Curix Aurora & Ambient Mesh Gradients */
+.bg-mesh-aurora {
+  background: 
+    radial-gradient(circle at 15% 15%, rgba(0, 168, 150, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 85% 20%, rgba(11, 194, 168, 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 50% 90%, rgba(244, 248, 251, 0.8) 0%, transparent 70%),
+    #FFFFFF;
 }
 
-.bg-antixor-teal-radial {
-  background: radial-gradient(circle at center, rgba(11, 194, 168, 0.2) 0%, transparent 70%);
+.bg-mesh-dark {
+  background: 
+    radial-gradient(circle at 80% 10%, rgba(11, 194, 168, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 20% 90%, rgba(0, 168, 150, 0.08) 0%, transparent 45%),
+    linear-gradient(145deg, #0A1C35 0%, #071524 100%);
 }
 
-.bg-antixor-navy {
-  background: linear-gradient(135deg, #0A1C35 0%, #071524 100%);
+/* Glassmorphism Classes */
+.glass-nav {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
 }
 
-/* Antixor Refined Glass Card */
-.card-antixor-clean {
-  background: #FFFFFF;
-  border: 1px solid #E2E8F0;
-  border-radius: 1.5rem;
-  box-shadow: 0 10px 30px -10px rgba(10, 28, 53, 0.04);
+.glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 10px 30px -10px rgba(10, 28, 53, 0.05);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.card-antixor-clean:hover {
-  border-color: rgba(0, 168, 150, 0.3);
-  box-shadow: 0 20px 35px -10px rgba(10, 28, 53, 0.08);
+.glass-card:hover {
+  border-color: rgba(0, 168, 150, 0.35);
+  box-shadow: 0 20px 40px -12px rgba(10, 28, 53, 0.1), 0 0 15px -3px rgba(0, 168, 150, 0.15);
   transform: translateY(-2px);
 }
 
-/* Antixor Buttons */
-.btn-antixor-teal {
-  background-color: #00A896;
+.glass-card-dark {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card-dark:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(11, 194, 168, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4), 0 0 25px -5px rgba(11, 194, 168, 0.2);
+}
+
+/* Button & Badge Utility Classes */
+.btn-curix-primary {
+  background: linear-gradient(135deg, #00A896 0%, #079181 100%);
   color: #FFFFFF;
   font-weight: 700;
   border-radius: 9999px;
-  transition: all 0.2s ease-in-out;
-  box-shadow: 0 4px 14px rgba(0, 168, 150, 0.25);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 18px rgba(0, 168, 150, 0.28);
 }
 
-.btn-antixor-teal:hover {
-  background-color: #079181;
-  box-shadow: 0 6px 20px rgba(0, 168, 150, 0.35);
-  transform: translateY(-1px);
+.btn-curix-primary:hover {
+  background: linear-gradient(135deg, #079181 0%, #057a6c 100%);
+  box-shadow: 0 6px 24px rgba(0, 168, 150, 0.42);
+  transform: translateY(-1.5px);
+}
+
+.btn-curix-primary:active {
+  transform: translateY(0);
+}
+
+/* Live Pulse Beacon */
+@keyframes beacon-pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 168, 150, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(0, 168, 150, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 168, 150, 0); }
+}
+
+.beacon-active {
+  animation: beacon-pulse 2s infinite;
 }
 
 /* Printable Prescription Slip */

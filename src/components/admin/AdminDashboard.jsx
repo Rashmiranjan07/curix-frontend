@@ -389,7 +389,7 @@ export default function AdminDashboard() {
                   }}
                   className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
                     isActive
-                      ? 'bg-[#00A896] text-white shadow-lg shadow-[#00A896]/25'
+                      ? 'bg-gradient-to-r from-[#00A896] to-[#079181] text-white shadow-lg shadow-[#00A896]/25'
                       : 'text-slate-600 hover:bg-[#E6F8F5] hover:text-[#00A896]'
                   }`}
                 >
@@ -425,14 +425,14 @@ export default function AdminDashboard() {
       <div className="flex-1 flex flex-col min-w-0">
         
         {/* Top Header Bar */}
-        <header className="h-20 bg-white border-b border-slate-200/80 px-6 sm:px-8 flex items-center justify-between gap-4 sticky top-0 z-30 shadow-xs">
+        <header className="h-20 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-6 sm:px-8 flex items-center justify-between gap-4 sticky top-0 z-30 shadow-2xs">
           <div className="flex items-center gap-3 flex-1 max-w-lg">
             <div className="relative w-full">
               <Search size={16} className="absolute left-4 top-3.5 text-slate-400" />
               <input
                 type="text"
                 placeholder="Search clinical units, physicians, or reports..."
-                className="w-full pl-11 pr-4 py-2.5 bg-[#F4F8FB] border border-slate-200 rounded-full text-xs focus:outline-none focus:bg-white focus:border-[#00A896] transition"
+                className="w-full pl-11 pr-4 py-2.5 bg-[#F4F8FB] border border-slate-200/90 rounded-full text-xs font-medium focus:outline-none focus:bg-white focus:border-[#00A896] focus:ring-4 focus:ring-[#00A896]/10 transition-all"
               />
             </div>
           </div>
@@ -442,7 +442,7 @@ export default function AdminDashboard() {
               onClick={loadAllAdminData}
               disabled={isSyncing}
               title="Sync Data"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#E6F8F5] hover:bg-[#d5f5ee] text-[#00A896] text-xs font-bold transition cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-[#E6F8F5] to-teal-100/60 hover:from-teal-100/80 hover:to-teal-200/60 text-[#00A896] text-xs font-extrabold transition shadow-2xs cursor-pointer"
             >
               <RefreshCw size={14} className={isSyncing ? 'animate-spin' : ''} />
               <span>Sync Node</span>

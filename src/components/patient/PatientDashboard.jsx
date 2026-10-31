@@ -589,19 +589,19 @@ export default function PatientDashboard() {
   const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
 
   return (
-    <div className="min-h-screen bg-[#F4F8FB] text-[#0A1C35] flex font-sans">
+    <div className="min-h-screen bg-[#F4F8FB] text-[#0A1C35] flex font-sans selection:bg-[#00A896] selection:text-white">
       
       {/* 1. LEFT SIDEBAR */}
       <aside className="w-64 bg-white border-r border-slate-200/80 hidden lg:flex flex-col justify-between shrink-0 select-none">
         <div>
           {/* Logo Header */}
           <div className="h-20 px-6 flex items-center gap-3 border-b border-slate-100">
-            <div className="w-10 h-10 rounded-2xl bg-[#00A896] text-white flex items-center justify-center font-black shadow-md shadow-[#00A896]/20">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#00A896] to-[#079181] text-white flex items-center justify-center font-black shadow-md shadow-[#00A896]/25">
               C
             </div>
             <div>
               <span className="font-extrabold text-sm tracking-tight text-[#0A1C35] block">CURIX</span>
-              <span className="text-[10px] text-[#00A896] font-bold block">Patient Portal</span>
+              <span className="text-[10px] text-[#00A896] font-extrabold uppercase tracking-wider block">Patient Portal</span>
             </div>
           </div>
 
@@ -622,8 +622,8 @@ export default function PatientDashboard() {
                   onClick={() => setActiveTab(item.id)}
                   className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-[#00A896] text-white shadow-lg shadow-[#00A896]/25'
-                      : 'text-slate-600 hover:bg-[#E6F8F5] hover:text-[#00A896]'
+                      ? 'bg-gradient-to-r from-[#00A896] to-[#079181] text-white shadow-lg shadow-[#00A896]/25'
+                      : 'text-slate-600 hover:bg-[#E6F8F5]/80 hover:text-[#00A896]'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -663,14 +663,14 @@ export default function PatientDashboard() {
       <div className="flex-1 flex flex-col min-w-0">
         
         {/* Top Header Bar */}
-        <header className="h-20 bg-white border-b border-slate-200/80 px-6 sm:px-8 flex items-center justify-between gap-4 sticky top-0 z-30 shadow-xs">
+        <header className="h-20 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-6 sm:px-8 flex items-center justify-between gap-4 sticky top-0 z-30 shadow-2xs">
           <div className="flex items-center gap-3 flex-1 max-w-lg">
             <div className="relative w-full">
               <Search size={16} className="absolute left-4 top-3.5 text-slate-400" />
               <input
                 type="text"
                 placeholder="Search physicians, departments, or records..."
-                className="w-full pl-11 pr-4 py-2.5 bg-[#F4F8FB] border border-slate-200 rounded-full text-xs focus:outline-none focus:bg-white focus:border-[#00A896] transition"
+                className="w-full pl-11 pr-4 py-2.5 bg-[#F4F8FB] border border-slate-200/90 rounded-full text-xs font-medium focus:outline-none focus:bg-white focus:border-[#00A896] focus:ring-4 focus:ring-[#00A896]/10 transition-all"
               />
             </div>
           </div>
@@ -680,7 +680,7 @@ export default function PatientDashboard() {
               onClick={loadAllPatientData}
               disabled={isSyncing}
               title="Sync Data"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#E6F8F5] hover:bg-[#d5f5ee] text-[#00A896] text-xs font-bold transition cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-[#E6F8F5] to-teal-100/60 hover:from-teal-100/80 hover:to-teal-200/60 text-[#00A896] text-xs font-extrabold transition shadow-2xs cursor-pointer"
             >
               <RefreshCw size={14} className={isSyncing ? 'animate-spin' : ''} />
               <span>Sync Node</span>
@@ -779,7 +779,7 @@ export default function PatientDashboard() {
                       const docName = getDoctorName(doc);
                       const initials = docName.replace('Dr. ', '').split(' ').map(n => n[0]).join('');
                       return (
-                        <div key={doc.id} className="p-6 rounded-3xl bg-white border border-slate-200/85 shadow-sm hover:border-[#00A896]/40 transition flex flex-col justify-between">
+                        <div key={doc.id} className="p-6 rounded-[28px] bg-white border border-slate-200/80 shadow-2xs hover:shadow-xl hover:border-[#00A896]/40 transition-all duration-300 flex flex-col justify-between">
                           <div>
                             <div className="flex items-start justify-between mb-4">
                               <div className="w-12 h-12 rounded-2xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center font-extrabold text-sm shadow-xs">
@@ -806,7 +806,7 @@ export default function PatientDashboard() {
 
                             <button
                               onClick={() => handleOpenBooking(doc)}
-                              className="px-4 py-2.5 rounded-xl bg-[#00A896] hover:bg-[#079181] text-white text-xs font-bold transition shadow-md shadow-[#00A896]/20 flex items-center gap-1.5 cursor-pointer"
+                              className="px-5 py-2.5 rounded-xl btn-curix-primary text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
                             >
                               <Calendar size={13} />
                               <span>Book Slot</span>

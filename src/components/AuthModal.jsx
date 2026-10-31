@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { 
   X, User, Stethoscope, Shield, AlertCircle, ArrowRight, 
-  Loader2, Eye, EyeOff, CheckCircle2 
+  Loader2, Eye, EyeOff, CheckCircle2, Lock, Sparkles
 } from 'lucide-react';
 
 export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) {
@@ -76,7 +76,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
           await login(formData.email.trim(), formData.password, 'PATIENT');
           onClose();
         } catch {
-          setSuccessMsg('Account registered successfully! Please sign in below.');
+          setSuccessMsg('Patient account registered successfully! Please sign in below.');
           setIsRegisterMode(false);
           setFormData(emptyForm);
         }
@@ -99,9 +99,9 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
   };
 
   const roles = [
-    { id: 'PATIENT', label: 'Patient', icon: User },
-    { id: 'DOCTOR', label: 'Doctor', icon: Stethoscope },
-    { id: 'ADMIN', label: 'Admin', icon: Shield },
+    { id: 'PATIENT', label: 'Patient', icon: User, color: 'text-[#00A896]' },
+    { id: 'DOCTOR', label: 'Doctor', icon: Stethoscope, color: 'text-sky-500' },
+    { id: 'ADMIN', label: 'Admin', icon: Shield, color: 'text-indigo-500' },
   ];
 
   const getEmailPlaceholder = () => {
@@ -111,33 +111,39 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#071524]/60 backdrop-blur-sm transition-opacity duration-300">
-      <div className="relative w-full max-w-lg bg-white border border-slate-200 rounded-3xl p-7 sm:p-9 shadow-2xl max-h-[92vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#071524]/75 backdrop-blur-md transition-all duration-300">
+      <div className="relative w-full max-w-lg bg-white border border-slate-200/90 rounded-[32px] p-7 sm:p-9 shadow-2xl max-h-[92vh] overflow-y-auto">
         
+        {/* Ambient Top Glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-2 rounded-full bg-gradient-to-r from-transparent via-[#00A896] to-transparent opacity-80" />
+
         {/* Close Button */}
         <button
           onClick={onClose}
           type="button"
           aria-label="Close"
-          className="absolute top-6 right-6 text-slate-400 hover:text-[#071524] p-2 rounded-full hover:bg-slate-100 transition-colors"
+          className="absolute top-6 right-6 text-slate-400 hover:text-[#071524] p-2 rounded-full hover:bg-slate-100 transition-colors cursor-pointer"
         >
           <X size={18} />
         </button>
 
         {/* Header */}
-        <div className="mb-7 text-center">
+        <div className="mb-6 text-center">
+          <div className="w-12 h-12 rounded-2xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center mx-auto mb-3 shadow-2xs">
+            <Lock size={20} className="stroke-[2.5]" />
+          </div>
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-[#071524]">
             {isRegisterMode && activeRole === 'PATIENT' ? 'Create Patient Account' : `Sign In as ${activeRole.charAt(0) + activeRole.slice(1).toLowerCase()}`}
           </h2>
           <p className="text-xs text-slate-500 font-medium mt-1.5">
             {isRegisterMode
-              ? 'Fill in your details to create an account'
+              ? 'Complete your clinical demographics to access the Curix portal'
               : `Access your verified ${activeRole.toLowerCase()} workspace`}
           </p>
         </div>
 
-        {/* Role Selector Tabs */}
-        <div className="flex p-1 bg-slate-100 rounded-full border border-slate-200/60 mb-6">
+        {/* Role Selector Tabs (Segmented Control) */}
+        <div className="flex p-1 bg-slate-100/90 rounded-full border border-slate-200/80 mb-6 shadow-2xs">
           {roles.map((r) => {
             const Icon = r.icon;
             const isActive = activeRole === r.id;
@@ -146,13 +152,13 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                 key={r.id}
                 type="button"
                 onClick={() => switchRole(r.id)}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-full text-xs font-bold transition-all duration-200 ${
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-xs font-extrabold transition-all duration-200 cursor-pointer ${
                   isActive
-                    ? 'bg-[#071524] text-white shadow-sm'
-                    : 'text-slate-600 hover:text-[#071524]'
+                    ? 'bg-white text-[#0A1C35] shadow-sm shadow-slate-900/10'
+                    : 'text-slate-600 hover:text-[#0A1C35]'
                 }`}
               >
-                <Icon size={14} className={isActive ? 'text-white' : 'text-slate-400'} />
+                <Icon size={14} className={isActive ? 'text-[#00A896]' : 'text-slate-400'} />
                 <span>{r.label}</span>
               </button>
             );
@@ -161,7 +167,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
 
         {/* Success Alert */}
         {successMsg && (
-          <div className="flex items-center gap-2.5 p-3.5 mb-5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
+          <div className="flex items-center gap-2.5 p-3.5 mb-5 rounded-2xl bg-emerald-50 border border-emerald-200/90 text-emerald-800 text-xs font-bold shadow-2xs">
             <CheckCircle2 size={16} className="shrink-0 text-emerald-600" />
             <span>{successMsg}</span>
           </div>
@@ -169,7 +175,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
 
         {/* Error Alert */}
         {error && (
-          <div className="flex items-start gap-2.5 p-3.5 mb-5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium">
+          <div className="flex items-start gap-2.5 p-3.5 mb-5 rounded-2xl bg-rose-50 border border-rose-200/90 text-rose-800 text-xs font-semibold shadow-2xs">
             <AlertCircle size={16} className="shrink-0 text-rose-600 mt-0.5" />
             <span className="leading-relaxed">{error}</span>
           </div>
@@ -190,7 +196,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                     placeholder="John"
                     value={formData.firstName}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-[#1A2E35] placeholder:text-slate-400 focus:border-[#071524] focus:ring-1 focus:ring-[#071524] focus:outline-none transition-all"
+                    className="w-full px-4 py-2.5 rounded-2xl bg-slate-50/70 border border-slate-200 text-sm text-[#0A1C35] placeholder:text-slate-400 focus:bg-white focus:border-[#00A896] focus:ring-4 focus:ring-[#00A896]/10 focus:outline-none transition-all font-medium"
                   />
                 </div>
                 <div>
@@ -202,7 +208,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                     placeholder="Doe"
                     value={formData.lastName}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-[#1A2E35] placeholder:text-slate-400 focus:border-[#071524] focus:ring-1 focus:ring-[#071524] focus:outline-none transition-all"
+                    className="w-full px-4 py-2.5 rounded-2xl bg-slate-50/70 border border-slate-200 text-sm text-[#0A1C35] placeholder:text-slate-400 focus:bg-white focus:border-[#00A896] focus:ring-4 focus:ring-[#00A896]/10 focus:outline-none transition-all font-medium"
                   />
                 </div>
               </div>
@@ -217,7 +223,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                     placeholder="john.doe@gmail.com"
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-[#1A2E35] placeholder:text-slate-400 focus:border-[#071524] focus:ring-1 focus:ring-[#071524] focus:outline-none transition-all"
+                    className="w-full px-4 py-2.5 rounded-2xl bg-slate-50/70 border border-slate-200 text-sm text-[#0A1C35] placeholder:text-slate-400 focus:bg-white focus:border-[#00A896] focus:ring-4 focus:ring-[#00A896]/10 focus:outline-none transition-all font-medium"
                   />
                 </div>
                 <div>
@@ -231,12 +237,12 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                       placeholder="Password123"
                       value={formData.password}
                       onChange={handleChange}
-                      className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-[#1A2E35] placeholder:text-slate-400 focus:border-[#071524] focus:ring-1 focus:ring-[#071524] focus:outline-none transition-all"
+                      className="w-full pl-4 pr-10 py-2.5 rounded-2xl bg-slate-50/70 border border-slate-200 text-sm text-[#0A1C35] placeholder:text-slate-400 focus:bg-white focus:border-[#00A896] focus:ring-4 focus:ring-[#00A896]/10 focus:outline-none transition-all font-medium"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
                     >
                       {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                     </button>
@@ -254,7 +260,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                     placeholder="+91 9876543210"
                     value={formData.phone}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-[#1A2E35] placeholder:text-slate-400 focus:border-[#071524] focus:ring-1 focus:ring-[#071524] focus:outline-none transition-all"
+                    className="w-full px-4 py-2.5 rounded-2xl bg-slate-50/70 border border-slate-200 text-sm text-[#0A1C35] placeholder:text-slate-400 focus:bg-white focus:border-[#00A896] focus:ring-4 focus:ring-[#00A896]/10 focus:outline-none transition-all font-medium"
                   />
                 </div>
                 <div>
@@ -266,7 +272,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                     placeholder="+91 9123456789"
                     value={formData.emergencyContact}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-[#1A2E35] placeholder:text-slate-400 focus:border-[#071524] focus:ring-1 focus:ring-[#071524] focus:outline-none transition-all"
+                    className="w-full px-4 py-2.5 rounded-2xl bg-slate-50/70 border border-slate-200 text-sm text-[#0A1C35] placeholder:text-slate-400 focus:bg-white focus:border-[#00A896] focus:ring-4 focus:ring-[#00A896]/10 focus:outline-none transition-all font-medium"
                   />
                 </div>
               </div>
@@ -280,7 +286,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                     required
                     value={formData.dateOfBirth}
                     onChange={handleChange}
-                    className="w-full px-2.5 py-2.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-800 focus:border-[#071524] focus:outline-none transition-all"
+                    className="w-full px-2.5 py-2.5 rounded-2xl bg-slate-50/70 border border-slate-200 text-xs font-semibold text-slate-800 focus:bg-white focus:border-[#00A896] focus:outline-none transition-all"
                   />
                 </div>
                 <div>
@@ -289,7 +295,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                     name="gender"
                     value={formData.gender}
                     onChange={handleChange}
-                    className="w-full px-2 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-800 focus:border-[#071524] focus:outline-none transition-all"
+                    className="w-full px-2 py-2.5 rounded-2xl bg-slate-50/70 border border-slate-200 text-xs font-extrabold text-slate-800 focus:bg-white focus:border-[#00A896] focus:outline-none transition-all"
                   >
                     <option value="MALE">MALE</option>
                     <option value="FEMALE">FEMALE</option>
@@ -302,7 +308,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                     name="bloodGroup"
                     value={formData.bloodGroup}
                     onChange={handleChange}
-                    className="w-full px-2 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-800 focus:border-[#071524] focus:outline-none transition-all"
+                    className="w-full px-2 py-2.5 rounded-2xl bg-slate-50/70 border border-slate-200 text-xs font-extrabold text-slate-800 focus:bg-white focus:border-[#00A896] focus:outline-none transition-all"
                   >
                     {['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'].map((bg) => (
                       <option key={bg} value={bg}>{bg}</option>
@@ -315,8 +321,8 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
             <>
               {/* Sign In Fields */}
               <div>
-                <label className="block text-xs font-bold text-[#071524] mb-1">
-                  {activeRole} Email
+                <label className="block text-xs font-bold text-[#071524] mb-1.5">
+                  {activeRole} Registered Email
                 </label>
                 <input
                   type="email"
@@ -326,12 +332,12 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                   placeholder={getEmailPlaceholder()}
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 text-sm text-[#1A2E35] placeholder:text-slate-400 focus:border-[#071524] focus:ring-1 focus:ring-[#071524] focus:outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-2xl bg-slate-50/70 border border-slate-200 text-sm text-[#0A1C35] placeholder:text-slate-400 focus:bg-white focus:border-[#00A896] focus:ring-4 focus:ring-[#00A896]/10 focus:outline-none transition-all font-medium"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#071524] mb-1">Password</label>
+                <label className="block text-xs font-bold text-[#071524] mb-1.5">Password</label>
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
@@ -341,7 +347,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                     placeholder="Enter your password"
                     value={formData.password}
                     onChange={handleChange}
-                    className="w-full pl-4 pr-11 py-3 rounded-xl bg-white border border-slate-200 text-sm text-[#1A2E35] placeholder:text-slate-400 focus:border-[#071524] focus:ring-1 focus:ring-[#071524] focus:outline-none transition-all"
+                    className="w-full pl-4 pr-11 py-3 rounded-2xl bg-slate-50/70 border border-slate-200 text-sm text-[#0A1C35] placeholder:text-slate-400 focus:bg-white focus:border-[#00A896] focus:ring-4 focus:ring-[#00A896]/10 focus:outline-none transition-all font-medium"
                   />
                   <button
                     type="button"
@@ -359,7 +365,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 py-3.5 rounded-full bg-[#071524] hover:bg-[#0a1c35] active:bg-[#040d17] text-white font-bold text-xs tracking-wide shadow-md shadow-[#071524]/25 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+            className="w-full mt-3 py-3.5 rounded-full btn-curix-primary text-white font-extrabold text-xs tracking-wide shadow-md shadow-[#00A896]/20 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
           >
             {loading ? (
               <>
@@ -371,7 +377,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                 <span>
                   {isRegisterMode && activeRole === 'PATIENT' ? 'Register Patient Account' : `Sign In as ${activeRole}`}
                 </span>
-                <ArrowRight size={16} />
+                <ArrowRight size={15} />
               </>
             )}
           </button>
@@ -379,14 +385,14 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
 
         {/* Footer Toggle */}
         {activeRole === 'PATIENT' ? (
-          <div className="mt-6 pt-5 border-t border-slate-100 text-center text-xs text-slate-500">
+          <div className="mt-6 pt-5 border-t border-slate-100 text-center text-xs text-slate-500 font-medium">
             {isRegisterMode ? (
               <p>
                 Already registered?{' '}
                 <button
                   type="button"
                   onClick={() => { setIsRegisterMode(false); setFormData(emptyForm); setError(''); setSuccessMsg(''); }}
-                  className="text-[#00A896] font-bold hover:underline ml-1 cursor-pointer"
+                  className="text-[#00A896] font-extrabold hover:underline ml-1 cursor-pointer"
                 >
                   Sign In
                 </button>
@@ -397,7 +403,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                 <button
                   type="button"
                   onClick={() => { setIsRegisterMode(true); setFormData(emptyForm); setError(''); setSuccessMsg(''); }}
-                  className="text-[#00A896] font-bold hover:underline ml-1 cursor-pointer"
+                  className="text-[#00A896] font-extrabold hover:underline ml-1 cursor-pointer"
                 >
                   Register Account
                 </button>
@@ -405,7 +411,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
             )}
           </div>
         ) : (
-          <p className="mt-5 text-center text-[11px] text-slate-400">
+          <p className="mt-5 text-center text-[11px] text-slate-400 font-medium">
             {activeRole} accounts must match the active portal tab to access the dashboard.
           </p>
         )}
