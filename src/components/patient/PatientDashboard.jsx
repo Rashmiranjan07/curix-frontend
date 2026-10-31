@@ -55,7 +55,7 @@ export default function PatientDashboard() {
     firstName: '',
     lastName: '',
     email: '',
-    contactNumber: '',
+    phone: '',
     bloodGroup: '',
     age: '',
     gender: 'OTHER',
@@ -133,7 +133,7 @@ export default function PatientDashboard() {
           firstName: data.firstName || data.user?.firstName || '',
           lastName: data.lastName || data.user?.lastName || '',
           email: data.email || data.user?.email || '',
-          contactNumber: data.contactNumber || '',
+          phone: data.phone || data.contactNumber || '',
           bloodGroup: data.bloodGroup || '',
           age: data.age || '',
           gender: data.gender || 'OTHER',
@@ -283,7 +283,7 @@ export default function PatientDashboard() {
       await patientApi.updateMyProfile({
         firstName: profile.firstName.trim(),
         lastName: profile.lastName.trim(),
-        contactNumber: profile.contactNumber.trim(),
+        phone: profile.phone.trim(),
         bloodGroup: profile.bloodGroup.trim(),
         age: profile.age ? Number(profile.age) : null,
         gender: profile.gender,
@@ -301,7 +301,6 @@ export default function PatientDashboard() {
   // Robust Doctor Name Resolver supporting all backend response formats
   const getDoctorName = (input) => {
     if (!input) return 'Attending Physician';
-    // If input is an appointment object containing a doctor reference
     const doc = input.doctor || input.physician || input;
 
     if (typeof doc === 'string') return doc.startsWith('Dr.') ? doc : `Dr. ${doc}`;
@@ -311,6 +310,7 @@ export default function PatientDashboard() {
     if (doc.name) return doc.name.startsWith('Dr.') ? doc.name : `Dr. ${doc.name}`;
     if (doc.user && doc.user.firstName) return `Dr. ${doc.user.firstName} ${doc.user.lastName || ''}`;
     if (doc.email) return `Dr. ${doc.email.split('@')[0]}`;
+    if (input.doctorName) return input.doctorName.startsWith('Dr.') ? input.doctorName : `Dr. ${input.doctorName}`;
     
     return `Doctor #${doc.id || input.doctorId || 'Specialist'}`;
   };
@@ -1020,12 +1020,13 @@ export default function PatientDashboard() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-bold text-[#0A1C35] mb-1">Phone Number</label>
+                        <label className="block text-xs font-bold text-[#0A1C35] mb-1">Phone Number *</label>
                         <input
                           type="tel"
+                          required
                           placeholder="+1 (555) 000-0000"
-                          value={profile.contactNumber}
-                          onChange={(e) => setProfile({ ...profile, contactNumber: e.target.value })}
+                          value={profile.phone}
+                          onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
                           className="w-full p-3 border border-slate-200 rounded-2xl text-xs"
                         />
                       </div>
