@@ -50,16 +50,16 @@ export default function Navbar({ onOpenAuth }) {
             Home
           </a>
           <a
-            href="#services"
-            className="px-4 py-1.5 rounded-full text-xs font-bold text-slate-700 hover:text-[#00A896] hover:bg-white hover:shadow-2xs transition-all duration-200"
-          >
-            Clinical Services
-          </a>
-          <a
             href="#about"
             className="px-4 py-1.5 rounded-full text-xs font-bold text-slate-700 hover:text-[#00A896] hover:bg-white hover:shadow-2xs transition-all duration-200"
           >
             About Us
+          </a>
+          <a
+            href="#services"
+            className="px-4 py-1.5 rounded-full text-xs font-bold text-slate-700 hover:text-[#00A896] hover:bg-white hover:shadow-2xs transition-all duration-200"
+          >
+            Clinical Services
           </a>
           <a
             href="#security"
@@ -140,18 +140,18 @@ export default function Navbar({ onOpenAuth }) {
             Home
           </a>
           <a
-            href="#services"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#00A896]"
-          >
-            Clinical Services
-          </a>
-          <a
             href="#about"
             onClick={() => setMobileMenuOpen(false)}
             className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#00A896]"
           >
             About Us
+          </a>
+          <a
+            href="#services"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#00A896]"
+          >
+            Clinical Services
           </a>
           <a
             href="#security"

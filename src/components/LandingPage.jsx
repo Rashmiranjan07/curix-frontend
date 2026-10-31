@@ -341,7 +341,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
     switch (type) {
       case 'cancer':
         return (
-          <div className="w-[114px] sm:w-[124px] h-[114px] sm:h-[124px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(2,132,199,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-sky-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+          <div className="w-[102px] sm:w-[112px] h-[102px] sm:h-[112px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(2,132,199,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-sky-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-sky-400/20 via-teal-300/10 to-transparent anim-equipment-pulse" />
             <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-sky-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
             <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
@@ -397,7 +397,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
       case 'ortho':
         return (
-          <div className="w-[114px] sm:w-[124px] h-[114px] sm:h-[124px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(16,185,129,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-emerald-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+          <div className="w-[102px] sm:w-[112px] h-[102px] sm:h-[112px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(16,185,129,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-emerald-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/20 via-teal-300/10 to-transparent anim-equipment-pulse" />
             <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
             <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
@@ -443,7 +443,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
       case 'cardiac':
         return (
-          <div className="w-[114px] sm:w-[124px] h-[114px] sm:h-[124px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(225,29,72,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-rose-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+          <div className="w-[102px] sm:w-[112px] h-[102px] sm:h-[112px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(225,29,72,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-rose-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-rose-400/20 via-pink-300/10 to-transparent anim-equipment-pulse" />
             <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-rose-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
             <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
@@ -502,7 +502,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
       case 'gastro':
         return (
-          <div className="w-[114px] sm:w-[124px] h-[114px] sm:h-[124px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(30,58,138,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-blue-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+          <div className="w-[102px] sm:w-[112px] h-[102px] sm:h-[112px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(30,58,138,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-blue-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 via-cyan-300/10 to-transparent anim-equipment-pulse" />
             <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-blue-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
             <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
@@ -546,7 +546,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
       case 'neuro':
         return (
-          <div className="w-[114px] sm:w-[124px] h-[114px] sm:h-[124px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(2,132,199,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-sky-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+          <div className="w-[102px] sm:w-[112px] h-[102px] sm:h-[112px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(2,132,199,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-sky-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-sky-400/20 via-indigo-300/10 to-transparent anim-equipment-pulse" />
             <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-sky-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
             <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
@@ -594,7 +594,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
       case 'renal':
         return (
-          <div className="w-[114px] sm:w-[124px] h-[114px] sm:h-[124px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(168,85,247,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-purple-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+          <div className="w-[102px] sm:w-[112px] h-[102px] sm:h-[112px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(168,85,247,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-purple-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-400/20 via-indigo-300/10 to-transparent anim-equipment-pulse" />
             <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-purple-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
             <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
@@ -633,7 +633,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
       case 'transplant':
         return (
-          <div className="w-[114px] sm:w-[124px] h-[114px] sm:h-[124px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(13,148,136,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-teal-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+          <div className="w-[102px] sm:w-[112px] h-[102px] sm:h-[112px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(13,148,136,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-teal-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-teal-400/20 via-cyan-300/10 to-transparent anim-equipment-pulse" />
             <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-teal-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
             <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
@@ -674,7 +674,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
       case 'mother-child':
         return (
-          <div className="w-[114px] sm:w-[124px] h-[114px] sm:h-[124px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(244,63,94,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-pink-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+          <div className="w-[102px] sm:w-[112px] h-[102px] sm:h-[112px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(244,63,94,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-pink-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-pink-400/20 via-rose-300/10 to-transparent anim-equipment-pulse" />
             <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-pink-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
             <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
@@ -713,7 +713,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
       case 'emergency':
         return (
-          <div className="w-[114px] sm:w-[124px] h-[114px] sm:h-[124px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(239,68,68,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-teal-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+          <div className="w-[102px] sm:w-[112px] h-[102px] sm:h-[112px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(239,68,68,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-teal-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-red-400/15 via-teal-300/15 to-transparent anim-equipment-pulse" />
             <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-red-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
             <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
@@ -1135,8 +1135,289 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
         </div>
       </section>
 
+      {/* 2. ABOUT US SECTION (UN-SQUEEZED, SPACIOUS & FULL-WIDTH ARCHITECTURE) */}
+      <section id="about" className="scroll-mt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-28 lg:py-32 relative overflow-hidden">
+        {/* Subtle Ambient Background Watermark */}
+        <div className="absolute top-1/3 left-0 w-80 h-80 rounded-full bg-[#00A896]/10 blur-3xl pointer-events-none -translate-y-1/2" />
+        <div className="absolute bottom-10 right-0 w-96 h-96 rounded-full bg-sky-400/10 blur-3xl pointer-events-none" />
+
+        {/* Section Header */}
+        <div className="max-w-3xl mb-14 sm:mb-16">
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <span className="text-[11px] font-black tracking-widest uppercase text-[#00A896] bg-[#E6F8F5] px-3.5 py-1.5 rounded-full border border-[#00A896]/20 shadow-2xs">
+              ABOUT CURIX HEALTHCARE
+            </span>
+            <span className="text-[10.5px] font-extrabold text-slate-500 bg-slate-100 px-3.5 py-1.5 rounded-full flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              Est. 2018 · Tertiary Medical Campus
+            </span>
+          </div>
+
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0A1C35] tracking-tight leading-[1.18] mb-4">
+            Transforming Healthcare Through{' '}
+            <span className="bg-gradient-to-r from-[#00A896] via-[#0BC2A8] to-sky-500 bg-clip-text text-transparent">
+              Clinical Excellence
+            </span>{' '}
+            & Digital Precision
+          </h2>
+
+          <p className="text-sm sm:text-base text-slate-600 font-medium leading-relaxed">
+            Curix is an accredited multi-specialty tertiary healthcare institution engineered to harmonize high-precision clinical outcomes with compassionate, zero-friction patient care. By integrating 9 specialized Centres of Excellence with an atomic digital health infrastructure, we eliminate waiting bottlenecks and booking collisions while providing seamless outpatient-to-inpatient transitions.
+          </p>
+        </div>
+
+        {/* 2-Column Showcase: Clinical Pillars (Left) + 3D Hospital Campus Architecture (Right) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center mb-16 sm:mb-20">
+          
+          {/* Left Column: 4 Clinical Pillars with Spacious Bento Cards */}
+          <div className="lg:col-span-7 space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+              <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/80 shadow-2xs hover:border-[#00A896]/50 hover:shadow-md transition-all flex flex-col justify-between">
+                <div className="w-11 h-11 rounded-2xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center mb-4">
+                  <Award size={22} />
+                </div>
+                <div>
+                  <h4 className="text-sm font-extrabold text-[#0A1C35] mb-1.5">JCI & NABH Aligned</h4>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    International gold standard infection control, clinical safety protocols, and certified hospital care.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/80 shadow-2xs hover:border-[#00A896]/50 hover:shadow-md transition-all flex flex-col justify-between">
+                <div className="w-11 h-11 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center mb-4">
+                  <Activity size={22} />
+                </div>
+                <div>
+                  <h4 className="text-sm font-extrabold text-[#0A1C35] mb-1.5">Robotic Surgical Suites</h4>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    Mako robotic articulated arm and LINAC 6MV radiation suites for 0.1mm sub-millimeter surgical precision.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/80 shadow-2xs hover:border-[#00A896]/50 hover:shadow-md transition-all flex flex-col justify-between">
+                <div className="w-11 h-11 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-4">
+                  <ShieldCheck size={22} />
+                </div>
+                <div>
+                  <h4 className="text-sm font-extrabold text-[#0A1C35] mb-1.5">Atomic Slot Locking</h4>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    Direct calendar synchronization locks your consultation slot instantly across hospital systems.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/80 shadow-2xs hover:border-[#00A896]/50 hover:shadow-md transition-all flex flex-col justify-between">
+                <div className="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mb-4">
+                  <PhoneCall size={22} />
+                </div>
+                <div>
+                  <h4 className="text-sm font-extrabold text-[#0A1C35] mb-1.5">24/7 Level-1 Trauma</h4>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    Golden-hour acute resuscitation, dedicated multi-bed surgical ICU, and mobile telemetry life-support fleet.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Interactive CTAs */}
+            <div className="flex flex-wrap items-center gap-4 pt-4">
+              <a
+                href="#centres-of-excellence"
+                className="px-7 py-3.5 rounded-full btn-curix-primary text-xs font-extrabold flex items-center gap-2 shadow-md hover:shadow-lg transition cursor-pointer"
+              >
+                <span>Explore Centres of Excellence</span>
+                <ArrowRight size={14} />
+              </a>
+              <a
+                href="#specialties"
+                className="px-6 py-3.5 rounded-full bg-white border border-slate-200/90 hover:border-slate-300 text-xs font-bold text-slate-700 shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>Meet Medical Faculty</span>
+                <ChevronRight size={14} className="text-[#00A896]" />
+              </a>
+            </div>
+          </div>
+
+          {/* Right Column: 3D Hospital Medical Campus Structure (Spacious Floating Portal) */}
+          <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
+            <div className="relative w-full max-w-[400px] sm:max-w-[440px] flex flex-col items-center">
+              
+              {/* Outer Floating Animation Frame */}
+              <div className="relative w-[320px] h-[320px] sm:w-[380px] sm:h-[380px] anim-doctor-float flex items-center justify-center z-10">
+                
+                {/* Ambient Soft Glow Behind the Portal */}
+                <div className="absolute -inset-6 sm:-inset-8 rounded-full bg-gradient-to-tr from-[#00A896]/30 via-[#0BC2A8]/20 to-sky-400/20 blur-3xl pointer-events-none anim-pulse-glow" />
+
+                {/* Concentric Dashed Orbit Ring with Orbiting Glowing Markers */}
+                <div className="absolute -inset-4 sm:-inset-5 rounded-full border-2 border-dashed border-[#00A896]/50 pointer-events-none anim-orbit-spin flex items-center justify-between p-2">
+                  <span className="w-3.5 h-3.5 rounded-full bg-[#00A896] shadow-[0_0_12px_#00A896]" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#0BC2A8] shadow-[0_0_10px_#0BC2A8]" />
+                </div>
+
+                {/* The Round Shape: Gradient Rim + Bevel Border + Mask (Matching Doctor Portal) */}
+                <div className="w-full h-full rounded-full p-2.5 sm:p-3 bg-gradient-to-b from-[#00A896] via-[#0BC2A8] to-slate-200/60 shadow-[0_20px_50px_rgba(10,28,53,0.22)] ring-8 ring-[#00A896]/15 flex items-center justify-center relative group overflow-hidden">
+                  
+                  {/* Inner Circular Portal Framing 3D Hospital Structure */}
+                  <div className="w-full h-full rounded-full overflow-hidden border-[5px] sm:border-[6px] border-white shadow-inner bg-gradient-to-b from-[#F0F9FF] via-[#E0F2FE] to-[#CCFBF1] relative flex items-center justify-center p-4">
+                    
+                    {/* High-Definition 3D Hospital Campus Architecture Vector */}
+                    <svg className="w-full h-full relative z-10 select-none pointer-events-none transition-transform duration-500 group-hover:scale-105" viewBox="0 0 500 500" fill="none">
+                      <defs>
+                        <linearGradient id="hospTowerFront2" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#38BDF8"/>
+                          <stop offset="50%" stopColor="#0284C7"/>
+                          <stop offset="100%" stopColor="#0369A1"/>
+                        </linearGradient>
+                        <linearGradient id="hospTowerSide2" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#0284C7"/>
+                          <stop offset="100%" stopColor="#0F172A"/>
+                        </linearGradient>
+                        <linearGradient id="hospWingFront2" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#2DD4BF"/>
+                          <stop offset="100%" stopColor="#0F766E"/>
+                        </linearGradient>
+                        <linearGradient id="hospWingSide2" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#0D9488"/>
+                          <stop offset="100%" stopColor="#134E4A"/>
+                        </linearGradient>
+                      </defs>
+
+                      {/* Campus Ground Shadow Base */}
+                      <ellipse cx="250" cy="420" rx="180" ry="40" fill="#94A3B8" opacity="0.3" />
+                      <path d="M100 365 L250 435 L400 365 L250 295 Z" fill="#F1F5F9" stroke="#CBD5E1" strokeWidth="1.5" />
+                      
+                      {/* Healing Garden Courtyard */}
+                      <path d="M130 360 L250 420 L210 440 L90 380 Z" fill="#A7F3D0" opacity="0.8" />
+                      <path d="M290 420 L370 380 L410 400 L330 440 Z" fill="#A7F3D0" opacity="0.8" />
+
+                      {/* Main 6-Story Hospital Tower (Isometric Center) */}
+                      <g>
+                        <path d="M205 130 L250 152 L250 365 L205 342 Z" fill="url(#hospTowerFront2)" stroke="#7DD3FC" strokeWidth="1.5" />
+                        <path d="M250 152 L295 130 L295 342 L250 365 Z" fill="url(#hospTowerSide2)" stroke="#0284C7" strokeWidth="1.5" />
+                        
+                        {/* Rooftop Helipad Platform */}
+                        <path d="M205 130 L250 108 L295 130 L250 152 Z" fill="#1E293B" stroke="#64748B" strokeWidth="2" />
+                        <ellipse cx="250" cy="130" rx="30" ry="15" stroke="#FACC15" strokeWidth="2.5" fill="#0F172A" />
+                        <ellipse cx="250" cy="130" rx="24" ry="12" stroke="#FACC15" strokeWidth="1" strokeDasharray="3 2" />
+                        <text x="250" y="135" fill="#FFFFFF" fontSize="14" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">H</text>
+
+                        {/* Tower Window Rows & Spandrels */}
+                        {[175, 210, 245, 280, 315].map((y, idx) => (
+                          <g key={idx}>
+                            <line x1="205" y1={y - 12} x2="250" y2={y + 10} stroke="#BAE6FD" strokeWidth="1.5" opacity="0.7" />
+                            <line x1="250" y1={y + 10} x2="295" y2={y - 12} stroke="#38BDF8" strokeWidth="1.5" opacity="0.5" />
+                            <circle cx="220" cy={y - 2} r="2.5" fill="#FEF08A" opacity="0.9" />
+                            <circle cx="238" cy={y + 7} r="2.5" fill="#FFFFFF" opacity="0.9" />
+                          </g>
+                        ))}
+
+                        {/* Rooftop Medical Radar & Antenna */}
+                        <line x1="250" y1="108" x2="250" y2="72" stroke="#00A896" strokeWidth="3" strokeLinecap="round" />
+                        <circle cx="250" cy="72" r="5" fill="#00A896" className="drop-shadow-[0_0_10px_#00A896]" />
+                        <circle cx="250" cy="72" r="2.5" fill="#FFFFFF" />
+                        <circle cx="250" cy="72" r="14" stroke="#00A896" strokeWidth="1.5" strokeDasharray="3 3" opacity="0.6" className="anim-radar-sweep" />
+                      </g>
+
+                      {/* West Surgical Pavilion Wing (Left) */}
+                      <g>
+                        <path d="M135 230 L205 265 L205 372 L135 338 Z" fill="url(#hospWingFront2)" stroke="#5EEAD4" strokeWidth="1.5" />
+                        <path d="M135 230 L170 212 L240 247 L205 265 Z" fill="#0F766E" stroke="#14B8A6" strokeWidth="1" />
+                        {[275, 305, 335].map((y, idx) => (
+                          <line key={idx} x1="140" y1={y - 8} x2="200" y2={y + 22} stroke="#CCFBF1" strokeWidth="1.5" opacity="0.7" />
+                        ))}
+                        <rect x="162" y="270" width="12" height="4" rx="1" fill="#FFFFFF" />
+                        <rect x="166" y="266" width="4" height="12" rx="1" fill="#FFFFFF" />
+                      </g>
+
+                      {/* East Diagnostic Wing (Right) */}
+                      <g>
+                        <path d="M295 265 L365 230 L365 338 L295 372 Z" fill="url(#hospWingSide2)" stroke="#0D9488" strokeWidth="1.5" />
+                        <path d="M260 247 L330 212 L365 230 L295 265 Z" fill="#0F766E" stroke="#14B8A6" strokeWidth="1" />
+                        {[275, 305, 335].map((y, idx) => (
+                          <line key={idx} x1="300" y1={y + 22} x2="360" y2={y - 8} stroke="#99F6E4" strokeWidth="1.5" opacity="0.5" />
+                        ))}
+                      </g>
+
+                      {/* Ground Emergency Ambulance Bay & Entrance */}
+                      <g>
+                        <path d="M195 348 L250 376 L305 348 L250 320 Z" fill="#0A1C35" stroke="#EF4444" strokeWidth="2" />
+                        <rect x="246" y="340" width="8" height="16" rx="2" fill="#EF4444" className="drop-shadow-[0_0_8px_#EF4444] animate-pulse" />
+                        <rect x="242" y="344" width="16" height="8" rx="2" fill="#EF4444" className="drop-shadow-[0_0_8px_#EF4444] animate-pulse" />
+                        <path d="M218 390 L246 404 L246 420 L218 406 Z" fill="#FFFFFF" stroke="#0A1C35" strokeWidth="1.2" />
+                        <path d="M246 404 L264 395 L264 411 L246 420 Z" fill="#E2E8F0" stroke="#0A1C35" strokeWidth="1.2" />
+                        <path d="M218 390 L236 381 L264 395 L246 404 Z" fill="#F8FAFC" />
+                        <circle cx="232" cy="385" r="3" fill="#EF4444" className="animate-ping" />
+                        <circle cx="232" cy="385" r="2" fill="#EF4444" />
+                        <circle cx="227" cy="409" r="3" fill="#0F172A" />
+                        <circle cx="243" cy="416" r="3" fill="#0F172A" />
+                      </g>
+                    </svg>
+
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-t from-[#0A1C35]/15 via-transparent to-white/10 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* Floating Telemetry Status Chips Anchored Around the Hospital Structure */}
+                <div className="absolute -top-1 -right-2 sm:-right-4 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                  </span>
+                  <span className="text-[10px] sm:text-[11px] font-black text-[#0A1C35]">
+                    24/7 Level-1 Trauma
+                  </span>
+                </div>
+
+                <div className="absolute bottom-2 right-0 sm:-right-2 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[10px] sm:text-[11px] font-black text-[#0A1C35]">
+                    500+ Bed Smart Campus
+                  </span>
+                </div>
+
+                <div className="absolute bottom-1 -left-2 sm:-left-4 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+                  <Award size={13} className="text-[#00A896]" />
+                  <span className="text-[10px] sm:text-[11px] font-black text-[#0A1C35]">
+                    NABH & JCI Accredited
+                  </span>
+                </div>
+
+              </div>
+
+              {/* Synchronized Floor Shadow Breathing Under Hospital Structure */}
+              <div className="w-[250px] sm:w-[320px] h-6 rounded-full bg-slate-900/30 blur-md pointer-events-none anim-shadow-breath mt-4 z-0" />
+            </div>
+          </div>
+
+        </div>
+
+        {/* FULL-WIDTH LUXURY TRUST METRICS SHOWCASE (SPACIOUS 4-COLUMN STRIP) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 pt-14 border-t border-slate-200/70">
+          <div className="p-6 sm:p-7 rounded-3xl bg-white border border-slate-200/80 shadow-2xs hover:shadow-md transition text-center flex flex-col justify-between">
+            <span className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0A1C35] tracking-tight block mb-2">50,000+</span>
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Patients Treated & Served</span>
+          </div>
+          <div className="p-6 sm:p-7 rounded-3xl bg-white border border-slate-200/80 shadow-2xs hover:shadow-md transition text-center flex flex-col justify-between">
+            <span className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#00A896] tracking-tight block mb-2">150+</span>
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Board-Certified Faculty</span>
+          </div>
+          <div className="p-6 sm:p-7 rounded-3xl bg-white border border-slate-200/80 shadow-2xs hover:shadow-md transition text-center flex flex-col justify-between">
+            <span className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0A1C35] tracking-tight block mb-2">9</span>
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Centres of Excellence</span>
+          </div>
+          <div className="p-6 sm:p-7 rounded-3xl bg-white border border-slate-200/80 shadow-2xs hover:shadow-md transition text-center flex flex-col justify-between">
+            <span className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0BC2A8] tracking-tight block mb-2">99.8%</span>
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Clinical Precision Rate</span>
+          </div>
+        </div>
+      </section>
+
+      
+
       {/* CENTRES OF EXCELLENCE & SPECIALIZED HOSPITAL CARE (MERGED FLAGSHIP SECTION) */}
-      <section id="centres-of-excellence" className="scroll-mt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 relative">
+      <section id="centres-of-excellence" className="scroll-mt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-28 lg:py-32 relative border-t border-slate-100/80">
         <span id="services" className="scroll-mt-24 absolute -top-10" />
 
         {/* Curix UI Themed Section Header */}
@@ -1192,12 +1473,12 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
         </div>
 
         {/* 3x3 Equal Height Grid (Combined Design: Clean, Balanced, 3D Animated Equipment) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 items-stretch">
           {centresOfExcellence.map((centre) => (
             <div
               key={centre.id}
               onClick={() => handleCentreClick(centre)}
-              className={`h-full min-h-[220px] sm:min-h-[230px] relative overflow-hidden rounded-[24px] border ${centre.border} bg-gradient-to-r ${centre.bgGradient} p-5 sm:p-6 flex flex-col justify-between shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer group`}
+              className={`h-full min-h-[250px] sm:min-h-[260px] relative overflow-hidden rounded-[28px] border ${centre.border} bg-gradient-to-r ${centre.bgGradient} p-6 sm:p-7 flex flex-col justify-between shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer group`}
             >
               {/* Header Title & Clinical Scope on Left, 3D Equipment Visual on Right */}
               <div className="flex justify-between items-start gap-2.5 flex-1">
@@ -1250,7 +1531,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
       </section>
 
       {/* 3. REGISTERED ATTENDING PHYSICIANS & SPECIALISTS DIRECTORY (EXPLICIT ADMIN DATA) */}
-      <section id="specialties" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <section id="specialties" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-28 lg:py-32 border-t border-slate-100/80">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -1505,294 +1786,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
       </section>
 
       
-      {/* 4. ABOUT US SECTION (TERTIARY HOSPITAL ARCHITECTURE & CLINICAL ECOSYSTEM) */}
-      <section id="about" className="scroll-mt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-24 relative overflow-hidden">
-        {/* Subtle Ambient Background Watermark */}
-        <div className="absolute top-1/2 left-0 w-72 h-72 rounded-full bg-[#00A896]/10 blur-3xl pointer-events-none -translate-y-1/2" />
-        
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-center">
-          
-          {/* Left Column: Hospital Mission, Story & Trust Pillars */}
-          <div className="lg:col-span-7 space-y-6">
-            
-            {/* Curix UI Design Token Badges */}
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[11px] font-black tracking-widest uppercase text-[#00A896] bg-[#E6F8F5] px-3.5 py-1 rounded-full border border-[#00A896]/20 shadow-2xs">
-                ABOUT CURIX HEALTHCARE
-              </span>
-              <span className="text-[10px] font-extrabold text-slate-500 bg-slate-100 px-3 py-1 rounded-full flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Est. 2018 · Tertiary Healthcare Campus
-              </span>
-            </div>
-
-            {/* Main Headline */}
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0A1C35] tracking-tight leading-[1.18]">
-              Pioneering Next-Gen Hospital Care &{' '}
-              <span className="bg-gradient-to-r from-[#00A896] via-[#0BC2A8] to-sky-500 bg-clip-text text-transparent">
-                Digital Medicine
-              </span>
-            </h2>
-
-            {/* Narrative Story */}
-            <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
-              Curix is a modern multi-specialty tertiary medical ecosystem built to bridge clinical excellence with compassionate, zero-friction patient care. By combining 9 specialized Centres of Excellence with an atomic digital health infrastructure, we eliminate long waiting queues and booking collisions while providing seamless outpatient-to-inpatient medical care.
-            </p>
-
-            <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
-              Our integrated campus houses 500+ beds, next-gen robotic surgery suites, continuous intensive care units (CRRT & NICU), and a verified network of 150+ board-certified faculty delivering evidence-based medicine around the clock.
-            </p>
-
-            {/* 4 Clinical Pillars Bento Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
-              <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-start gap-3 group hover:border-[#00A896]/40 transition">
-                <div className="w-9 h-9 rounded-xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center shrink-0">
-                  <Award size={18} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-[#0A1C35]">JCI & NABH Aligned</h4>
-                  <p className="text-[11px] text-slate-500 font-medium mt-0.5">International gold standard infection control & clinical outcomes.</p>
-                </div>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-start gap-3 group hover:border-[#00A896]/40 transition">
-                <div className="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
-                  <Activity size={18} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-[#0A1C35]">Robotic Surgical Suites</h4>
-                  <p className="text-[11px] text-slate-500 font-medium mt-0.5">Mako robotic arm & LINAC radiation for 0.1mm surgical accuracy.</p>
-                </div>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-start gap-3 group hover:border-[#00A896]/40 transition">
-                <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-                  <ShieldCheck size={18} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-[#0A1C35]">Atomic Slot Locking</h4>
-                  <p className="text-[11px] text-slate-500 font-medium mt-0.5">Zero booking collisions with verified direct calendar locks.</p>
-                </div>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-start gap-3 group hover:border-[#00A896]/40 transition">
-                <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
-                  <PhoneCall size={18} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-[#0A1C35]">24/7 Level-1 Trauma</h4>
-                  <p className="text-[11px] text-slate-500 font-medium mt-0.5">Golden-hour resuscitation with mobile telemetry ICU fleet.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* 4 Trust Metrics Counters */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-200/70">
-              <div className="p-3 rounded-2xl bg-slate-50/80 border border-slate-200/60 text-center">
-                <span className="text-xl sm:text-2xl font-black text-[#0A1C35] block">50,000+</span>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Patients Treated</span>
-              </div>
-              <div className="p-3 rounded-2xl bg-slate-50/80 border border-slate-200/60 text-center">
-                <span className="text-xl sm:text-2xl font-black text-[#00A896] block">150+</span>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Board Faculty</span>
-              </div>
-              <div className="p-3 rounded-2xl bg-slate-50/80 border border-slate-200/60 text-center">
-                <span className="text-xl sm:text-2xl font-black text-[#0A1C35] block">9</span>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Centres of Excellence</span>
-              </div>
-              <div className="p-3 rounded-2xl bg-slate-50/80 border border-slate-200/60 text-center">
-                <span className="text-xl sm:text-2xl font-black text-[#0BC2A8] block">99.8%</span>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Clinical Precision</span>
-              </div>
-            </div>
-
-            {/* Interactive Navigation Touchpoints */}
-            <div className="flex flex-wrap items-center gap-3 pt-2">
-              <a
-                href="#centres-of-excellence"
-                className="px-6 py-3 rounded-full btn-curix-primary text-xs font-extrabold flex items-center gap-2 shadow-md hover:shadow-lg transition cursor-pointer"
-              >
-                <span>Explore Centres of Excellence</span>
-                <ArrowRight size={14} />
-              </a>
-              <a
-                href="#specialties"
-                className="px-5 py-3 rounded-full bg-white border border-slate-200/90 hover:border-slate-300 text-xs font-bold text-slate-700 shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
-              >
-                <span>Meet Medical Faculty</span>
-                <ChevronRight size={14} className="text-[#00A896]" />
-              </a>
-            </div>
-
-          </div>
-
-          {/* Right Column: 3D Animated Hospital Medical Campus Structure (Counterpart to Hero's Doctor Portal) */}
-          <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
-            <div className="relative w-full max-w-[380px] sm:max-w-[420px] flex flex-col items-center">
-              
-              {/* Outer Floating Animation Frame */}
-              <div className="relative w-[300px] h-[300px] sm:w-[360px] sm:h-[360px] anim-doctor-float flex items-center justify-center z-10">
-                
-                {/* Ambient Soft Glow Behind the Portal */}
-                <div className="absolute -inset-4 sm:-inset-6 rounded-full bg-gradient-to-tr from-[#00A896]/30 via-[#0BC2A8]/20 to-sky-400/20 blur-3xl pointer-events-none anim-pulse-glow" />
-
-                {/* Concentric Dashed Orbit Ring with Orbiting Glowing Markers */}
-                <div className="absolute -inset-3 sm:-inset-4 rounded-full border-2 border-dashed border-[#00A896]/50 pointer-events-none anim-orbit-spin flex items-center justify-between p-1.5">
-                  <span className="w-3.5 h-3.5 rounded-full bg-[#00A896] shadow-[0_0_12px_#00A896]" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#0BC2A8] shadow-[0_0_10px_#0BC2A8]" />
-                </div>
-
-                {/* The Round Shape: Gradient Rim + Bevel Border + Mask (Matching Doctor Portal) */}
-                <div className="w-full h-full rounded-full p-2 sm:p-2.5 bg-gradient-to-b from-[#00A896] via-[#0BC2A8] to-slate-200/60 shadow-[0_20px_50px_rgba(10,28,53,0.22)] ring-8 ring-[#00A896]/15 flex items-center justify-center relative group overflow-hidden">
-                  
-                  {/* Inner Circular Portal Framing 3D Hospital Structure */}
-                  <div className="w-full h-full rounded-full overflow-hidden border-[5px] sm:border-[6px] border-white shadow-inner bg-gradient-to-b from-[#F0F9FF] via-[#E0F2FE] to-[#CCFBF1] relative flex items-center justify-center p-3">
-                    
-                    {/* High-Definition 3D Hospital Campus Architecture Vector */}
-                    <svg className="w-full h-full relative z-10 select-none pointer-events-none transition-transform duration-500 group-hover:scale-105" viewBox="0 0 500 500" fill="none">
-                      <defs>
-                        <linearGradient id="hospTowerFront" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#38BDF8"/>
-                          <stop offset="50%" stopColor="#0284C7"/>
-                          <stop offset="100%" stopColor="#0369A1"/>
-                        </linearGradient>
-                        <linearGradient id="hospTowerSide" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#0284C7"/>
-                          <stop offset="100%" stopColor="#0F172A"/>
-                        </linearGradient>
-                        <linearGradient id="hospWingFront" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#2DD4BF"/>
-                          <stop offset="100%" stopColor="#0F766E"/>
-                        </linearGradient>
-                        <linearGradient id="hospWingSide" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#0D9488"/>
-                          <stop offset="100%" stopColor="#134E4A"/>
-                        </linearGradient>
-                        <radialGradient id="campusGlow" cx="50%" cy="50%" r="50%">
-                          <stop offset="0%" stopColor="#00A896" stopOpacity="0.25"/>
-                          <stop offset="100%" stopColor="#00A896" stopOpacity="0"/>
-                        </radialGradient>
-                      </defs>
-
-                      {/* Campus Ground Shadow Base */}
-                      <ellipse cx="250" cy="420" rx="180" ry="40" fill="#94A3B8" opacity="0.3" />
-                      <path d="M100 365 L250 435 L400 365 L250 295 Z" fill="#F1F5F9" stroke="#CBD5E1" strokeWidth="1.5" />
-                      
-                      {/* Healing Garden Courtyard */}
-                      <path d="M130 360 L250 420 L210 440 L90 380 Z" fill="#A7F3D0" opacity="0.8" />
-                      <path d="M290 420 L370 380 L410 400 L330 440 Z" fill="#A7F3D0" opacity="0.8" />
-
-                      {/* Main 6-Story Hospital Tower (Isometric Center) */}
-                      <g>
-                        {/* Front Glass Facade */}
-                        <path d="M205 130 L250 152 L250 365 L205 342 Z" fill="url(#hospTowerFront)" stroke="#7DD3FC" strokeWidth="1.5" />
-                        {/* Right Shaded Facade */}
-                        <path d="M250 152 L295 130 L295 342 L250 365 Z" fill="url(#hospTowerSide)" stroke="#0284C7" strokeWidth="1.5" />
-                        
-                        {/* Rooftop Helipad Platform */}
-                        <path d="M205 130 L250 108 L295 130 L250 152 Z" fill="#1E293B" stroke="#64748B" strokeWidth="2" />
-                        <ellipse cx="250" cy="130" rx="30" ry="15" stroke="#FACC15" strokeWidth="2.5" fill="#0F172A" />
-                        <ellipse cx="250" cy="130" rx="24" ry="12" stroke="#FACC15" strokeWidth="1" strokeDasharray="3 2" />
-                        <text x="250" y="135" fill="#FFFFFF" fontSize="14" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">H</text>
-
-                        {/* Tower Window Rows & Spandrels */}
-                        {[175, 210, 245, 280, 315].map((y, idx) => (
-                          <g key={idx}>
-                            <line x1="205" y1={y - 12} x2="250" y2={y + 10} stroke="#BAE6FD" strokeWidth="1.5" opacity="0.7" />
-                            <line x1="250" y1={y + 10} x2="295" y2={y - 12} stroke="#38BDF8" strokeWidth="1.5" opacity="0.5" />
-                            <circle cx="220" cy={y - 2} r="2.5" fill="#FEF08A" opacity="0.9" />
-                            <circle cx="238" cy={y + 7} r="2.5" fill="#FFFFFF" opacity="0.9" />
-                          </g>
-                        ))}
-
-                        {/* Rooftop Medical Radar & Antenna */}
-                        <line x1="250" y1="108" x2="250" y2="72" stroke="#00A896" strokeWidth="3" strokeLinecap="round" />
-                        <circle cx="250" cy="72" r="5" fill="#00A896" className="drop-shadow-[0_0_10px_#00A896]" />
-                        <circle cx="250" cy="72" r="2.5" fill="#FFFFFF" />
-                        <circle cx="250" cy="72" r="14" stroke="#00A896" strokeWidth="1.5" strokeDasharray="3 3" opacity="0.6" className="anim-radar-sweep" />
-                      </g>
-
-                      {/* West Surgical Pavilion Wing (Left) */}
-                      <g>
-                        <path d="M135 230 L205 265 L205 372 L135 338 Z" fill="url(#hospWingFront)" stroke="#5EEAD4" strokeWidth="1.5" />
-                        <path d="M135 230 L170 212 L240 247 L205 265 Z" fill="#0F766E" stroke="#14B8A6" strokeWidth="1" />
-                        {[275, 305, 335].map((y, idx) => (
-                          <line key={idx} x1="140" y1={y - 8} x2="200" y2={y + 22} stroke="#CCFBF1" strokeWidth="1.5" opacity="0.7" />
-                        ))}
-                        {/* Red Medical Cross on Pavilion */}
-                        <rect x="162" y="270" width="12" height="4" rx="1" fill="#FFFFFF" />
-                        <rect x="166" y="266" width="4" height="12" rx="1" fill="#FFFFFF" />
-                      </g>
-
-                      {/* East Diagnostic Wing (Right) */}
-                      <g>
-                        <path d="M295 265 L365 230 L365 338 L295 372 Z" fill="url(#hospWingSide)" stroke="#0D9488" strokeWidth="1.5" />
-                        <path d="M260 247 L330 212 L365 230 L295 265 Z" fill="#0F766E" stroke="#14B8A6" strokeWidth="1" />
-                        {[275, 305, 335].map((y, idx) => (
-                          <line key={idx} x1="300" y1={y + 22} x2="360" y2={y - 8} stroke="#99F6E4" strokeWidth="1.5" opacity="0.5" />
-                        ))}
-                      </g>
-
-                      {/* Ground Emergency Ambulance Bay & Entrance */}
-                      <g>
-                        <path d="M195 348 L250 376 L305 348 L250 320 Z" fill="#0A1C35" stroke="#EF4444" strokeWidth="2" />
-                        <rect x="246" y="340" width="8" height="16" rx="2" fill="#EF4444" className="drop-shadow-[0_0_8px_#EF4444] animate-pulse" />
-                        <rect x="242" y="344" width="16" height="8" rx="2" fill="#EF4444" className="drop-shadow-[0_0_8px_#EF4444] animate-pulse" />
-                        {/* Ambulance Vehicle in Front */}
-                        <path d="M218 390 L246 404 L246 420 L218 406 Z" fill="#FFFFFF" stroke="#0A1C35" strokeWidth="1.2" />
-                        <path d="M246 404 L264 395 L264 411 L246 420 Z" fill="#E2E8F0" stroke="#0A1C35" strokeWidth="1.2" />
-                        <path d="M218 390 L236 381 L264 395 L246 404 Z" fill="#F8FAFC" />
-                        <circle cx="232" cy="385" r="3" fill="#EF4444" className="animate-ping" />
-                        <circle cx="232" cy="385" r="2" fill="#EF4444" />
-                        <circle cx="227" cy="409" r="3" fill="#0F172A" />
-                        <circle cx="243" cy="416" r="3" fill="#0F172A" />
-                      </g>
-                    </svg>
-
-                    {/* Subtle Depth Vignette */}
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-t from-[#0A1C35]/15 via-transparent to-white/10 pointer-events-none" />
-                  </div>
-                </div>
-
-                {/* Floating Telemetry Status Chips Anchored Around the Hospital Structure */}
-                {/* Top-Right: 24/7 Level-1 Trauma */}
-                <div className="absolute -top-1 -right-2 sm:-right-4 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 px-3 py-1.5 rounded-full shadow-lg flex items-center gap-2">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                  </span>
-                  <span className="text-[10px] sm:text-[10.5px] font-black text-[#0A1C35]">
-                    24/7 Level-1 Trauma
-                  </span>
-                </div>
-
-                {/* Bottom-Right: Smart Campus */}
-                <div className="absolute bottom-2 right-0 sm:-right-2 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-[10px] sm:text-[10.5px] font-black text-[#0A1C35]">
-                    500+ Bed Smart Campus
-                  </span>
-                </div>
-
-                {/* Bottom-Left: JCI / NABH */}
-                <div className="absolute bottom-1 -left-2 sm:-left-4 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
-                  <Award size={13} className="text-[#00A896]" />
-                  <span className="text-[10px] sm:text-[10.5px] font-black text-[#0A1C35]">
-                    NABH & JCI Accredited
-                  </span>
-                </div>
-
-              </div>
-
-              {/* Synchronized Floor Shadow Breathing Under Hospital Structure */}
-              <div className="w-[240px] sm:w-[310px] h-6 rounded-full bg-slate-900/30 blur-md pointer-events-none anim-shadow-breath mt-4 z-0" />
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* 5. HOW CURIX WORKS (Interactive Step Switcher) */}
+      {/* 4. HOW CURIX WORKS (Interactive Step Switcher) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-slate-100">
         <div className="text-center mb-14">
           <span className="text-[11px] font-black tracking-widest uppercase text-[#00A896] block mb-1">
