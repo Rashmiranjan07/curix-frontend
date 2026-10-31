@@ -1115,7 +1115,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
       </section>
 
       {/* 2. RAPID HEALTHCARE DISPATCH BAR */}
-      <section className="w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 -mt-6 sm:-mt-8 mb-4 sm:mb-6 relative z-20">
+      <section className="w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 -mt-6 sm:-mt-8 mb-10 sm:mb-14 lg:mb-16 relative z-20">
         <div className="p-6 sm:p-8 rounded-3xl glass-card grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
           
           <div className="flex items-center gap-4">
@@ -1158,16 +1158,96 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
       </section>
 
       {/* 2. ABOUT US SECTION (UN-SQUEEZED, SPACIOUS & FULL-WIDTH ARCHITECTURE) */}
-      <section id="about" className="scroll-mt-20 w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 pt-12 sm:pt-16 pb-12 sm:pb-16 relative overflow-hidden">
+      <section id="about" className="scroll-mt-20 w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 pt-16 sm:pt-20 lg:pt-24 pb-14 sm:pb-16 lg:pb-20 relative overflow-hidden border-t border-slate-100/80">
         {/* Subtle Ambient Background Watermark */}
         <div className="absolute top-1/3 left-0 w-80 h-80 rounded-full bg-[#00A896]/10 blur-3xl pointer-events-none -translate-y-1/2" />
         <div className="absolute bottom-10 right-0 w-96 h-96 rounded-full bg-sky-400/10 blur-3xl pointer-events-none" />
 
-        {/* 2-Column Showcase: Content & Pillars (Left) + Only Image (Right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 xl:gap-16 items-center">
+        {/* 2-Column Showcase: 3D Heart Image (Left) + All Written Description & Pillars (Right) */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-10 lg:gap-14 xl:gap-16 items-center">
           
-          {/* Left Column: Header Story, Narrative Paragraph, 4 Clinical Pillars & CTAs */}
-          <div className="lg:col-span-7 space-y-7">
+          {/* Left Column: ONLY the 3D Cardiac Medical Portal (Expanded & Clean White on Left) */}
+          <div className="md:col-span-5 flex flex-col items-center justify-center relative">
+            <div className="relative w-full max-w-[460px] sm:max-w-[500px] lg:max-w-[540px] flex flex-col items-center">
+              
+              {/* Outer Floating Animation Frame - Fluid Scaled Portal */}
+              <div className="relative w-[300px] h-[300px] sm:w-[380px] sm:h-[380px] md:w-[340px] md:h-[340px] lg:w-[450px] lg:h-[450px] xl:w-[500px] xl:h-[500px] 2xl:w-[520px] 2xl:h-[520px] anim-doctor-float flex items-center justify-center z-10">
+                
+                {/* Ambient Soft Glow Behind the Portal */}
+                <div className="absolute -inset-6 sm:-inset-8 rounded-full bg-gradient-to-tr from-[#00A896]/20 via-[#0BC2A8]/15 to-rose-400/15 blur-3xl pointer-events-none anim-pulse-glow" />
+
+                {/* Concentric Dashed Orbit Ring with Orbiting Glowing Markers */}
+                <div className="absolute -inset-4 sm:-inset-5 rounded-full border-2 border-dashed border-[#00A896]/40 pointer-events-none anim-orbit-spin flex items-center justify-between p-2">
+                  <span className="w-3.5 h-3.5 rounded-full bg-rose-500 shadow-[0_0_12px_#F43F5E]" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#00A896] shadow-[0_0_10px_#00A896]" />
+                </div>
+
+                {/* The Round Shape: Clean Gradient Rim + Bevel Border + Mask (Matching Doctor Portal) */}
+                <div className="w-full h-full rounded-full p-2.5 sm:p-3 bg-gradient-to-b from-[#00A896] via-[#0BC2A8] to-slate-200/60 shadow-[0_20px_50px_rgba(10,28,53,0.16)] ring-8 ring-[#00A896]/15 flex items-center justify-center relative group overflow-hidden">
+                  
+                  {/* Inner Circular Portal Framing 3D Anatomical Heart with Pure White Background */}
+                  <div className="w-full h-full rounded-full overflow-hidden border-[5px] sm:border-[6px] border-white shadow-inner bg-white relative flex items-center justify-center">
+                    
+                    {/* High-Definition 3D Human Heart Image with Realistic Heartbeat Pulse */}
+                    <img
+                      src={heart3dImage}
+                      alt="Curix 3D Clinical Cardiac Model"
+                      className="w-full h-full object-cover object-center select-none pointer-events-none anim-heart-pulse-3d transition-transform duration-700 group-hover:scale-105"
+                    />
+
+                    {/* Dynamic ECG Cardiac Waveform Across Lower Portal */}
+                    <svg className="absolute bottom-6 left-0 right-0 w-full h-10 px-8 z-10 pointer-events-none opacity-85" viewBox="0 0 300 40" fill="none">
+                      <path
+                        d="M0 20 L70 20 L80 10 L90 32 L100 6 L110 26 L120 20 L160 20 L170 10 L180 32 L190 6 L200 26 L210 20 L300 20"
+                        stroke="#00A896"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="anim-scan-wave drop-shadow-[0_0_8px_#00A896]"
+                      />
+                    </svg>
+
+                    {/* Subtle Top Specular Lighting Reflection for Depth */}
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/30 via-transparent to-slate-900/5 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* Floating Telemetry Status Chips Anchored Around the 3D Heart Portal */}
+                <div className="absolute -top-1 -right-2 sm:-right-4 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                  </span>
+                  <Activity size={12} className="text-rose-500" />
+                  <span className="text-[10px] sm:text-[11px] font-black text-[#0A1C35]">
+                    72 BPM · Sinus Rhythm
+                  </span>
+                </div>
+
+                <div className="absolute bottom-2 right-0 sm:-right-2 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <Heart size={12} className="text-[#00A896] fill-[#00A896]/20" />
+                  <span className="text-[10px] sm:text-[11px] font-black text-[#0A1C35]">
+                    99.8% Cardiac Vitality
+                  </span>
+                </div>
+
+                <div className="absolute bottom-1 -left-2 sm:-left-4 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+                  <Award size={13} className="text-[#00A896]" />
+                  <span className="text-[10px] sm:text-[11px] font-black text-[#0A1C35]">
+                    NABH & JCI Accredited
+                  </span>
+                </div>
+
+              </div>
+
+              {/* Synchronized Floor Shadow Breathing Under 3D Heart Structure */}
+              <div className="w-[260px] sm:w-[320px] md:w-[300px] lg:w-[380px] xl:w-[420px] h-7 rounded-full bg-slate-900/25 blur-md pointer-events-none anim-shadow-breath mt-4 z-0" />
+            </div>
+          </div>
+
+          {/* Right Column: Header Story, Narrative Writing Description, 4 Clinical Pillars & CTAs */}
+          <div className="md:col-span-7 space-y-6 lg:space-y-7">
             
             {/* Header Block: Badges, Title & Narrative Paragraph */}
             <div>
@@ -1263,86 +1343,6 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
               </a>
             </div>
 
-          </div>
-
-          {/* Right Column: ONLY the 3D Cardiac Medical Portal (Expanded & Clean White) */}
-          <div className="lg:col-span-5 xl:col-span-5 flex flex-col items-center justify-center relative">
-            <div className="relative w-full max-w-[460px] sm:max-w-[500px] lg:max-w-[540px] flex flex-col items-center">
-              
-              {/* Outer Floating Animation Frame - Enlarged Scale */}
-              <div className="relative w-[340px] h-[340px] sm:w-[440px] sm:h-[440px] md:w-[480px] md:h-[480px] lg:w-[490px] lg:h-[490px] xl:w-[520px] xl:h-[520px] anim-doctor-float flex items-center justify-center z-10">
-                
-                {/* Ambient Soft Glow Behind the Portal */}
-                <div className="absolute -inset-6 sm:-inset-8 rounded-full bg-gradient-to-tr from-[#00A896]/20 via-[#0BC2A8]/15 to-rose-400/15 blur-3xl pointer-events-none anim-pulse-glow" />
-
-                {/* Concentric Dashed Orbit Ring with Orbiting Glowing Markers */}
-                <div className="absolute -inset-4 sm:-inset-5 rounded-full border-2 border-dashed border-[#00A896]/40 pointer-events-none anim-orbit-spin flex items-center justify-between p-2">
-                  <span className="w-3.5 h-3.5 rounded-full bg-rose-500 shadow-[0_0_12px_#F43F5E]" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#00A896] shadow-[0_0_10px_#00A896]" />
-                </div>
-
-                {/* The Round Shape: Clean Gradient Rim + Bevel Border + Mask (Matching Doctor Portal) */}
-                <div className="w-full h-full rounded-full p-2.5 sm:p-3 bg-gradient-to-b from-[#00A896] via-[#0BC2A8] to-slate-200/60 shadow-[0_20px_50px_rgba(10,28,53,0.16)] ring-8 ring-[#00A896]/15 flex items-center justify-center relative group overflow-hidden">
-                  
-                  {/* Inner Circular Portal Framing 3D Anatomical Heart with Pure White Background */}
-                  <div className="w-full h-full rounded-full overflow-hidden border-[5px] sm:border-[6px] border-white shadow-inner bg-white relative flex items-center justify-center">
-                    
-                    {/* High-Definition 3D Human Heart Image with Realistic Heartbeat Pulse */}
-                    <img
-                      src={heart3dImage}
-                      alt="Curix 3D Clinical Cardiac Model"
-                      className="w-full h-full object-cover object-center select-none pointer-events-none anim-heart-pulse-3d transition-transform duration-700 group-hover:scale-105"
-                    />
-
-                    {/* Dynamic ECG Cardiac Waveform Across Lower Portal */}
-                    <svg className="absolute bottom-6 left-0 right-0 w-full h-10 px-8 z-10 pointer-events-none opacity-85" viewBox="0 0 300 40" fill="none">
-                      <path
-                        d="M0 20 L70 20 L80 10 L90 32 L100 6 L110 26 L120 20 L160 20 L170 10 L180 32 L190 6 L200 26 L210 20 L300 20"
-                        stroke="#00A896"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="anim-scan-wave drop-shadow-[0_0_8px_#00A896]"
-                      />
-                    </svg>
-
-                    {/* Subtle Top Specular Lighting Reflection for Depth */}
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/30 via-transparent to-slate-900/5 pointer-events-none" />
-                  </div>
-                </div>
-
-                {/* Floating Telemetry Status Chips Anchored Around the 3D Heart Portal */}
-                <div className="absolute -top-1 -right-2 sm:-right-4 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-2">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
-                  </span>
-                  <Activity size={12} className="text-rose-500" />
-                  <span className="text-[10px] sm:text-[11px] font-black text-[#0A1C35]">
-                    72 BPM · Sinus Rhythm
-                  </span>
-                </div>
-
-                <div className="absolute bottom-2 right-0 sm:-right-2 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <Heart size={12} className="text-[#00A896] fill-[#00A896]/20" />
-                  <span className="text-[10px] sm:text-[11px] font-black text-[#0A1C35]">
-                    99.8% Cardiac Vitality
-                  </span>
-                </div>
-
-                <div className="absolute bottom-1 -left-2 sm:-left-4 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
-                  <Award size={13} className="text-[#00A896]" />
-                  <span className="text-[10px] sm:text-[11px] font-black text-[#0A1C35]">
-                    NABH & JCI Accredited
-                  </span>
-                </div>
-
-              </div>
-
-              {/* Synchronized Floor Shadow Breathing Under 3D Heart Structure */}
-              <div className="w-[280px] sm:w-[360px] md:w-[400px] h-7 rounded-full bg-slate-900/25 blur-md pointer-events-none anim-shadow-breath mt-4 z-0" />
-            </div>
           </div>
 
         </div>
