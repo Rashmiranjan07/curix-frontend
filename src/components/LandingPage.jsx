@@ -1401,21 +1401,28 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
       <section id="centres-of-excellence" className="scroll-mt-20 w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 pt-16 sm:pt-20 pb-14 sm:pb-16 lg:pb-20 relative border-t border-slate-100/80">
         <span id="services" className="scroll-mt-24 absolute -top-10" />
 
-        {/* Centered Curix UI Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-14">
-          <div className="inline-flex flex-wrap items-center justify-center gap-2 mb-3">
-            <span className="text-[11px] font-black tracking-widest uppercase text-[#00A896] bg-[#E6F8F5] px-4 py-1.5 rounded-full border border-[#00A896]/20 shadow-2xs">
-              TERTIARY HUBS & SPECIALIZED CARE
+        {/* Centered Curix UI Section Header - Vertical Stacked Order */}
+        <div className="flex flex-col items-center text-center max-w-5xl mx-auto mb-12 sm:mb-14">
+          {/* 1. Category Badge */}
+          <span className="text-[11px] font-black tracking-widest uppercase text-[#00A896] bg-[#E6F8F5] px-4 py-1.5 rounded-full border border-[#00A896]/20 shadow-2xs mb-2.5">
+            TERTIARY HUBS & SPECIALIZED CARE
+          </span>
+
+          {/* 2. Institutes Indicator Badge */}
+          <span className="text-[10.5px] font-extrabold text-slate-500 bg-slate-100 px-3.5 py-1 rounded-full flex items-center gap-1.5 mb-3.5 shadow-2xs">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <Award size={13} className="text-[#00A896]" />
+            <span>9 Tertiary Institutes</span>
+          </span>
+
+          {/* 3. Main Heading - Single Line with Vibrant Font Color */}
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[42px] xl:text-[46px] font-black tracking-tight mb-3 sm:whitespace-nowrap">
+            <span className="bg-gradient-to-r from-[#00A896] via-[#0BC2A8] to-sky-600 bg-clip-text text-transparent">
+              Centres of Excellence & Specialized Care
             </span>
-            <span className="text-[10.5px] font-extrabold text-slate-500 bg-slate-100 px-3.5 py-1.5 rounded-full flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <Award size={13} className="text-[#00A896]" />
-              <span>9 Tertiary Institutes</span>
-            </span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0A1C35] tracking-tight mb-3">
-            Centres of <span className="text-[#00A896]">Excellence</span> & Specialized Care
           </h2>
+
+          {/* 4. Subtitle */}
           <p className="text-sm sm:text-base text-slate-600 font-medium leading-relaxed max-w-2xl mx-auto">
             World-class tertiary clinical institutes and specialized hospital care disciplines equipped with next-gen robotic systems, precision diagnostics, and 24/7 intensive monitoring.
           </p>
