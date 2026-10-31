@@ -941,7 +941,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
       `}</style>
 
       {/* 1. HERO SECTION (With High-Tech Animated Aura & Doctor Image Fitted on Rounding Bracket) */}
-      <section id="home" className="relative pt-4 sm:pt-6 pb-10 sm:pb-14 overflow-hidden bg-mesh-aurora">
+      <section id="home" className="relative pt-8 sm:pt-12 lg:pt-16 pb-12 sm:pb-16 lg:pb-20 overflow-hidden bg-mesh-aurora">
         {/* Ambient Grid Overlay */}
         <div 
           className="absolute inset-0 opacity-[0.035] pointer-events-none" 
@@ -949,7 +949,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
         />
 
         <div className="w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
             
             {/* Left Headline & Clinical Content */}
             <div className="lg:col-span-7 space-y-6 text-left">
@@ -972,12 +972,12 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
                 for your family
               </h1>
 
-              <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-3xl font-medium">
+              <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-2xl font-medium">
                 From licensed doctor consultations to certified nursing care and tamper-proof digital prescriptions, Curix delivers comprehensive outpatient clinical workflows built for precision and patient trust.
               </p>
 
               {/* Interactive Quick-Search Bar */}
-              <div className="pt-1 max-w-3xl">
+              <div className="pt-1 max-w-xl">
                 <div className="relative flex items-center shadow-md shadow-slate-900/5 rounded-full bg-white border border-slate-200/90 focus-within:border-[#00A896] focus-within:ring-4 focus-within:ring-[#00A896]/10 transition-all p-1.5">
                   <Search size={18} className="ml-3 text-slate-400 shrink-0" />
                   <input
@@ -1057,7 +1057,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
               <div className="relative z-10 anim-doctor-float flex flex-col items-center">
                 
                 {/* Core Round Shape Frame Container (Unified Size) */}
-                <div className="relative w-[320px] h-[320px] sm:w-[410px] sm:h-[410px] flex items-center justify-center">
+                <div className="relative w-[320px] h-[320px] sm:w-[410px] sm:h-[410px] lg:w-[430px] lg:h-[430px] flex items-center justify-center">
                   
                   {/* Pulsing Core Glow Behind the Round Shape */}
                   <div className="absolute -inset-4 sm:-inset-6 rounded-full bg-gradient-to-tr from-[#00A896]/30 via-[#0BC2A8]/20 to-cyan-400/20 blur-3xl pointer-events-none anim-pulse-glow" />
@@ -1105,7 +1105,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
                 </div>
 
                 {/* Synchronized Floor Shadow Breathing Under the Round Shape */}
-                <div className="w-[230px] sm:w-[300px] h-6 rounded-full bg-slate-900/30 blur-md pointer-events-none anim-shadow-breath mt-4 z-0" />
+                <div className="w-[230px] sm:w-[300px] lg:w-[320px] h-6 rounded-full bg-slate-900/30 blur-md pointer-events-none anim-shadow-breath mt-4 z-0" />
               </div>
 
             </div>
