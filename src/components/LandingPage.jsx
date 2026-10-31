@@ -341,7 +341,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
     switch (type) {
       case 'cancer':
         return (
-          <div className="w-[102px] sm:w-[112px] h-[102px] sm:h-[112px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(2,132,199,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-sky-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+          <div className="w-[110px] sm:w-[120px] h-[110px] sm:h-[120px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(2,132,199,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-sky-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-sky-400/20 via-teal-300/10 to-transparent anim-equipment-pulse" />
             <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-sky-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
             <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
@@ -397,7 +397,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
       case 'ortho':
         return (
-          <div className="w-[102px] sm:w-[112px] h-[102px] sm:h-[112px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(16,185,129,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-emerald-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+          <div className="w-[110px] sm:w-[120px] h-[110px] sm:h-[120px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(16,185,129,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-emerald-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/20 via-teal-300/10 to-transparent anim-equipment-pulse" />
             <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
             <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
@@ -443,7 +443,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
       case 'cardiac':
         return (
-          <div className="w-[102px] sm:w-[112px] h-[102px] sm:h-[112px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(225,29,72,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-rose-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+          <div className="w-[110px] sm:w-[120px] h-[110px] sm:h-[120px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(225,29,72,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-rose-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-rose-400/20 via-pink-300/10 to-transparent anim-equipment-pulse" />
             <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-rose-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
             <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
@@ -502,7 +502,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
       case 'gastro':
         return (
-          <div className="w-[102px] sm:w-[112px] h-[102px] sm:h-[112px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(30,58,138,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-blue-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+          <div className="w-[110px] sm:w-[120px] h-[110px] sm:h-[120px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(30,58,138,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-blue-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 via-cyan-300/10 to-transparent anim-equipment-pulse" />
             <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-blue-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
             <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
@@ -546,7 +546,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
       case 'neuro':
         return (
-          <div className="w-[102px] sm:w-[112px] h-[102px] sm:h-[112px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(2,132,199,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-sky-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+          <div className="w-[110px] sm:w-[120px] h-[110px] sm:h-[120px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(2,132,199,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-sky-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-sky-400/20 via-indigo-300/10 to-transparent anim-equipment-pulse" />
             <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-sky-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
             <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
@@ -594,7 +594,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
       case 'renal':
         return (
-          <div className="w-[102px] sm:w-[112px] h-[102px] sm:h-[112px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(168,85,247,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-purple-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+          <div className="w-[110px] sm:w-[120px] h-[110px] sm:h-[120px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(168,85,247,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-purple-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-400/20 via-indigo-300/10 to-transparent anim-equipment-pulse" />
             <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-purple-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
             <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
@@ -633,7 +633,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
       case 'transplant':
         return (
-          <div className="w-[102px] sm:w-[112px] h-[102px] sm:h-[112px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(13,148,136,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-teal-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+          <div className="w-[110px] sm:w-[120px] h-[110px] sm:h-[120px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(13,148,136,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-teal-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-teal-400/20 via-cyan-300/10 to-transparent anim-equipment-pulse" />
             <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-teal-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
             <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
@@ -674,7 +674,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
       case 'mother-child':
         return (
-          <div className="w-[102px] sm:w-[112px] h-[102px] sm:h-[112px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(244,63,94,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-pink-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+          <div className="w-[110px] sm:w-[120px] h-[110px] sm:h-[120px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(244,63,94,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-pink-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-pink-400/20 via-rose-300/10 to-transparent anim-equipment-pulse" />
             <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-pink-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
             <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
@@ -713,7 +713,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
       case 'emergency':
         return (
-          <div className="w-[102px] sm:w-[112px] h-[102px] sm:h-[112px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(239,68,68,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-teal-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+          <div className="w-[110px] sm:w-[120px] h-[110px] sm:h-[120px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(239,68,68,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-teal-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-red-400/15 via-teal-300/15 to-transparent anim-equipment-pulse" />
             <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-red-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
             <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
@@ -919,14 +919,14 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
       `}</style>
 
       {/* 1. HERO SECTION (With High-Tech Animated Aura & Doctor Image Fitted on Rounding Bracket) */}
-      <section id="home" className="relative pt-8 sm:pt-14 pb-20 overflow-hidden bg-mesh-aurora">
+      <section id="home" className="relative pt-4 sm:pt-6 pb-10 sm:pb-14 overflow-hidden bg-mesh-aurora">
         {/* Ambient Grid Overlay */}
         <div 
           className="absolute inset-0 opacity-[0.035] pointer-events-none" 
           style={{ backgroundImage: 'radial-gradient(#0A1C35 1px, transparent 1px)', backgroundSize: '24px 24px' }} 
         />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
             
             {/* Left Headline & Clinical Content */}
@@ -950,12 +950,12 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
                 for your family
               </h1>
 
-              <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-xl font-medium">
+              <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-3xl font-medium">
                 From licensed doctor consultations to certified nursing care and tamper-proof digital prescriptions, Curix delivers comprehensive outpatient clinical workflows built for precision and patient trust.
               </p>
 
               {/* Interactive Quick-Search Bar */}
-              <div className="pt-1 max-w-lg">
+              <div className="pt-1 max-w-3xl">
                 <div className="relative flex items-center shadow-md shadow-slate-900/5 rounded-full bg-white border border-slate-200/90 focus-within:border-[#00A896] focus-within:ring-4 focus-within:ring-[#00A896]/10 transition-all p-1.5">
                   <Search size={18} className="ml-3 text-slate-400 shrink-0" />
                   <input
@@ -1093,7 +1093,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
       </section>
 
       {/* 2. RAPID HEALTHCARE DISPATCH BAR */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20">
+      <section className="w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 -mt-6 sm:-mt-8 mb-4 sm:mb-6 relative z-20">
         <div className="p-6 sm:p-8 rounded-3xl glass-card grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
           
           <div className="flex items-center gap-4">
@@ -1136,7 +1136,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
       </section>
 
       {/* 2. ABOUT US SECTION (UN-SQUEEZED, SPACIOUS & FULL-WIDTH ARCHITECTURE) */}
-      <section id="about" className="scroll-mt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-28 lg:py-32 relative overflow-hidden">
+      <section id="about" className="scroll-mt-20 w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 pt-12 sm:pt-16 pb-4 sm:pb-6 relative overflow-hidden">
         {/* Subtle Ambient Background Watermark */}
         <div className="absolute top-1/3 left-0 w-80 h-80 rounded-full bg-[#00A896]/10 blur-3xl pointer-events-none -translate-y-1/2" />
         <div className="absolute bottom-10 right-0 w-96 h-96 rounded-full bg-sky-400/10 blur-3xl pointer-events-none" />
@@ -1167,7 +1167,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
         </div>
 
         {/* 2-Column Showcase: Clinical Pillars (Left) + 3D Hospital Campus Architecture (Right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center mb-16 sm:mb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center mb-0">
           
           {/* Left Column: 4 Clinical Pillars with Spacious Bento Cards */}
           <div className="lg:col-span-7 space-y-6">
@@ -1245,7 +1245,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
             <div className="relative w-full max-w-[400px] sm:max-w-[440px] flex flex-col items-center">
               
               {/* Outer Floating Animation Frame */}
-              <div className="relative w-[320px] h-[320px] sm:w-[380px] sm:h-[380px] anim-doctor-float flex items-center justify-center z-10">
+              <div className="relative w-[350px] h-[350px] sm:w-[420px] sm:h-[420px] anim-doctor-float flex items-center justify-center z-10">
                 
                 {/* Ambient Soft Glow Behind the Portal */}
                 <div className="absolute -inset-6 sm:-inset-8 rounded-full bg-gradient-to-tr from-[#00A896]/30 via-[#0BC2A8]/20 to-sky-400/20 blur-3xl pointer-events-none anim-pulse-glow" />
@@ -1393,31 +1393,12 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
         </div>
 
-        {/* FULL-WIDTH LUXURY TRUST METRICS SHOWCASE (SPACIOUS 4-COLUMN STRIP) */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 pt-14 border-t border-slate-200/70">
-          <div className="p-6 sm:p-7 rounded-3xl bg-white border border-slate-200/80 shadow-2xs hover:shadow-md transition text-center flex flex-col justify-between">
-            <span className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0A1C35] tracking-tight block mb-2">50,000+</span>
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Patients Treated & Served</span>
-          </div>
-          <div className="p-6 sm:p-7 rounded-3xl bg-white border border-slate-200/80 shadow-2xs hover:shadow-md transition text-center flex flex-col justify-between">
-            <span className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#00A896] tracking-tight block mb-2">150+</span>
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Board-Certified Faculty</span>
-          </div>
-          <div className="p-6 sm:p-7 rounded-3xl bg-white border border-slate-200/80 shadow-2xs hover:shadow-md transition text-center flex flex-col justify-between">
-            <span className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0A1C35] tracking-tight block mb-2">9</span>
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Centres of Excellence</span>
-          </div>
-          <div className="p-6 sm:p-7 rounded-3xl bg-white border border-slate-200/80 shadow-2xs hover:shadow-md transition text-center flex flex-col justify-between">
-            <span className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0BC2A8] tracking-tight block mb-2">99.8%</span>
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Clinical Precision Rate</span>
-          </div>
-        </div>
       </section>
 
       
 
       {/* CENTRES OF EXCELLENCE & SPECIALIZED HOSPITAL CARE (MERGED FLAGSHIP SECTION) */}
-      <section id="centres-of-excellence" className="scroll-mt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-28 lg:py-32 relative border-t border-slate-100/80">
+      <section id="centres-of-excellence" className="scroll-mt-20 w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 pt-8 sm:pt-10 pb-14 sm:pb-16 lg:pb-20 relative border-t border-slate-100/80">
         <span id="services" className="scroll-mt-24 absolute -top-10" />
 
         {/* Curix UI Themed Section Header */}
@@ -1434,7 +1415,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#0A1C35] tracking-tight">
               Centres of <span className="text-[#00A896]">Excellence</span> & Specialized Care
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl font-medium">
+            <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-3xl font-medium">
               World-class tertiary clinical institutes and specialized hospital care disciplines equipped with next-gen robotic systems, precision diagnostics, and 24/7 intensive monitoring.
             </p>
           </div>
@@ -1448,37 +1429,13 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
           </div>
         </div>
 
-        {/* Core Hospital Care Capabilities Banner (Combined from Specialized Care) */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8 sm:mb-10">
-          {[
-            { icon: <Stethoscope size={16} className="text-[#00A896]" />, title: 'Doctor OPD', tag: 'In-Clinic' },
-            { icon: <Heart size={16} className="text-[#00A896]" />, title: 'Nursing Care', tag: 'Certified Staff' },
-            { icon: <Activity size={16} className="text-[#00A896]" />, title: 'Diagnostics & Labs', tag: 'NABL Aligned' },
-            { icon: <ShieldCheck size={16} className="text-[#00A896]" />, title: 'Critical Care ICU', tag: '24/7 Monitoring' },
-            { icon: <FileText size={16} className="text-[#00A896]" />, title: 'Digital Rx Slips', tag: 'Tamper-Proof' },
-            { icon: <PhoneCall size={16} className="text-[#00A896]" />, title: '24/7 Emergency', tag: 'Rapid Response' }
-          ].map((srv, sIdx) => (
-            <div key={sIdx} className="p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs hover:border-[#00A896]/40 hover:shadow-xs transition-all flex flex-col justify-between">
-              <div className="flex items-center justify-between mb-2">
-                <div className="w-8 h-8 rounded-xl bg-[#E6F8F5] flex items-center justify-center shrink-0">
-                  {srv.icon}
-                </div>
-                <span className="text-[9px] font-black uppercase tracking-wider text-[#00A896] bg-[#E6F8F5]/80 px-2 py-0.5 rounded-md">
-                  {srv.tag}
-                </span>
-              </div>
-              <span className="text-xs font-bold text-[#0A1C35] truncate">{srv.title}</span>
-            </div>
-          ))}
-        </div>
-
         {/* 3x3 Equal Height Grid (Combined Design: Clean, Balanced, 3D Animated Equipment) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 items-stretch">
           {centresOfExcellence.map((centre) => (
             <div
               key={centre.id}
               onClick={() => handleCentreClick(centre)}
-              className={`h-full min-h-[250px] sm:min-h-[260px] relative overflow-hidden rounded-[28px] border ${centre.border} bg-gradient-to-r ${centre.bgGradient} p-6 sm:p-7 flex flex-col justify-between shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer group`}
+              className={`h-full min-h-[225px] sm:min-h-[235px] relative overflow-hidden rounded-[26px] border ${centre.border} bg-gradient-to-r ${centre.bgGradient} p-6 sm:p-7 flex flex-col justify-between shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer group`}
             >
               {/* Header Title & Clinical Scope on Left, 3D Equipment Visual on Right */}
               <div className="flex justify-between items-start gap-2.5 flex-1">
@@ -1491,13 +1448,13 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
                     {/* Fixed Height Title Container */}
                     <div className="h-10 sm:h-11 flex items-start mb-1.5">
-                      <h3 className="text-sm sm:text-[15px] font-bold text-[#0A1C35] leading-snug group-hover:text-[#00A896] transition-colors line-clamp-2">
+                      <h3 className="text-[15px] sm:text-base lg:text-[17px] font-bold text-[#0A1C35] leading-snug group-hover:text-[#00A896] transition-colors line-clamp-2">
                         {centre.title}
                       </h3>
                     </div>
 
                     {/* Unified Clinical Care Description */}
-                    <p className="text-xs text-slate-600 font-medium leading-relaxed line-clamp-2 mb-2.5">
+                    <p className="text-xs sm:text-[13px] text-slate-600 font-medium leading-relaxed line-clamp-2 mb-3">
                       {centre.description}
                     </p>
                   </div>
@@ -1531,7 +1488,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
       </section>
 
       {/* 3. REGISTERED ATTENDING PHYSICIANS & SPECIALISTS DIRECTORY (EXPLICIT ADMIN DATA) */}
-      <section id="specialties" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-28 lg:py-32 border-t border-slate-100/80">
+      <section id="specialties" className="w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 py-14 sm:py-16 lg:py-14 sm:py-16 lg:py-18 border-t border-slate-100/80">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -1545,7 +1502,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
             <h2 className="text-2xl sm:text-3xl font-black text-[#0A1C35] tracking-tight">
               Attending Physicians & Specialists
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl font-medium">
+            <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-3xl font-medium">
               Verified clinical physicians provisioned and certified by hospital administration. Browse active doctor profiles, consultation fees, and reserve your direct clinical appointment.
             </p>
           </div>
@@ -1749,7 +1706,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
           </div>
         ) : (
           /* Clean Empty State when no registered doctors match */
-          <div className="p-12 sm:p-16 rounded-[32px] bg-slate-50/70 border border-slate-200/90 text-center max-w-2xl mx-auto">
+          <div className="p-12 sm:p-16 rounded-[32px] bg-slate-50/70 border border-slate-200/90 text-center max-w-3xl mx-auto">
             <div className="w-16 h-16 rounded-3xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center mx-auto mb-4 shadow-xs">
               <Stethoscope size={30} />
             </div>
@@ -1787,7 +1744,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
       
       {/* 4. HOW CURIX WORKS (Interactive Step Switcher) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-slate-100">
+      <section className="w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 py-20 border-t border-slate-100">
         <div className="text-center mb-14">
           <span className="text-[11px] font-black tracking-widest uppercase text-[#00A896] block mb-1">
             SEAMLESS OUTPATIENT WORKFLOW
@@ -1795,7 +1752,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
           <h2 className="text-2xl sm:text-4xl font-black text-[#0A1C35] tracking-tight">
             How Curix Works
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-2 max-w-md mx-auto font-medium">
+          <p className="text-xs sm:text-sm text-slate-500 mt-2 max-w-xl mx-auto font-medium">
             From registration to verified digital prescriptions in four guided clinical stages.
           </p>
         </div>
@@ -1865,7 +1822,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
       </section>
 
       {/* 6. INTERACTIVE CARE PLANS & ESTIMATOR */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+      <section className="w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 py-14 sm:py-16 lg:py-18">
         <div className="text-center mb-14">
           <span className="text-[11px] font-black tracking-widest text-[#00A896] uppercase block mb-1">
             TRANSPARENT CLINICAL PRICING
@@ -1873,7 +1830,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
           <h2 className="text-3xl sm:text-4xl font-black text-[#0A1C35] tracking-tight">
             Clear Healthcare Fees, Zero Hidden Costs
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-2 max-w-md mx-auto font-medium">
+          <p className="text-xs sm:text-sm text-slate-500 mt-2 max-w-xl mx-auto font-medium">
             Choose the consultation channel that best fits your medical needs and schedule.
           </p>
         </div>
@@ -1943,7 +1900,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
       </section>
 
       {/* 7. INTERACTIVE FAQ ACCORDION */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <section className="w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 py-16">
         <div className="text-center mb-12">
           <span className="text-[11px] font-black tracking-widest uppercase text-[#00A896] block mb-1">
             PATIENT KNOWLEDGE BASE
@@ -1951,7 +1908,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
           <h2 className="text-2xl sm:text-3xl font-black text-[#0A1C35] tracking-tight">
             Frequently Asked Questions
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-md mx-auto font-medium">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-xl mx-auto font-medium">
             Everything you need to know about booking, prescriptions, and digital patient security.
           </p>
         </div>
@@ -1989,7 +1946,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
       </section>
 
       {/* 8. PRIORITY MEDICAL CALLOUT (Emergency & Home Visit) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <section className="w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 py-8 sm:py-10">
         <div className="p-8 sm:p-12 rounded-[32px] bg-gradient-to-r from-[#0A1C35] via-[#0d274c] to-[#0A1C35] text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl relative overflow-hidden">
           {/* Subtle glow aura */}
           <div className="absolute right-0 top-0 w-80 h-80 rounded-full bg-[#00A896]/20 blur-3xl pointer-events-none" />
@@ -2028,7 +1985,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
       {/* 9. FOOTER */}
       <footer id="security" className="bg-[#071524] border-t border-white/10 pt-16 pb-12 text-slate-400 text-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pb-12 border-b border-white/10">
             
             <div className="md:col-span-5 space-y-4">

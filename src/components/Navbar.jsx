@@ -34,7 +34,7 @@ export default function Navbar({ onOpenAuth }) {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass-nav transition-all duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <div className="w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 h-20 flex items-center justify-between">
         
         {/* Curix Brand Logo */}
         <a href="#home" className="inline-flex items-center group transition-transform duration-300 hover:scale-[1.02]">
