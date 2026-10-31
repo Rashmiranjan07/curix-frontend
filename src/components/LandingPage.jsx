@@ -102,111 +102,106 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
     return matchesSearch && matchesDept;
   });
 
-  // 9 Centres of Excellence (Dito specification from medical centres)
+  // 9 Centres of Excellence & Specialized Clinical Care
   const centresOfExcellence = [
     {
       id: 'cancer',
-      title: 'Utkal Cancer Institute',
-      specialties: [
-        'Medical Oncology',
-        'Surgical Oncology',
-        'Radiation Oncology',
-        'Nuclear Medicine'
-      ],
-      image: cancerImage,
+      title: 'Cancer Institute',
+      categoryTag: 'Tertiary Oncology',
+      description: 'Comprehensive medical, surgical & precision nuclear oncology with robotic tumour resection.',
+      servicePill: 'In-Patient & Outpatient Care',
+      equipmentBadge: 'LINAC 6MV · PRECISION',
       bgGradient: 'from-[#E3F2FB] via-[#E8F4FC] to-[#D0E7F7]',
-      border: 'border-[#BDDDF4]/70'
+      border: 'border-[#BDDDF4]/80',
+      badgeColor: 'text-sky-800 bg-sky-100/90 border-sky-200'
     },
     {
       id: 'ortho',
       title: 'Institute of Orthopaedics & Joint Replacement',
-      specialties: [
-        'Orthopaedics'
-      ],
-      image: orthoImage,
+      categoryTag: 'Robotic Surgery',
+      description: 'Mako robotic total knee and hip replacement, arthroscopic repair, and spine surgery.',
+      servicePill: 'Rapid Rehab & Physio Care',
+      equipmentBadge: 'ROBOTIC MAKO · 0.1mm',
       bgGradient: 'from-[#E3F6EF] via-[#EAF8F3] to-[#CDEFE4]',
-      border: 'border-[#BCE7D8]/70'
+      border: 'border-[#BCE7D8]/80',
+      badgeColor: 'text-emerald-800 bg-emerald-100/90 border-emerald-200'
     },
     {
       id: 'cardiac',
       title: 'Institute of Cardiac Sciences',
-      specialties: [
-        'Cardiology',
-        'CTVS'
-      ],
-      image: cardiacImage,
+      categoryTag: 'Cath Lab & CTVS',
+      description: '24/7 primary angioplasty, heart failure clinic, valve reconstruction, and arrhythmia care.',
+      servicePill: 'Emergency Cath Lab 24/7',
+      equipmentBadge: 'CATH LAB · 72 BPM ECG',
       bgGradient: 'from-[#FDECEC] via-[#FDF1F0] to-[#FCE0D4]',
-      border: 'border-[#F8D4C8]/70'
+      border: 'border-[#F8D4C8]/80',
+      badgeColor: 'text-rose-800 bg-rose-100/90 border-rose-200'
     },
     {
       id: 'gastro',
       title: 'Institute of Gastrosciences',
-      specialties: [
-        'Gastroenterology',
-        'HPB & GI Surgery'
-      ],
-      image: gastroImage,
+      categoryTag: 'GI Surgery & 4K Endo',
+      description: 'Advanced diagnostic 4K endoscopy, liver disease protocols, and laparoscopic HPB surgery.',
+      servicePill: 'Daycare Endoscopy Suite',
+      equipmentBadge: '4K ENDO · 60fps',
       bgGradient: 'from-[#E8F1FB] via-[#EDF5FC] to-[#D6E9F7]',
-      border: 'border-[#C2E0F5]/70'
+      border: 'border-[#C2E0F5]/80',
+      badgeColor: 'text-blue-800 bg-blue-100/90 border-blue-200'
     },
     {
       id: 'neuro',
       title: 'Institute of Neurosciences',
-      specialties: [
-        'Neurology',
-        'Neurosurgery',
-        'Interventional Neurology',
-        'Spine Surgery'
-      ],
-      image: neuroImage,
+      categoryTag: 'Neuro & Brain Surgery',
+      description: 'Golden-hour stroke interventions, stereotactic brain tumour navigation, and spine care.',
+      servicePill: 'Comprehensive Stroke Unit',
+      equipmentBadge: 'NEURO-NAV · 120Hz',
       bgGradient: 'from-[#E6F3FC] via-[#ECF6FD] to-[#CEE7F8]',
-      border: 'border-[#BFE0F7]/70'
+      border: 'border-[#BFE0F7]/80',
+      badgeColor: 'text-sky-800 bg-sky-100/90 border-sky-200'
     },
     {
       id: 'renal',
       title: 'Institute of Renal Sciences',
-      specialties: [
-        'Nephrology',
-        'Urology'
-      ],
-      image: renalImage,
+      categoryTag: 'Nephrology & Urology',
+      description: 'Continuous renal replacement therapy, laser stone removal, and comprehensive urology.',
+      servicePill: '24/7 Dialysis Stations',
+      equipmentBadge: 'CRRT · 150ml/min',
       bgGradient: 'from-[#F3EDFB] via-[#F6F1FD] to-[#E3D9F8]',
-      border: 'border-[#D9CAF4]/70'
+      border: 'border-[#D9CAF4]/80',
+      badgeColor: 'text-purple-800 bg-purple-100/90 border-purple-200'
     },
     {
       id: 'transplant',
       title: 'Institute of Transplant',
-      specialties: [
-        'Liver Transplant',
-        'Liver & Multi-Organ Transplant',
-        'Dedicated Post-Transplant ICU',
-        'Bone Marrow Transplant'
-      ],
-      image: transplantImage,
+      categoryTag: 'Multi-Organ Transplant',
+      description: 'Dedicated post-transplant cleanroom ICUs, ex-vivo organ perfusion, and stem cell therapy.',
+      servicePill: 'Sterile Isolation ICU',
+      equipmentBadge: 'ORGAN POD · 4.0°C',
       bgGradient: 'from-[#E9F4FA] via-[#EEF7FB] to-[#D6EBF6]',
-      border: 'border-[#C2E3F4]/70'
+      border: 'border-[#C2E3F4]/80',
+      badgeColor: 'text-teal-800 bg-teal-100/90 border-teal-200'
     },
     {
       id: 'mother-child',
       title: 'Institute of Mother & Child',
-      specialties: [
-        'Obstetrics and Gynaecology',
-        'Pediatrics & Neonatology'
-      ],
-      image: motherChildImage,
+      categoryTag: 'Maternal & Level-3 NICU',
+      description: 'High-risk obstetrics, neonatal intensive care incubators, and specialized paediatric care.',
+      servicePill: 'Level-3 Neonatal ICU',
+      equipmentBadge: 'NICU POD · 36.8°C',
       bgGradient: 'from-[#FDEFF3] via-[#FEF3F6] to-[#FCDCE6]',
-      border: 'border-[#F8CCD9]/70'
+      border: 'border-[#F8CCD9]/80',
+      badgeColor: 'text-pink-800 bg-pink-100/90 border-pink-200'
     },
     {
       id: 'emergency',
       title: 'Institute of Emergency & Critical Care',
-      specialties: [
-        'Emergency Medicine',
-        'Critical Care'
-      ],
-      image: emergencyImage,
+      categoryTag: '24/7 Trauma & Critical ICU',
+      description: 'Rapid resuscitation bays, telemetry-equipped life support ambulances, and multi-bed ICU.',
+      servicePill: 'Priority Zero-Wait Triage',
+      equipmentBadge: 'BIPHASIC · 200J 24/7',
       bgGradient: 'from-[#ECF7F6] via-[#EFF9F8] to-[#D6EEEB]',
-      border: 'border-[#C1E6E1]/70'
+      border: 'border-[#C1E6E1]/80',
+      badgeColor: 'text-teal-900 bg-teal-100/90 border-teal-200'
     }
   ];
 
@@ -238,46 +233,6 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
       el.scrollIntoView({ behavior: 'smooth' });
     }
   };
-
-  // 6 Primary Curix Clinical Services
-  const clinicalServices = [
-    {
-      title: 'Doctor Consultations',
-      desc: 'Connect with verified physicians for outpatient appointments, follow-ups, and specialized clinical visits.',
-      icon: <Stethoscope size={24} className="text-[#00A896]" />,
-      tag: 'OPD & In-Clinic'
-    },
-    {
-      title: 'Nursing Care',
-      desc: 'Post-operative recovery, elderly assistance, wound dressing, and routine vitals tracking by certified nurses.',
-      icon: <Heart size={24} className="text-[#00A896]" />,
-      tag: 'Certified Staff'
-    },
-    {
-      title: 'Diagnostics & Lab Tests',
-      desc: 'Full-body health packages, blood panels, and doorstep sample collections with tamper-proof digital records.',
-      icon: <Activity size={24} className="text-[#00A896]" />,
-      tag: 'NABL Aligned'
-    },
-    {
-      title: 'Critical Care & ICU Setup',
-      desc: 'Hospital-grade bedside patient monitors, oxygen concentrators, and specialized palliative care protocols.',
-      icon: <ShieldCheck size={24} className="text-[#00A896]" />,
-      tag: '24/7 Monitoring'
-    },
-    {
-      title: 'Digital Prescriptions',
-      desc: 'Access verified clinical prescription slips with line-item dosages directly from your digital health vault.',
-      icon: <FileText size={24} className="text-[#00A896]" />,
-      tag: 'Tamper-Proof'
-    },
-    {
-      title: 'Emergency Medical Support',
-      desc: 'Priority slot booking, immediate doctor routing, and integrated outpatient medical facilities assistance.',
-      icon: <PhoneCall size={24} className="text-[#00A896]" />,
-      tag: 'Rapid Response'
-    }
-  ];
 
   // 4 Steps: How Curix Works
   const processSteps = [
@@ -381,12 +336,425 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
     }
   ];
 
-  const filteredServices = clinicalServices.filter(s => 
-    s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    s.desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    s.tag.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // 3D Animated Hospital Equipment Design Component
+  const renderHospitalEquipment = (type, badge) => {
+    switch (type) {
+      case 'cancer':
+        return (
+          <div className="w-[114px] sm:w-[124px] h-[114px] sm:h-[124px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(2,132,199,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-sky-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-sky-400/20 via-teal-300/10 to-transparent anim-equipment-pulse" />
+            <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-sky-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
+            <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
+              <defs>
+                <linearGradient id="dnaGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#38BDF8"/>
+                  <stop offset="100%" stopColor="#0284C7"/>
+                </linearGradient>
+                <linearGradient id="dnaGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#34D399"/>
+                  <stop offset="100%" stopColor="#00A896"/>
+                </linearGradient>
+                <radialGradient id="linacGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.45"/>
+                  <stop offset="100%" stopColor="#0284C7" stopOpacity="0"/>
+                </radialGradient>
+              </defs>
+              {/* Outer LINAC Radiation Collimator Ring */}
+              <circle cx="50" cy="50" r="44" stroke="#0284C7" strokeWidth="1.5" strokeDasharray="5 3" opacity="0.45" />
+              <circle cx="50" cy="50" r="37" stroke="url(#dnaGrad2)" strokeWidth="2" opacity="0.65" />
+              <circle cx="50" cy="50" r="28" fill="url(#linacGlow)" />
+              {/* Rotating Radiation Reticle */}
+              <g className="anim-orbit-spin" style={{ transformOrigin: '50px 50px' }}>
+                <line x1="50" y1="12" x2="50" y2="24" stroke="#00A896" strokeWidth="2.5" strokeLinecap="round" />
+                <line x1="50" y1="76" x2="50" y2="88" stroke="#00A896" strokeWidth="2.5" strokeLinecap="round" />
+                <line x1="12" y1="50" x2="24" y2="50" stroke="#0284C7" strokeWidth="2.5" strokeLinecap="round" />
+                <line x1="76" y1="50" x2="88" y2="50" stroke="#0284C7" strokeWidth="2.5" strokeLinecap="round" />
+                <circle cx="50" cy="18" r="2" fill="#38BDF8" />
+                <circle cx="50" cy="82" r="2" fill="#38BDF8" />
+              </g>
+              {/* 3D Double Helix DNA Molecular Architecture */}
+              <path d="M28 20 C42 34, 58 34, 72 20" stroke="url(#dnaGrad2)" strokeWidth="3" strokeLinecap="round" />
+              <path d="M28 50 C42 34, 58 34, 72 50" stroke="url(#dnaGrad1)" strokeWidth="3" strokeLinecap="round" />
+              <path d="M28 50 C42 66, 58 66, 72 50" stroke="url(#dnaGrad2)" strokeWidth="3" strokeLinecap="round" />
+              <path d="M28 80 C42 66, 58 66, 72 80" stroke="url(#dnaGrad1)" strokeWidth="3" strokeLinecap="round" />
+              {/* Cross Hydrogen Bonds */}
+              <line x1="36" y1="28" x2="64" y2="28" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" opacity="0.8" />
+              <circle cx="50" cy="28" r="3" fill="#00A896" />
+              <line x1="38" y1="42" x2="62" y2="42" stroke="#34D399" strokeWidth="2" strokeLinecap="round" opacity="0.8" />
+              <line x1="38" y1="58" x2="62" y2="58" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" opacity="0.8" />
+              <line x1="36" y1="72" x2="64" y2="72" stroke="#34D399" strokeWidth="2" strokeLinecap="round" opacity="0.8" />
+              <circle cx="50" cy="72" r="3" fill="#0284C7" />
+              {/* High-Energy Stereotactic Center Emitter */}
+              <circle cx="50" cy="50" r="7" fill="#00A896" className="drop-shadow-[0_0_8px_#00A896]" />
+              <circle cx="50" cy="50" r="3.5" fill="#FFFFFF" />
+            </svg>
+            <div className="absolute bottom-1 px-2 py-0.5 rounded-full bg-sky-950/85 text-white font-mono text-[7.5px] font-bold tracking-wider z-20 shadow-xs flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
+              <span>LINAC · 6MV</span>
+            </div>
+          </div>
+        );
 
+      case 'ortho':
+        return (
+          <div className="w-[114px] sm:w-[124px] h-[114px] sm:h-[124px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(16,185,129,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-emerald-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/20 via-teal-300/10 to-transparent anim-equipment-pulse" />
+            <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
+            <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
+              <defs>
+                <linearGradient id="titaniumGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#94A3B8"/>
+                  <stop offset="50%" stopColor="#64748B"/>
+                  <stop offset="100%" stopColor="#334155"/>
+                </linearGradient>
+                <linearGradient id="implantGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#10B981"/>
+                  <stop offset="50%" stopColor="#059669"/>
+                  <stop offset="100%" stopColor="#047857"/>
+                </linearGradient>
+              </defs>
+              {/* Robotic Base Platform */}
+              <rect x="20" y="80" width="60" height="11" rx="4" fill="url(#titaniumGrad)" stroke="#10B981" strokeWidth="1.5" />
+              {/* 3D Articulated Robotic Arm Segment 1 */}
+              <circle cx="34" cy="74" r="6.5" fill="#047857" stroke="#10B981" strokeWidth="2" />
+              <line x1="34" y1="74" x2="48" y2="48" stroke="url(#titaniumGrad)" strokeWidth="6" strokeLinecap="round" />
+              {/* Joint Elbow Bearing */}
+              <circle cx="48" cy="48" r="5.5" fill="#10B981" stroke="#FFFFFF" strokeWidth="1.5" />
+              {/* Segment 2 Arm to Surgical Tool */}
+              <line x1="48" y1="48" x2="68" y2="30" stroke="#047857" strokeWidth="5" strokeLinecap="round" />
+              {/* Precision Tool Knuckle & Calibration Laser */}
+              <circle cx="68" cy="30" r="4.5" fill="#059669" />
+              <line x1="68" y1="30" x2="78" y2="20" stroke="#10B981" strokeWidth="3" strokeLinecap="round" />
+              {/* Laser Beam to 3D Knee Implant */}
+              <line x1="68" y1="30" x2="40" y2="22" stroke="#34D399" strokeWidth="1.5" strokeDasharray="3 2" className="anim-scan-wave" />
+              {/* 3D Bionic Titanium Femoral & Tibial Component */}
+              <path d="M22 18 C30 14, 46 14, 52 24 C50 34, 38 38, 28 36 Z" fill="url(#implantGrad)" stroke="#A7F3D0" strokeWidth="1.5" />
+              <rect x="24" y="38" width="26" height="5" rx="2" fill="#64748B" />
+              <line x1="37" y1="43" x2="37" y2="54" stroke="#94A3B8" strokeWidth="3.5" strokeLinecap="round" />
+              {/* Alignment Radar Rings */}
+              <circle cx="68" cy="30" r="12" stroke="#10B981" strokeWidth="1" strokeDasharray="3 3" opacity="0.6" />
+            </svg>
+            <div className="absolute bottom-1 px-2 py-0.5 rounded-full bg-emerald-950/85 text-white font-mono text-[7.5px] font-bold tracking-wider z-20 shadow-xs flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>ROBOTIC · 0.1mm</span>
+            </div>
+          </div>
+        );
+
+      case 'cardiac':
+        return (
+          <div className="w-[114px] sm:w-[124px] h-[114px] sm:h-[124px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(225,29,72,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-rose-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-rose-400/20 via-pink-300/10 to-transparent anim-equipment-pulse" />
+            <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-rose-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
+            <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
+              <defs>
+                <radialGradient id="heart3DGrad" cx="45%" cy="40%" r="55%">
+                  <stop offset="0%" stopColor="#FB7185"/>
+                  <stop offset="45%" stopColor="#E11D48"/>
+                  <stop offset="90%" stopColor="#881337"/>
+                  <stop offset="100%" stopColor="#4C0519"/>
+                </radialGradient>
+                <linearGradient id="aortaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#FDA4AF"/>
+                  <stop offset="100%" stopColor="#BE123C"/>
+                </linearGradient>
+              </defs>
+              {/* Cath Lab Background Waveform Grid */}
+              <circle cx="50" cy="50" r="42" stroke="#FDA4AF" strokeWidth="1" strokeDasharray="3 3" opacity="0.3" />
+              {/* 3D Anatomical Heart with Organic Beating Motion */}
+              <g className="anim-heartbeat">
+                {/* Aorta Arch & Great Vessels */}
+                <path d="M42 26 C42 12, 58 12, 58 24" stroke="url(#aortaGrad)" strokeWidth="6" strokeLinecap="round" fill="none" />
+                <line x1="46" y1="14" x2="46" y2="8" stroke="#E11D48" strokeWidth="3" strokeLinecap="round" />
+                <line x1="52" y1="13" x2="54" y2="8" stroke="#E11D48" strokeWidth="2.5" strokeLinecap="round" />
+                <line x1="58" y1="16" x2="62" y2="10" stroke="#E11D48" strokeWidth="2.5" strokeLinecap="round" />
+                <path d="M58 24 C62 20, 68 20, 68 28" stroke="#0284C7" strokeWidth="4.5" strokeLinecap="round" fill="none" />
+                {/* 3D Ventricle Muscle Silhouette */}
+                <path 
+                  d="M50 82 C22 62, 14 42, 22 28 C28 18, 42 18, 50 28 C58 18, 72 18, 78 28 C86 42, 78 62, 50 82 Z" 
+                  fill="url(#heart3DGrad)" 
+                  stroke="#9F1239" 
+                  strokeWidth="2" 
+                />
+                {/* Coronary Arterial Arborization Branches */}
+                <path d="M48 34 Q42 46, 38 56 Q34 62, 32 68" stroke="#FFE4E6" strokeWidth="1.5" strokeLinecap="round" opacity="0.8" fill="none" />
+                <path d="M44 44 Q50 50, 56 60 Q60 66, 62 70" stroke="#FFE4E6" strokeWidth="1.2" strokeLinecap="round" opacity="0.8" fill="none" />
+                <circle cx="50" cy="82" r="3" fill="#E11D48" />
+              </g>
+              {/* Active High-Definition ECG Waveform Trace */}
+              <path 
+                d="M10 52 L26 52 L30 52 L34 45 L38 62 L44 32 L50 68 L54 48 L58 52 L88 52" 
+                stroke="#10B981" 
+                strokeWidth="2.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+                className="drop-shadow-[0_0_8px_rgba(16,185,129,0.9)]"
+              />
+              <circle cx="88" cy="52" r="3.5" fill="#34D399" className="drop-shadow-[0_0_8px_#34D399] animate-ping" />
+              <circle cx="88" cy="52" r="2.5" fill="#FFFFFF" />
+            </svg>
+            <div className="absolute bottom-1 px-2 py-0.5 rounded-full bg-rose-950/85 text-white font-mono text-[7.5px] font-bold tracking-wider z-20 shadow-xs flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+              <span>72 BPM · ECG</span>
+            </div>
+          </div>
+        );
+
+      case 'gastro':
+        return (
+          <div className="w-[114px] sm:w-[124px] h-[114px] sm:h-[124px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(30,58,138,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-blue-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 via-cyan-300/10 to-transparent anim-equipment-pulse" />
+            <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-blue-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
+            <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
+              <defs>
+                <linearGradient id="endoTowerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#1E3A8A"/>
+                  <stop offset="100%" stopColor="#0F172A"/>
+                </linearGradient>
+                <linearGradient id="probeBeam" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.8"/>
+                  <stop offset="100%" stopColor="#38BDF8" stopOpacity="0"/>
+                </linearGradient>
+              </defs>
+              {/* 3D Endoscopy Mobile Cart & Tower Chassis */}
+              <rect x="22" y="14" width="56" height="68" rx="8" fill="url(#endoTowerGrad)" stroke="#3B82F6" strokeWidth="2" />
+              {/* Main 4K Ultra-HD Diagnostic Screen */}
+              <rect x="28" y="20" width="44" height="28" rx="4" fill="#020617" stroke="#60A5FA" strokeWidth="1.5" />
+              {/* High-Contrast Digestive Lumen Display Wave */}
+              <path d="M32 34 Q40 25, 50 34 T68 34" stroke="#38BDF8" strokeWidth="2" fill="none" />
+              <ellipse cx="50" cy="34" rx="8" ry="5" fill="#38BDF8" opacity="0.3" />
+              <circle cx="58" cy="30" r="2.5" fill="#34D399" className="animate-pulse" />
+              {/* Control Panel Shelf with Illumination Dials */}
+              <rect x="28" y="52" width="44" height="24" rx="4" fill="#1E293B" />
+              <circle cx="36" cy="62" r="3" fill="#60A5FA" />
+              <circle cx="46" cy="62" r="3" fill="#34D399" />
+              <circle cx="56" cy="62" r="3" fill="#F59E0B" />
+              <rect x="63" y="58" width="6" height="8" rx="1.5" fill="#94A3B8" />
+              {/* Flexible Fiber-Optic Probe Cable */}
+              <path d="M46 76 C46 90, 78 88, 78 72 C78 58, 86 52, 90 52" stroke="#38BDF8" strokeWidth="3" strokeLinecap="round" fill="none" />
+              {/* 4K Sapphire Lens with Active Emitting Light Cone */}
+              <polygon points="90,52 98,44 98,60" fill="url(#probeBeam)" />
+              <circle cx="90" cy="52" r="4.5" fill="#0284C7" stroke="#FFFFFF" strokeWidth="1.5" className="drop-shadow-[0_0_8px_#38BDF8]" />
+              <circle cx="90" cy="52" r="2" fill="#38BDF8" />
+            </svg>
+            <div className="absolute bottom-1 px-2 py-0.5 rounded-full bg-blue-950/85 text-white font-mono text-[7.5px] font-bold tracking-wider z-20 shadow-xs flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+              <span>4K ENDO · 60fps</span>
+            </div>
+          </div>
+        );
+
+      case 'neuro':
+        return (
+          <div className="w-[114px] sm:w-[124px] h-[114px] sm:h-[124px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(2,132,199,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-sky-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-sky-400/20 via-indigo-300/10 to-transparent anim-equipment-pulse" />
+            <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-sky-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
+            <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
+              <defs>
+                <radialGradient id="neuroHoloGrad" cx="50%" cy="45%" r="55%">
+                  <stop offset="0%" stopColor="#BAE6FD"/>
+                  <stop offset="60%" stopColor="#38BDF8"/>
+                  <stop offset="100%" stopColor="#0369A1"/>
+                </radialGradient>
+              </defs>
+              {/* Stereotactic 3D Coordinate Grid */}
+              <ellipse cx="50" cy="50" rx="43" ry="34" stroke="#0284C7" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.5" />
+              <line x1="50" y1="12" x2="50" y2="88" stroke="#38BDF8" strokeWidth="1" strokeDasharray="2 2" opacity="0.4" />
+              <line x1="8" y1="50" x2="92" y2="50" stroke="#38BDF8" strokeWidth="1" strokeDasharray="2 2" opacity="0.4" />
+              {/* 3D Translucent Holographic Brain Hemisphere */}
+              <path 
+                d="M32 48 C24 40, 26 26, 38 22 C46 20, 50 26, 50 34 C50 26, 54 20, 62 22 C74 26, 76 40, 68 48 C76 56, 74 72, 60 74 C54 74, 52 70, 50 64 C48 70, 46 74, 40 74 C26 72, 24 56, 32 48 Z" 
+                fill="url(#neuroHoloGrad)" 
+                stroke="#0284C7" 
+                strokeWidth="2" 
+                opacity="0.9"
+              />
+              {/* Active Synaptic Action Potentials & Neural Firing Network */}
+              <g className="anim-synapse">
+                <circle cx="36" cy="34" r="3.5" fill="#FACC15" className="drop-shadow-[0_0_6px_#FACC15]" />
+                <circle cx="64" cy="34" r="3.5" fill="#FACC15" className="drop-shadow-[0_0_6px_#FACC15]" />
+                <circle cx="42" cy="52" r="3" fill="#FFFFFF" className="drop-shadow-[0_0_6px_#FFFFFF]" />
+                <circle cx="58" cy="52" r="3" fill="#FFFFFF" className="drop-shadow-[0_0_6px_#FFFFFF]" />
+                <circle cx="50" cy="40" r="4" fill="#38BDF8" className="drop-shadow-[0_0_8px_#38BDF8]" />
+                <line x1="36" y1="34" x2="50" y2="40" stroke="#FACC15" strokeWidth="2" />
+                <line x1="64" y1="34" x2="50" y2="40" stroke="#FACC15" strokeWidth="2" />
+                <line x1="42" y1="52" x2="50" y2="40" stroke="#FFFFFF" strokeWidth="2" />
+                <line x1="58" y1="52" x2="50" y2="40" stroke="#FFFFFF" strokeWidth="2" />
+                <line x1="42" y1="52" x2="58" y2="52" stroke="#38BDF8" strokeWidth="1.5" strokeDasharray="2 2" />
+              </g>
+              {/* Target Navigation Reticle */}
+              <circle cx="50" cy="40" r="10" stroke="#00A896" strokeWidth="1.5" strokeDasharray="3 2" />
+            </svg>
+            <div className="absolute bottom-1 px-2 py-0.5 rounded-full bg-sky-950/85 text-white font-mono text-[7.5px] font-bold tracking-wider z-20 shadow-xs flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
+              <span>NEURO-NAV · 120Hz</span>
+            </div>
+          </div>
+        );
+
+      case 'renal':
+        return (
+          <div className="w-[114px] sm:w-[124px] h-[114px] sm:h-[124px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(168,85,247,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-purple-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-400/20 via-indigo-300/10 to-transparent anim-equipment-pulse" />
+            <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-purple-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
+            <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
+              <defs>
+                <linearGradient id="dialyzerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#581C87"/>
+                  <stop offset="100%" stopColor="#2E1065"/>
+                </linearGradient>
+                <linearGradient id="filterFiberGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#E9D5FF"/>
+                  <stop offset="50%" stopColor="#C084FC"/>
+                  <stop offset="100%" stopColor="#9333EA"/>
+                </linearGradient>
+              </defs>
+              {/* Dialysis Machine Tower Frame */}
+              <rect x="22" y="16" width="56" height="72" rx="8" fill="url(#dialyzerGrad)" stroke="#A855F7" strokeWidth="2" />
+              {/* Dual Transparent High-Flux Dialyzer Columns */}
+              <rect x="28" y="24" width="18" height="46" rx="4" fill="url(#filterFiberGrad)" stroke="#D8B4FE" strokeWidth="1.5" />
+              <line x1="37" y1="26" x2="37" y2="68" stroke="#FFFFFF" strokeWidth="1.5" strokeDasharray="3 2" />
+              <rect x="54" y="24" width="18" height="46" rx="4" fill="url(#filterFiberGrad)" stroke="#D8B4FE" strokeWidth="1.5" />
+              <line x1="63" y1="26" x2="63" y2="68" stroke="#FFFFFF" strokeWidth="1.5" strokeDasharray="3 2" />
+              {/* Arterial (Red) & Venous (Blue) Extracorporeal Blood Lines with Fluid Flow */}
+              <path d="M37 24 C37 12, 63 12, 63 24" stroke="#EF4444" strokeWidth="3" strokeLinecap="round" fill="none" className="anim-fluid-flow" />
+              <path d="M37 70 C37 84, 63 84, 63 70" stroke="#3B82F6" strokeWidth="3" strokeLinecap="round" fill="none" className="anim-fluid-flow" />
+              {/* Peristaltic Roller Pump & Digital Pressure Transducer */}
+              <circle cx="50" cy="50" r="7.5" fill="#FAF5FF" stroke="#7E22CE" strokeWidth="2.5" />
+              <circle cx="50" cy="50" r="3" fill="#9333EA" />
+              <line x1="50" y1="43" x2="50" y2="57" stroke="#7E22CE" strokeWidth="1.5" />
+            </svg>
+            <div className="absolute bottom-1 px-2 py-0.5 rounded-full bg-purple-950/85 text-white font-mono text-[7.5px] font-bold tracking-wider z-20 shadow-xs flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+              <span>CRRT · 150ml/min</span>
+            </div>
+          </div>
+        );
+
+      case 'transplant':
+        return (
+          <div className="w-[114px] sm:w-[124px] h-[114px] sm:h-[124px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(13,148,136,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-teal-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-teal-400/20 via-cyan-300/10 to-transparent anim-equipment-pulse" />
+            <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-teal-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
+            <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
+              <defs>
+                <linearGradient id="perfusionDome" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#CCFBF1" stopOpacity="0.85"/>
+                  <stop offset="60%" stopColor="#5EEAD4" stopOpacity="0.4"/>
+                  <stop offset="100%" stopColor="#0D9488" stopOpacity="0.2"/>
+                </linearGradient>
+                <linearGradient id="organGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#2DD4BF"/>
+                  <stop offset="100%" stopColor="#0F766E"/>
+                </linearGradient>
+              </defs>
+              {/* 3D Hypothermic Perfusion Pod Base Console */}
+              <rect x="20" y="66" width="60" height="20" rx="5" fill="#0F766E" stroke="#14B8A6" strokeWidth="2" />
+              <circle cx="32" cy="76" r="3.5" fill="#2DD4BF" />
+              <circle cx="44" cy="76" r="3.5" fill="#38BDF8" />
+              <rect x="54" y="73" width="18" height="6" rx="2" fill="#042F2E" />
+              {/* Sterile Cryogenic Glass Preservation Dome */}
+              <path d="M24 66 C24 30, 76 30, 76 66 Z" fill="url(#perfusionDome)" stroke="#0D9488" strokeWidth="2" />
+              {/* Glass Specular Glare Reflection */}
+              <path d="M30 60 C30 38, 48 34, 48 34" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" opacity="0.7" fill="none" />
+              {/* Suspended Living Donor Graft Hologram */}
+              <ellipse cx="50" cy="50" rx="15" ry="11" fill="url(#organGlow)" stroke="#5EEAD4" strokeWidth="1.5" />
+              <path d="M42 50 Q50 44, 58 50" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" fill="none" />
+              {/* Oxygenation Nutrient Micro-Cannula Tubes */}
+              <line x1="36" y1="66" x2="44" y2="55" stroke="#14B8A6" strokeWidth="2.5" strokeLinecap="round" />
+              <line x1="64" y1="66" x2="56" y2="55" stroke="#14B8A6" strokeWidth="2.5" strokeLinecap="round" />
+              <circle cx="48" cy="46" r="1.5" fill="#FFFFFF" className="animate-ping" />
+            </svg>
+            <div className="absolute bottom-1 px-2 py-0.5 rounded-full bg-teal-950/85 text-white font-mono text-[7.5px] font-bold tracking-wider z-20 shadow-xs flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" />
+              <span>ORGAN POD · 4.0°C</span>
+            </div>
+          </div>
+        );
+
+      case 'mother-child':
+        return (
+          <div className="w-[114px] sm:w-[124px] h-[114px] sm:h-[124px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(244,63,94,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-pink-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-pink-400/20 via-rose-300/10 to-transparent anim-equipment-pulse" />
+            <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-pink-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
+            <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
+              <defs>
+                <radialGradient id="warmthGlow" cx="50%" cy="40%" r="50%">
+                  <stop offset="0%" stopColor="#FDA4AF" stopOpacity="0.6"/>
+                  <stop offset="100%" stopColor="#F43F5E" stopOpacity="0"/>
+                </radialGradient>
+              </defs>
+              {/* Radiant Warmer Overhead Lamp Canopy */}
+              <path d="M28 20 C28 14, 72 14, 72 20 L78 26 L22 26 Z" fill="#F43F5E" stroke="#BE185D" strokeWidth="1.5" />
+              {/* Infrared Gentle Warming Rays */}
+              <line x1="36" y1="28" x2="36" y2="38" stroke="#FB7185" strokeWidth="1.5" strokeDasharray="3 2" />
+              <line x1="50" y1="28" x2="50" y2="38" stroke="#FB7185" strokeWidth="1.5" strokeDasharray="3 2" />
+              <line x1="64" y1="28" x2="64" y2="38" stroke="#FB7185" strokeWidth="1.5" strokeDasharray="3 2" />
+              {/* 3D Acrylic Infant Incubator Isolette Bassinet */}
+              <rect x="20" y="38" width="60" height="28" rx="8" fill="#FCE7F3" stroke="#F43F5E" strokeWidth="2" />
+              <circle cx="50" cy="52" r="22" fill="url(#warmthGlow)" />
+              {/* Dual Silicone Hand Access Port Grommets */}
+              <circle cx="34" cy="52" r="6.5" fill="#FB7185" stroke="#FFFFFF" strokeWidth="1.5" />
+              <circle cx="66" cy="52" r="6.5" fill="#FB7185" stroke="#FFFFFF" strokeWidth="1.5" />
+              {/* Neonatal Mattress Bed */}
+              <rect x="28" y="58" width="44" height="5" rx="2" fill="#FDA4AF" />
+              {/* Heavy Duty Mobile Pedestal Base & Wheels */}
+              <line x1="50" y1="66" x2="50" y2="76" stroke="#9D174D" strokeWidth="4" />
+              <rect x="26" y="76" width="48" height="8" rx="3" fill="#831843" />
+              <circle cx="32" cy="87" r="3.5" fill="#9D174D" />
+              <circle cx="68" cy="87" r="3.5" fill="#9D174D" />
+            </svg>
+            <div className="absolute bottom-1 px-2 py-0.5 rounded-full bg-pink-950/85 text-white font-mono text-[7.5px] font-bold tracking-wider z-20 shadow-xs flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-pulse" />
+              <span>NICU · 36.8°C</span>
+            </div>
+          </div>
+        );
+
+      case 'emergency':
+        return (
+          <div className="w-[114px] sm:w-[124px] h-[114px] sm:h-[124px] rounded-2xl relative flex items-center justify-center p-1.5 shrink-0 bg-white/90 shadow-[0_4px_16px_rgba(239,68,68,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] border border-teal-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-red-400/15 via-teal-300/15 to-transparent anim-equipment-pulse" />
+            <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-red-400 to-transparent anim-laser-vertical pointer-events-none z-10" />
+            <svg className="w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] relative z-10" viewBox="0 0 100 100" fill="none">
+              <defs>
+                <linearGradient id="defibGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#134E4A"/>
+                  <stop offset="100%" stopColor="#042F2E"/>
+                </linearGradient>
+              </defs>
+              {/* 24/7 Red ER Emergency Beacon Dome with Active Strobe */}
+              <g className="anim-radar-sweep" style={{ transformOrigin: '50px 18px' }}>
+                <circle cx="50" cy="18" r="7" fill="#EF4444" className="drop-shadow-[0_0_10px_#EF4444]" />
+                <polygon points="50,18 70,8 70,28" fill="#EF4444" opacity="0.4" />
+              </g>
+              <circle cx="50" cy="18" r="4.5" fill="#FCA5A5" />
+              {/* 3D Ruggedized Defibrillator Main Chassis */}
+              <rect x="20" y="24" width="60" height="58" rx="8" fill="url(#defibGrad)" stroke="#0D9488" strokeWidth="2" />
+              {/* High-Contrast Vital Signs Monitor */}
+              <rect x="26" y="30" width="48" height="26" rx="4" fill="#020617" stroke="#14B8A6" strokeWidth="1.5" />
+              {/* Rapid Defib Wave Rhythm Strip */}
+              <path d="M30 43 L38 43 L42 35 L45 50 L49 38 L53 45 L68 45" stroke="#34D399" strokeWidth="2" strokeLinecap="round" fill="none" className="drop-shadow-[0_0_6px_#34D399]" />
+              {/* Dual Shock Discharge Paddles with Ergonomic Grips */}
+              <rect x="28" y="62" width="18" height="14" rx="3" fill="#E11D48" stroke="#FFFFFF" strokeWidth="1.5" />
+              <circle cx="37" cy="69" r="2.5" fill="#FFFFFF" />
+              <rect x="54" y="62" width="18" height="14" rx="3" fill="#E11D48" stroke="#FFFFFF" strokeWidth="1.5" />
+              <circle cx="63" cy="69" r="2.5" fill="#FFFFFF" />
+              {/* Heavy Coiled Cable Connections */}
+              <path d="M37 76 C37 84, 46 84, 46 76" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" fill="none" />
+              <path d="M63 76 C63 84, 54 84, 54 76" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" fill="none" />
+            </svg>
+            <div className="absolute bottom-1 px-2 py-0.5 rounded-full bg-slate-950/85 text-white font-mono text-[7.5px] font-bold tracking-wider z-20 shadow-xs flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+              <span>BIPHASIC · 200J</span>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
   return (
     <div className="relative pt-20 bg-white text-slate-700 font-sans selection:bg-[#00A896] selection:text-white">
       
@@ -450,6 +818,103 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
         }
         .anim-shadow-breath {
           animation: shadowBreath 5.5s ease-in-out infinite;
+        }
+        @keyframes medicalPulse {
+          0%, 100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.05);
+          }
+        }
+        @keyframes scanWave {
+          0% {
+            stroke-dashoffset: 80;
+            opacity: 0.3;
+          }
+          50% {
+            opacity: 1;
+          }
+          100% {
+            stroke-dashoffset: 0;
+            opacity: 0.3;
+          }
+        }
+        .anim-equipment-pulse {
+          animation: medicalPulse 3.5s ease-in-out infinite;
+        }
+                @keyframes heartbeatBeat {
+          0%, 100% {
+            transform: scale(1);
+          }
+          14% {
+            transform: scale(1.1);
+          }
+          28% {
+            transform: scale(1);
+          }
+          42% {
+            transform: scale(1.14);
+          }
+          70% {
+            transform: scale(1);
+          }
+        }
+        @keyframes radarSweep {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+        @keyframes laserScanVertical {
+          0%, 100% {
+            transform: translateY(0px);
+            opacity: 0.15;
+          }
+          50% {
+            transform: translateY(90px);
+            opacity: 0.85;
+          }
+        }
+        @keyframes synapseFlicker {
+          0%, 100% {
+            opacity: 0.35;
+          }
+          50% {
+            opacity: 1;
+            filter: drop-shadow(0 0 6px #38BDF8);
+          }
+        }
+        @keyframes fluidFlow {
+          0% {
+            stroke-dashoffset: 40;
+          }
+          100% {
+            stroke-dashoffset: 0;
+          }
+        }
+        .anim-heartbeat {
+          transform-origin: 50px 50px;
+          animation: heartbeatBeat 1.8s ease-in-out infinite;
+        }
+        .anim-radar-sweep {
+          animation: radarSweep 4s linear infinite;
+        }
+        .anim-laser-vertical {
+          animation: laserScanVertical 2.6s ease-in-out infinite;
+        }
+        .anim-synapse {
+          animation: synapseFlicker 1.8s ease-in-out infinite;
+        }
+        .anim-fluid-flow {
+          stroke-dasharray: 8 4;
+          animation: fluidFlow 1.4s linear infinite;
+        }
+.anim-scan-wave {
+          stroke-dasharray: 40;
+          animation: scanWave 2.2s linear infinite;
         }
       `}</style>
 
@@ -670,46 +1135,114 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
         </div>
       </section>
 
-      {/* CENTRES OF EXCELLENCE (DITO FROM MEDICAL SPECIFICATION) */}
-      <section id="centres-of-excellence" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-6">
-        <div className="mb-6 sm:mb-8">
-          <h2 className="text-xl sm:text-2xl lg:text-[26px] font-black tracking-wide text-[#65A30D] uppercase font-display">
-            CENTRES OF EXCELLENCE
-          </h2>
+      {/* CENTRES OF EXCELLENCE & SPECIALIZED HOSPITAL CARE (MERGED FLAGSHIP SECTION) */}
+      <section id="centres-of-excellence" className="scroll-mt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 relative">
+        <span id="services" className="scroll-mt-24 absolute -top-10" />
+
+        {/* Curix UI Themed Section Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-10 gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[11px] font-black tracking-widest uppercase text-[#00A896] bg-[#E6F8F5] px-3.5 py-1 rounded-full border border-[#00A896]/20 shadow-2xs">
+                TERTIARY HUBS & SPECIALIZED CARE
+              </span>
+              <span className="text-[10px] font-extrabold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                Hospital Grade Care
+              </span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#0A1C35] tracking-tight">
+              Centres of <span className="text-[#00A896]">Excellence</span> & Specialized Care
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl font-medium">
+              World-class tertiary clinical institutes and specialized hospital care disciplines equipped with next-gen robotic systems, precision diagnostics, and 24/7 intensive monitoring.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 self-start md:self-auto">
+            <span className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200/90 text-xs font-bold text-slate-700 shadow-2xs flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <Award size={14} className="text-[#00A896]" />
+              <span>9 Tertiary Institutes</span>
+            </span>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        {/* Core Hospital Care Capabilities Banner (Combined from Specialized Care) */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8 sm:mb-10">
+          {[
+            { icon: <Stethoscope size={16} className="text-[#00A896]" />, title: 'Doctor OPD', tag: 'In-Clinic' },
+            { icon: <Heart size={16} className="text-[#00A896]" />, title: 'Nursing Care', tag: 'Certified Staff' },
+            { icon: <Activity size={16} className="text-[#00A896]" />, title: 'Diagnostics & Labs', tag: 'NABL Aligned' },
+            { icon: <ShieldCheck size={16} className="text-[#00A896]" />, title: 'Critical Care ICU', tag: '24/7 Monitoring' },
+            { icon: <FileText size={16} className="text-[#00A896]" />, title: 'Digital Rx Slips', tag: 'Tamper-Proof' },
+            { icon: <PhoneCall size={16} className="text-[#00A896]" />, title: '24/7 Emergency', tag: 'Rapid Response' }
+          ].map((srv, sIdx) => (
+            <div key={sIdx} className="p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs hover:border-[#00A896]/40 hover:shadow-xs transition-all flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-8 h-8 rounded-xl bg-[#E6F8F5] flex items-center justify-center shrink-0">
+                  {srv.icon}
+                </div>
+                <span className="text-[9px] font-black uppercase tracking-wider text-[#00A896] bg-[#E6F8F5]/80 px-2 py-0.5 rounded-md">
+                  {srv.tag}
+                </span>
+              </div>
+              <span className="text-xs font-bold text-[#0A1C35] truncate">{srv.title}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* 3x3 Equal Height Grid (Combined Design: Clean, Balanced, 3D Animated Equipment) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 items-stretch">
           {centresOfExcellence.map((centre) => (
             <div
               key={centre.id}
               onClick={() => handleCentreClick(centre)}
-              className={`relative overflow-hidden rounded-[22px] border ${centre.border} bg-gradient-to-r ${centre.bgGradient} flex justify-between min-h-[144px] sm:min-h-[150px] shadow-xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 cursor-pointer group`}
+              className={`h-full min-h-[220px] sm:min-h-[230px] relative overflow-hidden rounded-[24px] border ${centre.border} bg-gradient-to-r ${centre.bgGradient} p-5 sm:p-6 flex flex-col justify-between shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer group`}
             >
-              {/* Left Content (Title & Bullet points) */}
-              <div className="p-4 sm:p-5 flex-1 z-10 flex flex-col justify-between max-w-[62%]">
-                <div>
-                  <h3 className="text-sm sm:text-[14.5px] font-bold text-[#0A1C35] leading-snug mb-2.5 group-hover:text-[#00A896] transition-colors">
-                    {centre.title}
-                  </h3>
-                  <ul className="space-y-1">
-                    {centre.specialties.map((item, sIdx) => (
-                      <li key={sIdx} className="flex items-start gap-1 text-[11.5px] sm:text-xs text-slate-700 font-medium leading-tight">
-                        <ChevronRight size={13} className="text-[#65A30D] shrink-0 mt-0.5 stroke-[3]" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
+              {/* Header Title & Clinical Scope on Left, 3D Equipment Visual on Right */}
+              <div className="flex justify-between items-start gap-2.5 flex-1">
+                <div className="flex-1 min-w-0 pr-1 flex flex-col justify-between h-full">
+                  <div>
+                    {/* Clinical Category Tag */}
+                    <span className={`inline-flex items-center text-[10px] font-black tracking-wider uppercase px-2.5 py-0.5 rounded-full border mb-2 ${centre.badgeColor}`}>
+                      {centre.categoryTag}
+                    </span>
+
+                    {/* Fixed Height Title Container */}
+                    <div className="h-10 sm:h-11 flex items-start mb-1.5">
+                      <h3 className="text-sm sm:text-[15px] font-bold text-[#0A1C35] leading-snug group-hover:text-[#00A896] transition-colors line-clamp-2">
+                        {centre.title}
+                      </h3>
+                    </div>
+
+                    {/* Unified Clinical Care Description */}
+                    <p className="text-xs text-slate-600 font-medium leading-relaxed line-clamp-2 mb-2.5">
+                      {centre.description}
+                    </p>
+                  </div>
+
+                  {/* Specialized Care Unit Badge */}
+                  <span className="inline-flex items-center gap-1.5 text-[10.5px] font-bold text-slate-600 bg-white/80 border border-slate-200/60 px-2.5 py-0.5 rounded-lg self-start">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#00A896]" />
+                    <span>{centre.servicePill}</span>
+                  </span>
+                </div>
+
+                {/* 3D Animated Hospital Equipment Visual Module */}
+                <div className="shrink-0 self-center pl-1">
+                  {renderHospitalEquipment(centre.id, centre.equipmentBadge)}
                 </div>
               </div>
 
-              {/* Right Illustration */}
-              <div className="w-[38%] sm:w-[42%] h-full relative shrink-0 overflow-hidden rounded-r-[22px] flex items-center justify-end">
-                <img 
-                  src={centre.image} 
-                  alt={centre.title} 
-                  className="w-full h-full object-cover object-right pointer-events-none select-none transition-transform duration-500 group-hover:scale-105" 
-                  loading="lazy"
-                />
+              {/* Bottom Interactive Touchpoint Bar */}
+              <div className="pt-3 mt-3.5 border-t border-slate-200/70 flex items-center justify-between text-xs font-bold text-[#00A896]">
+                <span className="flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                  <span>Consult Specialists</span>
+                  <ArrowRight size={12} className="stroke-[2.5]" />
+                </span>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500/90 font-extrabold bg-white/70 px-2 py-0.5 rounded-md border border-slate-200/50">
+                  {centre.equipmentBadge}
+                </span>
               </div>
             </div>
           ))}
@@ -1047,72 +1580,6 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
             </div>
           );
         })()}
-      </section>
-
-      {/* 5. SPECIALIZED HOSPITAL & PATIENT CARE (Luxury Dark Navy Bento Grid) */}
-      <section id="services" className="py-24 bg-[#0A1C35] text-white relative overflow-hidden bg-mesh-dark">
-        {/* Glow orb */}
-        <div className="absolute top-0 right-1/4 w-96 h-96 rounded-full bg-[#00A896]/10 blur-3xl pointer-events-none" />
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-14 gap-6">
-            <div>
-              <span className="text-[11px] font-black uppercase tracking-widest text-[#0BC2A8] block mb-2">
-                COMPREHENSIVE MEDICAL SERVICES
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-                Specialized Hospital & Patient Care
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-300 mt-2 max-w-xl font-medium leading-relaxed">
-                Hospital-grade clinical disciplines modeled after modern healthcare institutions to serve your entire family's health lifecycle.
-              </p>
-            </div>
-
-            <button 
-              type="button"
-              onClick={() => onOpenAuth?.()}
-              className="px-6 py-3 rounded-full border border-white/20 text-xs font-bold text-white hover:bg-white/10 hover:border-white/40 transition-all self-start sm:self-auto cursor-pointer"
-            >
-              Explore All Units
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredServices.map((srv, idx) => (
-              <div 
-                key={idx}
-                className="p-8 rounded-3xl glass-card-dark flex flex-col justify-between group"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="w-13 h-13 rounded-2xl bg-white/10 text-[#0BC2A8] flex items-center justify-center group-hover:scale-105 group-hover:bg-[#00A896]/20 transition-all duration-300">
-                      {srv.icon}
-                    </div>
-                    <span className="px-3 py-1 rounded-full text-[10px] font-black bg-white/10 text-teal-300 uppercase tracking-wider border border-white/10">
-                      {srv.tag}
-                    </span>
-                  </div>
-
-                  <h3 className="text-lg font-black text-white mb-2 group-hover:text-teal-200 transition-colors">{srv.title}</h3>
-                  <p className="text-xs text-slate-300 leading-relaxed font-medium">{srv.desc}</p>
-                </div>
-
-                <div className="pt-6 mt-6 border-t border-white/10 flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={() => onOpenAuth?.()}
-                    className="text-xs font-bold text-[#0BC2A8] hover:text-white flex items-center gap-1.5 transition cursor-pointer group-hover:translate-x-0.5"
-                  >
-                    <span>Book Consultation</span>
-                    <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-        </div>
       </section>
 
       {/* 6. INTERACTIVE CARE PLANS & ESTIMATOR */}
