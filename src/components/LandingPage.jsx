@@ -1,20 +1,102 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import doctorImage from '../assets/doctor.png';
+import { patientApi, adminApi } from '../services/api';
 import { 
   Calendar, Stethoscope, ShieldCheck, CheckCircle2, 
   Heart, Activity, Lock, PhoneCall, Clock, Award, 
   FileText, ArrowRight, Search, LogIn, Star,
   Sparkles, Check, ChevronRight, Zap, ChevronDown,
-  HelpCircle, UserCheck, CheckCircle, Video, Home
+  HelpCircle, UserCheck, CheckCircle, Video, Home,
+  RefreshCw, AlertCircle, Filter
 } from 'lucide-react';
 
 export default function LandingPage({ onOpenAuth = () => {} }) {
-  // Interactive Search & Specialty Filter
+  // Real Registered Doctors & Departments from Backend (Admin Registered)
+  const [registeredDoctors, setRegisteredDoctors] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [loadingDoctors, setLoadingDoctors] = useState(true);
+  const [doctorSearchTerm, setDoctorSearchTerm] = useState('');
+  const [selectedDeptFilter, setSelectedDeptFilter] = useState('ALL');
+
+  // Interactive Tabs
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSpecialty, setSelectedSpecialty] = useState('Cardiology');
   const [activeStepTab, setActiveStepTab] = useState('01');
   const [selectedPlanTab, setSelectedPlanTab] = useState('clinic');
   const [expandedFaq, setExpandedFaq] = useState(0);
+
+  // Fetch real doctors and departments on mount
+  useEffect(() => {
+    fetchRegisteredDoctors();
+    fetchRegisteredDepartments();
+  }, []);
+
+  const fetchRegisteredDoctors = async () => {
+    setLoadingDoctors(true);
+    try {
+      const res = await patientApi.getDoctors();
+      const list = res.data?.data || res.data;
+      setRegisteredDoctors(Array.isArray(list) ? list : []);
+    } catch (err) {
+      console.warn("Could not load registered doctors via patientApi:", err);
+      try {
+        const fallbackRes = await adminApi.getAllDoctors();
+        const fallbackList = fallbackRes.data?.data || fallbackRes.data;
+        setRegisteredDoctors(Array.isArray(fallbackList) ? fallbackList : []);
+      } catch (e) {
+        setRegisteredDoctors([]);
+      }
+    } finally {
+      setLoadingDoctors(false);
+    }
+  };
+
+  const fetchRegisteredDepartments = async () => {
+    try {
+      const res = await adminApi.getDepartments();
+      const list = res.data?.data || res.data;
+      setDepartments(Array.isArray(list) ? list : []);
+    } catch (err) {
+      console.warn("Could not load departments:", err);
+      setDepartments([]);
+    }
+  };
+
+  // Helper: Resolve Doctor Name from registered record
+  const getDoctorDisplayName = (doc) => {
+    if (!doc) return 'Attending Physician';
+    const target = doc.doctor || doc.physician || doc;
+    if (typeof target === 'string') return target.startsWith('Dr.') ? target : `Dr. ${target}`;
+    if (target.firstName && target.lastName) return `Dr. ${target.firstName} ${target.lastName}`;
+    if (target.fullName) return target.fullName.startsWith('Dr.') ? target.fullName : `Dr. ${target.fullName}`;
+    if (target.doctorName) return target.doctorName.startsWith('Dr.') ? target.doctorName : `Dr. ${target.doctorName}`;
+    if (target.name) return target.name.startsWith('Dr.') ? target.name : `Dr. ${target.name}`;
+    if (target.user && target.user.firstName) return `Dr. ${target.user.firstName} ${target.user.lastName || ''}`;
+    if (target.email) return `Dr. ${target.email.split('@')[0]}`;
+    return `Doctor #${target.id || 'Specialist'}`;
+  };
+
+  // Helper: Extract Initials for Doctor Avatar
+  const getDoctorInitials = (doc) => {
+    const name = getDoctorDisplayName(doc).replace(/^Dr\.\s*/i, '');
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2 && parts[0] && parts[1]) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    if (parts.length === 1 && parts[0]) return parts[0].slice(0, 2).toUpperCase();
+    return 'DR';
+  };
+
+  // Filter Registered Doctors based on explicit database attributes
+  const filteredRegisteredDoctors = registeredDoctors.filter((doc) => {
+    const docName = getDoctorDisplayName(doc).toLowerCase();
+    const specialty = (doc.specialty || doc.specialization || '').toLowerCase();
+    const query = (doctorSearchTerm || searchQuery).toLowerCase();
+    const matchesSearch = !query || docName.includes(query) || specialty.includes(query);
+
+    const matchesDept = selectedDeptFilter === 'ALL' || 
+      String(doc.departmentId || doc.department?.id || '') === String(selectedDeptFilter) ||
+      (doc.department?.name && doc.department.name.toLowerCase() === selectedDeptFilter.toLowerCase());
+
+    return matchesSearch && matchesDept;
+  });
 
   // 6 Primary Curix Clinical Services
   const clinicalServices = [
@@ -55,72 +137,6 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
       tag: 'Rapid Response'
     }
   ];
-
-  // Specialties with Interactive Data
-  const specialties = [
-    {
-      id: 'Cardiology',
-      name: 'Cardiology',
-      icon: Heart,
-      count: '12 Specialists',
-      doctor: 'Dr. Sarah Jenkins, MD',
-      hospital: 'Curix Cardiovascular Institute',
-      fee: '$50.00',
-      rating: '4.95',
-      slots: ['09:30 AM', '11:00 AM', '02:30 PM', '04:15 PM'],
-      bio: 'Comprehensive cardiovascular evaluations, ECG telemetry reviews, and preventive hypertension plans.'
-    },
-    {
-      id: 'Dermatology',
-      name: 'Dermatology',
-      icon: Sparkles,
-      count: '8 Specialists',
-      doctor: 'Dr. Marcus Vance, FAAD',
-      hospital: 'Center for Clinical Dermatology',
-      fee: '$45.00',
-      rating: '4.91',
-      slots: ['10:00 AM', '01:15 PM', '03:45 PM', '05:30 PM'],
-      bio: 'Clinical dermatology, acute allergen analysis, eczema management, and digital skin mapping.'
-    },
-    {
-      id: 'Neurology',
-      name: 'Neurology',
-      icon: Activity,
-      count: '6 Specialists',
-      doctor: 'Dr. Elena Rostova, PhD',
-      hospital: 'Neuroscience & Stroke Care Unit',
-      fee: '$60.00',
-      rating: '4.98',
-      slots: ['09:00 AM', '11:45 AM', '02:00 PM', '04:30 PM'],
-      bio: 'Migraine care, neuro-muscular diagnostics, cranial health screening, and cognitive assessments.'
-    },
-    {
-      id: 'Orthopedics',
-      name: 'Orthopedics',
-      icon: Award,
-      count: '9 Specialists',
-      doctor: 'Dr. Liam Montgomery, MS',
-      hospital: 'Orthopedic & Joint Recovery Desk',
-      fee: '$55.00',
-      rating: '4.93',
-      slots: ['10:30 AM', '01:00 PM', '03:15 PM', '05:00 PM'],
-      bio: 'Joint mobility, post-fracture physical rehabilitation, arthritic relief, and sports injury consultations.'
-    },
-    {
-      id: 'Pediatrics',
-      name: 'Pediatrics',
-      icon: Stethoscope,
-      count: '14 Specialists',
-      doctor: 'Dr. Chloe Adams, FAAP',
-      hospital: 'Child Wellness & Neonatal Care',
-      fee: '$40.00',
-      rating: '4.97',
-      slots: ['08:45 AM', '11:15 AM', '01:45 PM', '04:00 PM'],
-      bio: 'Developmental milestones, pediatric nutrition, immunization scheduling, and acute childhood illnesses.'
-    }
-  ];
-
-  const currentSpecialtyData = specialties.find(s => s.id === selectedSpecialty) || specialties[0];
 
   // 4 Steps: How Curix Works
   const processSteps = [
@@ -352,14 +368,13 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
                       Clear
                     </button>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => onOpenAuth?.()}
+                  <a
+                    href="#specialties"
                     className="px-5 py-2.5 rounded-full btn-curix-primary text-xs font-extrabold tracking-wide shrink-0 cursor-pointer flex items-center gap-1.5"
                   >
                     <span>Find</span>
                     <ArrowRight size={13} />
-                  </button>
+                  </a>
                 </div>
               </div>
 
@@ -379,7 +394,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
                   href="#specialties"
                   className="px-6 py-3.5 rounded-full bg-white hover:bg-slate-50 border border-slate-200/90 text-slate-700 text-xs font-bold shadow-2xs hover:shadow-sm transition-all duration-200"
                 >
-                  Explore Specialties
+                  Explore Physicians
                 </a>
               </div>
 
@@ -514,136 +529,259 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
         </div>
       </section>
 
-      {/* 3. INTERACTIVE CLINICAL SPECIALTIES & REAL-TIME SLOT EXPLORER */}
+      {/* 3. REGISTERED ATTENDING PHYSICIANS & SPECIALISTS DIRECTORY (EXPLICIT ADMIN DATA) */}
       <section id="specialties" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
           <div>
-            <span className="text-[11px] font-black tracking-widest uppercase text-[#00A896] block mb-1">
-              INTERACTIVE SPECIALTY EXPLORER
-            </span>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[11px] font-black tracking-widest uppercase text-[#00A896] bg-[#E6F8F5] px-3.5 py-1 rounded-full border border-[#00A896]/20">
+                OFFICIAL MEDICAL FACULTY
+              </span>
+              <span className="text-[10px] font-extrabold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                Admin Registered
+              </span>
+            </div>
             <h2 className="text-2xl sm:text-3xl font-black text-[#0A1C35] tracking-tight">
-              Select Specialty & Preview Available Today Slots
+              Attending Physicians & Specialists
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-xl font-medium">
-              Click any clinical discipline below to preview attending physicians and real-time open calendar slots.
+            <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl font-medium">
+              Verified clinical physicians provisioned and certified by hospital administration. Browse active doctor profiles, consultation fees, and reserve your direct clinical appointment.
             </p>
           </div>
-          <button 
-            type="button"
-            onClick={() => onOpenAuth?.()}
-            className="text-xs font-bold text-[#00A896] hover:text-[#079181] flex items-center gap-1 transition self-start md:self-auto cursor-pointer"
-          >
-            <span>View Full Physician Directory</span>
-            <ChevronRight size={14} />
-          </button>
-        </div>
 
-        {/* Specialty Selector Tabs */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 mb-8">
-          {specialties.map((spec) => {
-            const Icon = spec.icon;
-            const isSelected = selectedSpecialty === spec.id;
-            return (
-              <button
-                key={spec.id}
-                type="button"
-                onClick={() => setSelectedSpecialty(spec.id)}
-                className={`p-4 rounded-2xl border transition-all duration-200 text-left group shadow-2xs cursor-pointer flex items-center gap-3 ${
-                  isSelected
-                    ? 'bg-[#0A1C35] border-[#0A1C35] text-white shadow-md'
-                    : 'bg-white border-slate-200/80 hover:border-[#00A896]/40 hover:bg-[#E6F8F5]/30'
-                }`}
-              >
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors shrink-0 ${
-                  isSelected ? 'bg-white/10 text-[#0BC2A8]' : 'bg-slate-50 text-slate-600 group-hover:text-[#00A896] group-hover:bg-[#E6F8F5]'
-                }`}>
-                  <Icon size={18} />
-                </div>
-                <div>
-                  <h4 className={`text-xs font-black transition-colors ${isSelected ? 'text-white' : 'text-[#0A1C35] group-hover:text-[#00A896]'}`}>
-                    {spec.name}
-                  </h4>
-                  <span className={`text-[10px] font-semibold ${isSelected ? 'text-slate-300' : 'text-slate-400'}`}>
-                    {spec.count}
-                  </span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Interactive Live Slot Booking Card Preview */}
-        <div className="p-7 sm:p-9 rounded-[32px] bg-gradient-to-br from-white via-slate-50/50 to-[#E6F8F5]/30 border border-slate-200/80 shadow-xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          <div className="lg:col-span-7 space-y-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#E6F8F5] text-[#00A896] border border-[#00A896]/20">
-                Active Department: {currentSpecialtyData.name}
-              </span>
-              <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
-                ★ {currentSpecialtyData.rating} Clinical Rating
-              </span>
-            </div>
-
-            <h3 className="text-2xl font-black text-[#0A1C35]">
-              {currentSpecialtyData.doctor}
-            </h3>
-            <p className="text-xs text-slate-500 font-semibold">
-              {currentSpecialtyData.hospital} · Standard Fee: <strong className="text-[#00A896] font-mono text-sm">{currentSpecialtyData.fee}</strong>
-            </p>
-            <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed max-w-xl">
-              {currentSpecialtyData.bio}
-            </p>
-
-            <div className="pt-2">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block mb-2">
-                Today's Open Consultation Slots (Instant Booking):
-              </span>
-              <div className="flex flex-wrap gap-2.5">
-                {currentSpecialtyData.slots.map((slot) => (
-                  <button
-                    key={slot}
-                    type="button"
-                    onClick={() => onOpenAuth?.()}
-                    className="px-4 py-2 rounded-xl bg-white border border-slate-200 hover:border-[#00A896] hover:bg-[#E6F8F5] text-[#0A1C35] hover:text-[#00A896] font-mono font-bold text-xs transition shadow-2xs cursor-pointer flex items-center gap-1.5 group"
-                  >
-                    <Clock size={12} className="text-[#00A896]" />
-                    <span>{slot}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:col-span-5 p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-4">
-            <h4 className="text-sm font-black text-[#0A1C35] flex items-center gap-2">
-              <CheckCircle size={16} className="text-[#00A896]" />
-              <span>Curix Verified Outpatient Assurance</span>
-            </h4>
-            <ul className="space-y-2.5 text-xs text-slate-600 font-medium">
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#00A896]" />
-                Zero waiting queue with real-time arrival check-in
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#00A896]" />
-                Downloadable electronic prescription with dosage instructions
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#00A896]" />
-                Full integration with hospital diagnostic labs
-              </li>
-            </ul>
-
-            <button
+          <div className="flex items-center gap-3 self-start md:self-auto">
+            <button 
+              type="button"
+              onClick={fetchRegisteredDoctors}
+              className="px-4 py-2.5 rounded-xl bg-white border border-slate-200/90 hover:border-slate-300 text-xs font-bold text-slate-700 transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+              title="Refresh Directory"
+            >
+              <RefreshCw size={13} className={loadingDoctors ? 'animate-spin text-[#00A896]' : ''} />
+              <span>Refresh</span>
+            </button>
+            <button 
               type="button"
               onClick={() => onOpenAuth?.()}
-              className="w-full py-3.5 rounded-full btn-curix-primary text-white font-extrabold text-xs tracking-wide shadow-md cursor-pointer flex items-center justify-center gap-2"
+              className="px-5 py-2.5 rounded-xl btn-curix-primary text-xs font-extrabold tracking-wide flex items-center gap-1.5 shadow-md cursor-pointer"
             >
-              <span>Book Appointment in {currentSpecialtyData.name}</span>
-              <ArrowRight size={14} />
+              <span>Patient Portal</span>
+              <ChevronRight size={14} />
             </button>
           </div>
         </div>
+
+        {/* Real-time Search & Department Filtering Controls */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm mb-8 flex flex-col sm:flex-row gap-3 items-center justify-between">
+          <div className="relative w-full sm:flex-1">
+            <Search size={15} className="absolute left-4 top-3.5 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search registered doctor by name or specialty..."
+              value={doctorSearchTerm}
+              onChange={(e) => setDoctorSearchTerm(e.target.value)}
+              className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200/90 rounded-xl text-xs focus:outline-none focus:border-[#00A896] focus:bg-white text-slate-800 transition"
+            />
+            {doctorSearchTerm && (
+              <button 
+                type="button" 
+                onClick={() => setDoctorSearchTerm('')} 
+                className="absolute right-3 top-2.5 text-xs text-slate-400 hover:text-slate-600 cursor-pointer"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+
+          {departments.length > 0 && (
+            <div className="w-full sm:w-64">
+              <select
+                value={selectedDeptFilter}
+                onChange={(e) => setSelectedDeptFilter(e.target.value)}
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200/90 rounded-xl text-xs font-bold text-[#0A1C35] focus:outline-none focus:border-[#00A896] focus:bg-white transition cursor-pointer"
+              >
+                <option value="ALL">All Departments ({departments.length})</option>
+                {departments.map((d) => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+
+        {/* DOCTORS DIRECTORY CARDS GRID */}
+        {loadingDoctors ? (
+          /* Shimmer Loading Skeletons */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((n) => (
+              <div key={n} className="p-6 rounded-[28px] bg-white border border-slate-200/70 shadow-sm animate-pulse space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-slate-200" />
+                  <div className="space-y-2 flex-1">
+                    <div className="h-4 bg-slate-200 rounded w-3/4" />
+                    <div className="h-3 bg-slate-100 rounded w-1/2" />
+                  </div>
+                </div>
+                <div className="h-10 bg-slate-100 rounded-xl" />
+                <div className="h-10 bg-slate-200 rounded-xl mt-4" />
+              </div>
+            ))}
+          </div>
+        ) : filteredRegisteredDoctors.length > 0 ? (
+          /* Real Registered Doctors Cards */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredRegisteredDoctors.map((doc) => {
+              const docName = getDoctorDisplayName(doc);
+              const initials = getDoctorInitials(doc);
+              const specialty = doc.specialty || doc.specialization || 'Clinical Specialist';
+              const department = doc.department?.name || doc.departmentName || '';
+              const qualification = doc.qualification || 'Licensed Physician';
+              const experience = doc.experienceYears !== undefined && doc.experienceYears !== null ? `${doc.experienceYears} Years Exp.` : '';
+              const fee = doc.consultationFee !== undefined && doc.consultationFee !== null ? `$${parseFloat(doc.consultationFee).toFixed(2)}` : '$50.00';
+              const licenseNumber = doc.licenseNumber || '';
+              const doctorImgSrc = doc.image || doc.profileImage || null;
+
+              return (
+                <div 
+                  key={doc.id || docName} 
+                  className="p-6 rounded-[28px] bg-white border border-slate-200/90 shadow-2xs hover:shadow-xl hover:border-[#00A896]/50 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden"
+                >
+                  {/* Subtle top light bar */}
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#00A896]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                  <div>
+                    {/* Header Row: Doctor Image/Avatar + Verification Badge */}
+                    <div className="flex items-start justify-between gap-4 mb-4">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#E6F8F5] via-teal-50 to-teal-100 text-[#00A896] border border-[#00A896]/20 shadow-xs flex items-center justify-center font-black text-base shrink-0 overflow-hidden">
+                        {doctorImgSrc ? (
+                          <img src={doctorImgSrc} alt={docName} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="flex flex-col items-center justify-center leading-tight">
+                            <span>{initials}</span>
+                            <span className="text-[9px] font-bold opacity-70">MD</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col items-end">
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                          <CheckCircle2 size={11} className="stroke-[2.5]" />
+                          <span>Admin Verified</span>
+                        </span>
+                        {licenseNumber && (
+                          <span className="text-[10px] font-mono text-slate-400 font-bold mt-1">
+                            Lic: #{licenseNumber}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Doctor Name & Specialty */}
+                    <div>
+                      <h3 className="text-base font-black text-[#0A1C35] group-hover:text-[#00A896] transition-colors">
+                        {docName}
+                      </h3>
+                      <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                        <span className="text-xs font-bold text-[#00A896]">
+                          {specialty}
+                        </span>
+                        {department && (
+                          <>
+                            <span className="text-slate-300">·</span>
+                            <span className="text-xs text-slate-500 font-medium">
+                              {department}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Credentials & Experience */}
+                    <div className="mt-3.5 pt-3 border-t border-slate-100 flex flex-wrap items-center gap-2 text-xs text-slate-600 font-medium">
+                      <div className="flex items-center gap-1">
+                        <Award size={13} className="text-[#00A896]" />
+                        <span>{qualification}</span>
+                      </div>
+                      {experience && (
+                        <>
+                          <span className="text-slate-300">·</span>
+                          <span className="text-slate-500">{experience}</span>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Availabilities / Shifts Preview (if registered) */}
+                    {Array.isArray(doc.availabilities) && doc.availabilities.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-1">
+                        {doc.availabilities.slice(0, 4).map((av, idx) => (
+                          <span key={idx} className="px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200 text-[10px] font-bold text-slate-600">
+                            {av.dayOfWeek ? av.dayOfWeek.slice(0, 3) : `Shift ${idx + 1}`}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Card Bottom: Consultation Fee & Booking CTA */}
+                  <div className="pt-4 mt-5 border-t border-slate-100 flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                        Consultation Fee
+                      </span>
+                      <span className="text-lg font-black text-[#00A896] font-mono">
+                        {fee}
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => onOpenAuth?.()}
+                      className="px-5 py-2.5 rounded-xl btn-curix-primary text-xs font-extrabold tracking-wide flex items-center gap-1.5 shadow-sm group-hover:shadow-md transition-all cursor-pointer"
+                    >
+                      <Calendar size={13} />
+                      <span>Book Slot</span>
+                      <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          /* Clean Empty State when no registered doctors match */
+          <div className="p-12 sm:p-16 rounded-[32px] bg-slate-50/70 border border-slate-200/90 text-center max-w-2xl mx-auto">
+            <div className="w-16 h-16 rounded-3xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center mx-auto mb-4 shadow-xs">
+              <Stethoscope size={30} />
+            </div>
+            <h3 className="text-lg font-black text-[#0A1C35]">
+              No Registered Physicians Found
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-500 mt-2 font-medium leading-relaxed">
+              {doctorSearchTerm || selectedDeptFilter !== 'ALL'
+                ? 'No registered doctors match your current search query or department filter.'
+                : 'No attending physicians have been provisioned in the hospital system yet. Hospital administrators can register doctors with their license and shift schedules via the Admin Portal.'}
+            </p>
+            <div className="pt-5 flex items-center justify-center gap-3">
+              {(doctorSearchTerm || selectedDeptFilter !== 'ALL') ? (
+                <button
+                  type="button"
+                  onClick={() => { setDoctorSearchTerm(''); setSelectedDeptFilter('ALL'); }}
+                  className="px-5 py-2.5 rounded-full bg-white border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-700 transition shadow-2xs cursor-pointer"
+                >
+                  Clear Filters
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onOpenAuth?.()}
+                  className="px-6 py-2.5 rounded-full btn-curix-primary text-xs font-extrabold tracking-wide shadow-md cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>Admin / Staff Sign In</span>
+                  <ArrowRight size={13} />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* 4. HOW CURIX WORKS (Interactive Step Switcher) */}
@@ -925,7 +1063,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               PRIORITY MEDICAL SUPPORT
             </span>
-            <h3 className="text-2xl sm:text-3xl font-black tracking-tight mt-2">
+            <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight mt-2">
               Need Immediate Medical Assistance or a Home Doctor Visit?
             </h3>
             <p className="text-xs sm:text-sm text-slate-300 max-w-xl font-medium leading-relaxed">
