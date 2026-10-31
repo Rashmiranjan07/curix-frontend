@@ -1163,36 +1163,38 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
         <div className="absolute top-1/3 left-0 w-80 h-80 rounded-full bg-[#00A896]/10 blur-3xl pointer-events-none -translate-y-1/2" />
         <div className="absolute bottom-10 right-0 w-96 h-96 rounded-full bg-sky-400/10 blur-3xl pointer-events-none" />
 
-        {/* Section Header */}
-        <div className="max-w-3xl mb-14 sm:mb-16">
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            <span className="text-[11px] font-black tracking-widest uppercase text-[#00A896] bg-[#E6F8F5] px-3.5 py-1.5 rounded-full border border-[#00A896]/20 shadow-2xs">
-              ABOUT CURIX HEALTHCARE
-            </span>
-            <span className="text-[10.5px] font-extrabold text-slate-500 bg-slate-100 px-3.5 py-1.5 rounded-full flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Est. 2018 · Tertiary Medical Campus
-            </span>
-          </div>
-
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0A1C35] tracking-tight leading-[1.18] mb-4">
-            Transforming Healthcare Through{' '}
-            <span className="bg-gradient-to-r from-[#00A896] via-[#0BC2A8] to-sky-500 bg-clip-text text-transparent">
-              Clinical Excellence
-            </span>{' '}
-            & Digital Precision
-          </h2>
-
-          <p className="text-sm sm:text-base text-slate-600 font-medium leading-relaxed">
-            Curix is an accredited multi-specialty tertiary healthcare institution engineered to harmonize high-precision clinical outcomes with compassionate, zero-friction patient care. By integrating 9 specialized Centres of Excellence with an atomic digital health infrastructure, we eliminate waiting bottlenecks and booking collisions while providing seamless outpatient-to-inpatient transitions.
-          </p>
-        </div>
-
-        {/* 2-Column Showcase: Clinical Pillars (Left) + 3D Hospital Campus Architecture (Right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center mb-0">
+        {/* 2-Column Showcase: Content & Pillars (Left) + Only Image (Right) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 xl:gap-16 items-center">
           
-          {/* Left Column: 4 Clinical Pillars with Spacious Bento Cards */}
-          <div className="lg:col-span-7 space-y-6">
+          {/* Left Column: Header Story, Narrative Paragraph, 4 Clinical Pillars & CTAs */}
+          <div className="lg:col-span-7 space-y-7">
+            
+            {/* Header Block: Badges, Title & Narrative Paragraph */}
+            <div>
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <span className="text-[11px] font-black tracking-widest uppercase text-[#00A896] bg-[#E6F8F5] px-3.5 py-1.5 rounded-full border border-[#00A896]/20 shadow-2xs">
+                  ABOUT CURIX HEALTHCARE
+                </span>
+                <span className="text-[10.5px] font-extrabold text-slate-500 bg-slate-100 px-3.5 py-1.5 rounded-full flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  Est. 2018 · Tertiary Medical Campus
+                </span>
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0A1C35] tracking-tight leading-[1.18] mb-4">
+                Transforming Healthcare Through{' '}
+                <span className="bg-gradient-to-r from-[#00A896] via-[#0BC2A8] to-sky-500 bg-clip-text text-transparent">
+                  Clinical Excellence
+                </span>{' '}
+                & Digital Precision
+              </h2>
+
+              <p className="text-sm sm:text-base text-slate-600 font-medium leading-relaxed">
+                Curix is an accredited multi-specialty tertiary healthcare institution engineered to harmonize high-precision clinical outcomes with compassionate, zero-friction patient care. By integrating 9 specialized Centres of Excellence with an atomic digital health infrastructure, we eliminate waiting bottlenecks and booking collisions while providing seamless outpatient-to-inpatient transitions.
+              </p>
+            </div>
+
+            {/* 4 Clinical Pillars with Spacious Bento Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
               <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/80 shadow-2xs hover:border-[#00A896]/50 hover:shadow-md transition-all flex flex-col justify-between">
                 <div className="w-11 h-11 rounded-2xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center mb-4">
@@ -1244,7 +1246,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
             </div>
 
             {/* Interactive CTAs */}
-            <div className="flex flex-wrap items-center gap-4 pt-4">
+            <div className="flex flex-wrap items-center gap-4 pt-2">
               <a
                 href="#centres-of-excellence"
                 className="px-7 py-3.5 rounded-full btn-curix-primary text-xs font-extrabold flex items-center gap-2 shadow-md hover:shadow-lg transition cursor-pointer"
@@ -1260,38 +1262,36 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
                 <ChevronRight size={14} className="text-[#00A896]" />
               </a>
             </div>
+
           </div>
 
-          {/* Right Column: High-Definition 3D Cardiac Medical Portal */}
-          <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
-            <div className="relative w-full max-w-[400px] sm:max-w-[440px] flex flex-col items-center">
+          {/* Right Column: ONLY the 3D Cardiac Medical Portal (Expanded & Clean White) */}
+          <div className="lg:col-span-5 xl:col-span-5 flex flex-col items-center justify-center relative">
+            <div className="relative w-full max-w-[460px] sm:max-w-[500px] lg:max-w-[540px] flex flex-col items-center">
               
-              {/* Outer Floating Animation Frame */}
-              <div className="relative w-[350px] h-[350px] sm:w-[420px] sm:h-[420px] anim-doctor-float flex items-center justify-center z-10">
+              {/* Outer Floating Animation Frame - Enlarged Scale */}
+              <div className="relative w-[340px] h-[340px] sm:w-[440px] sm:h-[440px] md:w-[480px] md:h-[480px] lg:w-[490px] lg:h-[490px] xl:w-[520px] xl:h-[520px] anim-doctor-float flex items-center justify-center z-10">
                 
                 {/* Ambient Soft Glow Behind the Portal */}
-                <div className="absolute -inset-6 sm:-inset-8 rounded-full bg-gradient-to-tr from-rose-500/25 via-[#00A896]/25 to-cyan-400/20 blur-3xl pointer-events-none anim-pulse-glow" />
+                <div className="absolute -inset-6 sm:-inset-8 rounded-full bg-gradient-to-tr from-[#00A896]/20 via-[#0BC2A8]/15 to-rose-400/15 blur-3xl pointer-events-none anim-pulse-glow" />
 
                 {/* Concentric Dashed Orbit Ring with Orbiting Glowing Markers */}
-                <div className="absolute -inset-4 sm:-inset-5 rounded-full border-2 border-dashed border-[#00A896]/50 pointer-events-none anim-orbit-spin flex items-center justify-between p-2">
+                <div className="absolute -inset-4 sm:-inset-5 rounded-full border-2 border-dashed border-[#00A896]/40 pointer-events-none anim-orbit-spin flex items-center justify-between p-2">
                   <span className="w-3.5 h-3.5 rounded-full bg-rose-500 shadow-[0_0_12px_#F43F5E]" />
                   <span className="w-2.5 h-2.5 rounded-full bg-[#00A896] shadow-[0_0_10px_#00A896]" />
                 </div>
 
-                {/* The Round Shape: Gradient Rim + Bevel Border + Mask (Matching Doctor Portal) */}
-                <div className="w-full h-full rounded-full p-2.5 sm:p-3 bg-gradient-to-b from-[#00A896] via-[#0BC2A8] to-slate-200/60 shadow-[0_20px_50px_rgba(10,28,53,0.22)] ring-8 ring-[#00A896]/15 flex items-center justify-center relative group overflow-hidden">
+                {/* The Round Shape: Clean Gradient Rim + Bevel Border + Mask (Matching Doctor Portal) */}
+                <div className="w-full h-full rounded-full p-2.5 sm:p-3 bg-gradient-to-b from-[#00A896] via-[#0BC2A8] to-slate-200/60 shadow-[0_20px_50px_rgba(10,28,53,0.16)] ring-8 ring-[#00A896]/15 flex items-center justify-center relative group overflow-hidden">
                   
-                  {/* Inner Circular Portal Framing 3D Anatomical Heart */}
-                  <div className="w-full h-full rounded-full overflow-hidden border-[5px] sm:border-[6px] border-white shadow-inner bg-gradient-to-b from-[#0F172A] via-[#0A1C35] to-[#020617] relative flex items-center justify-center">
+                  {/* Inner Circular Portal Framing 3D Anatomical Heart with Pure White Background */}
+                  <div className="w-full h-full rounded-full overflow-hidden border-[5px] sm:border-[6px] border-white shadow-inner bg-white relative flex items-center justify-center">
                     
-                    {/* Glowing Heartbeat Telemetry Grid Background */}
-                    <div className="absolute inset-0 bg-[radial-gradient(#00A896_1px,transparent_1px)] [background-size:18px_18px] opacity-20 pointer-events-none" />
-
                     {/* High-Definition 3D Human Heart Image with Realistic Heartbeat Pulse */}
                     <img
                       src={heart3dImage}
                       alt="Curix 3D Clinical Cardiac Model"
-                      className="w-full h-full object-cover object-center select-none pointer-events-none anim-heart-pulse-3d transition-transform duration-700 group-hover:scale-110"
+                      className="w-full h-full object-cover object-center select-none pointer-events-none anim-heart-pulse-3d transition-transform duration-700 group-hover:scale-105"
                     />
 
                     {/* Dynamic ECG Cardiac Waveform Across Lower Portal */}
@@ -1306,8 +1306,8 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
                       />
                     </svg>
 
-                    {/* Vignette & Soft Specular Lighting Reflection */}
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-t from-slate-950/40 via-transparent to-white/10 pointer-events-none" />
+                    {/* Subtle Top Specular Lighting Reflection for Depth */}
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/30 via-transparent to-slate-900/5 pointer-events-none" />
                   </div>
                 </div>
 
@@ -1340,8 +1340,8 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
               </div>
 
-              {/* Synchronized Floor Shadow Breathing Under Hospital Structure */}
-              <div className="w-[250px] sm:w-[320px] h-6 rounded-full bg-slate-900/30 blur-md pointer-events-none anim-shadow-breath mt-4 z-0" />
+              {/* Synchronized Floor Shadow Breathing Under 3D Heart Structure */}
+              <div className="w-[280px] sm:w-[360px] md:w-[400px] h-7 rounded-full bg-slate-900/25 blur-md pointer-events-none anim-shadow-breath mt-4 z-0" />
             </div>
           </div>
 
