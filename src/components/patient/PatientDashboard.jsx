@@ -49,6 +49,8 @@ export default function PatientDashboard() {
   const [myPrescriptions, setMyPrescriptions] = useState([]);
   const [viewingRx, setViewingRx] = useState(null);
   const [loadingRxDetails, setLoadingRxDetails] = useState(false);
+  const [loadingApptRxId, setLoadingApptRxId] = useState(null);
+  const [pendingRxNotice, setPendingRxNotice] = useState(null);
 
   // 5. Profile State
   const [profile, setProfile] = useState({
@@ -197,6 +199,84 @@ export default function PatientDashboard() {
       } finally {
         setLoadingRxDetails(false);
       }
+    }
+  };
+
+  const handleViewAppointmentPrescription = async (appt) => {
+    if (!appt) return;
+
+    // Check if prescription already linked on appt or present in loaded myPrescriptions
+    let foundRx = appt.prescription || myPrescriptions.find(
+      (rx) => Number(rx.appointmentId) === Number(appt.id) ||
+              Number(rx.appointment?.id) === Number(appt.id) ||
+              (appt.prescriptionId && Number(rx.id) === Number(appt.prescriptionId))
+    );
+
+    if (!foundRx) {
+      setLoadingApptRxId(appt.id);
+      try {
+        const res = await patientApi.getPrescriptionByAppointment(appt.id).catch(() =>
+          api.get(`/prescriptions?appointmentId=${appt.id}`).catch(() =>
+            api.get(`/prescriptions/by-appointment/${appt.id}`)
+          )
+        );
+        const data = res?.data?.data || res?.data;
+        if (data && (data.id || data.diagnosis || (Array.isArray(data) && data.length > 0))) {
+          foundRx = Array.isArray(data) ? data[0] : data;
+        }
+      } catch (err) {
+        console.warn("Could not retrieve prescription for consultation:", err);
+      }
+
+      // If still not found, try refreshing myPrescriptions list just in case
+      if (!foundRx) {
+        try {
+          const rxListRes = await patientApi.getMyPrescriptions();
+          const list = rxListRes.data?.data || rxListRes.data;
+          if (Array.isArray(list)) {
+            setMyPrescriptions(list);
+            foundRx = list.find(
+              (rx) => Number(rx.appointmentId) === Number(appt.id) ||
+                      Number(rx.appointment?.id) === Number(appt.id) ||
+                      (appt.prescriptionId && Number(rx.id) === Number(appt.prescriptionId))
+            );
+          }
+        } catch (e) {
+          console.warn("Vault refresh fallback failed:", e);
+        }
+      }
+      setLoadingApptRxId(null);
+    }
+
+    if (foundRx) {
+      const doctorName = getDoctorName(appt) || getDoctorName(foundRx);
+      const deptName = appt.specialty || appt.departmentName || appt.doctor?.specialty || appt.doctor?.department?.name || foundRx.departmentName || foundRx.specialty || 'General Consultation';
+
+      const enrichedRx = {
+        ...foundRx,
+        appointmentId: foundRx.appointmentId || appt.id,
+        doctorName: foundRx.doctorName || doctorName,
+        doctor: foundRx.doctor || appt.doctor,
+        departmentName: deptName,
+        appointmentDate: appt.appointmentDate || foundRx.appointmentDate,
+        appointmentTime: appt.startTime || appt.appointmentTime
+      };
+
+      if (enrichedRx.id) {
+        setMyPrescriptions((prev) => {
+          if (prev.some((p) => Number(p.id) === Number(enrichedRx.id))) return prev;
+          return [enrichedRx, ...prev];
+        });
+      }
+
+      handleOpenViewingRx(enrichedRx);
+    } else {
+      setPendingRxNotice({
+        appointmentId: appt.id,
+        doctorName: getDoctorName(appt),
+        date: appt.appointmentDate,
+        time: appt.startTime || appt.appointmentTime || ''
+      });
     }
   };
 
@@ -366,6 +446,7 @@ export default function PatientDashboard() {
           </div>
           <div style="text-align: right;">
             <div style="font-size: 14px; font-weight: bold; color: #00A896;">Rx ID: #${viewingRx.id || 'N/A'}</div>
+            ${viewingRx.appointmentId ? `<div style="font-size: 11px; font-family: monospace; color: #64748b; margin-top: 2px;">Consultation Ref: #${viewingRx.appointmentId}</div>` : ''}
             <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Date: ${viewingRx.createdAt ? new Date(viewingRx.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}</div>
           </div>
         </div>
@@ -493,6 +574,7 @@ export default function PatientDashboard() {
           </div>
           <div style="text-align: right;">
             <div style="font-size: 14px; font-weight: bold; color: #00A896;">Rx ID: #${viewingRx.id || 'N/A'}</div>
+            ${viewingRx.appointmentId ? `<div style="font-size: 11px; font-family: monospace; color: #64748b; margin-top: 2px;">Consultation Ref: #${viewingRx.appointmentId}</div>` : ''}
             <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Date: ${viewingRx.createdAt ? new Date(viewingRx.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}</div>
           </div>
         </div>
@@ -900,10 +982,22 @@ export default function PatientDashboard() {
 
                             {isCompleted && (
                               <button
-                                onClick={() => setActiveTab('prescriptions')}
-                                className="px-4 py-2 rounded-xl bg-[#0A1C35] hover:bg-[#132d4e] text-white text-xs font-bold transition shadow-xs cursor-pointer"
+                                onClick={() => handleViewAppointmentPrescription(appt)}
+                                disabled={loadingApptRxId === appt.id}
+                                className="px-4 py-2 rounded-xl bg-[#00A896] hover:bg-[#079181] text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
+                                title="Open Official Prescription Slip"
                               >
-                                View Prescription
+                                {loadingApptRxId === appt.id ? (
+                                  <>
+                                    <Loader2 size={13} className="animate-spin" />
+                                    <span>Loading Slip...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <FileText size={13} />
+                                    <span>View Prescription</span>
+                                  </>
+                                )}
                               </button>
                             )}
                           </div>
@@ -948,15 +1042,27 @@ export default function PatientDashboard() {
                               <div className="w-10 h-10 rounded-2xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center font-bold">
                                 <FileText size={18} />
                               </div>
-                              <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
-                                Rx-ID: #{rx.id}
-                              </span>
+                              <div className="text-right">
+                                <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 block">
+                                  Rx-ID: #{rx.id}
+                                </span>
+                                {rx.appointmentId && (
+                                  <span className="text-[10px] font-mono font-semibold text-slate-400 block mt-1">
+                                    Ref: #{rx.appointmentId}
+                                  </span>
+                                )}
+                              </div>
                             </div>
 
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Clinical Diagnosis</span>
                             <h4 className="text-sm font-extrabold text-[#0A1C35] mt-0.5">{rx.diagnosis || 'Clinical Consultation'}</h4>
 
-                            <p className="text-xs text-slate-500 mt-2 font-medium">
+                            <div className="mt-2 text-xs text-slate-600 font-medium flex items-center gap-1.5">
+                              <Stethoscope size={13} className="text-[#00A896]" />
+                              <span>{getDoctorName(rx)}</span>
+                            </div>
+
+                            <p className="text-xs text-slate-500 mt-1 font-medium">
                               {itemsCount} medication{itemsCount === 1 ? '' : 's'} prescribed · Issued {rx.createdAt ? new Date(rx.createdAt).toLocaleDateString() : 'Recent'}
                             </p>
                           </div>
@@ -1302,6 +1408,9 @@ export default function PatientDashboard() {
               </div>
               <div className="text-right">
                 <span className="text-xs font-mono font-bold text-[#00A896] block">Rx ID: #{viewingRx.id}</span>
+                {viewingRx.appointmentId && (
+                  <span className="text-[11px] font-mono font-semibold text-slate-500 block">Consultation Ref: #{viewingRx.appointmentId}</span>
+                )}
                 <span className="text-xs text-slate-500">Date: {viewingRx.createdAt ? new Date(viewingRx.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}</span>
               </div>
             </div>
@@ -1349,7 +1458,7 @@ export default function PatientDashboard() {
                       const items = extractItems(viewingRx).map(normalizeItem).filter(Boolean);
                       if (items.length === 0) {
                         return (
-                          <tr><td colSpan="5" className="p-6 text-center text-slate-400">{loadingRxDetails ? 'Loading medication details...' : 'No line-item medications recorded.'}</td></tr>
+                          <tr><td colSpan="6" className="p-6 text-center text-slate-400">{loadingRxDetails ? 'Loading medication details...' : 'No line-item medications recorded.'}</td></tr>
                         );
                       }
                       return items.map((m, idx) => (
@@ -1384,6 +1493,59 @@ export default function PatientDashboard() {
               <button type="button" onClick={handlePrint} className="px-6 py-2.5 bg-[#00A896] hover:bg-[#079181] text-white rounded-full text-xs font-bold shadow-md flex items-center gap-2 cursor-pointer">
                 <Printer size={14} />
                 <span>Print Official Slip</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 4: PENDING PRESCRIPTION NOTICE */}
+      {pendingRxNotice && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A1C35]/50 backdrop-blur-xs">
+          <div className="relative w-full max-w-md bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+              <AlertCircle size={24} />
+            </div>
+
+            <div>
+              <h3 className="text-lg font-black text-[#0A1C35]">Prescription Pending Finalization</h3>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                {pendingRxNotice.doctorName} has not published a finalized digital prescription slip for Consultation <span className="font-mono font-bold text-[#0A1C35]">#{pendingRxNotice.appointmentId}</span> yet.
+              </p>
+            </div>
+
+            <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-600 space-y-1.5">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400">Doctor:</span>
+                <span className="font-bold text-[#0A1C35]">{pendingRxNotice.doctorName}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400">Consultation Date:</span>
+                <span className="font-bold text-[#0A1C35]">
+                  {pendingRxNotice.date} {pendingRxNotice.time ? `· ${String(pendingRxNotice.time).slice(0, 5)}` : ''}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400">Vault Status:</span>
+                <span className="font-semibold text-amber-600">Awaiting Physician Upload</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                onClick={() => setPendingRxNotice(null)}
+                className="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  setPendingRxNotice(null);
+                  setActiveTab('prescriptions');
+                }}
+                className="px-4 py-2 bg-[#0A1C35] hover:bg-[#132d4e] text-white rounded-xl text-xs font-bold transition cursor-pointer"
+              >
+                Go to Rx Vault
               </button>
             </div>
           </div>
