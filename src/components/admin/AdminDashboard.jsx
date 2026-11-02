@@ -7,8 +7,10 @@ import {
   Loader2, X, Search, Calendar, ChevronLeft, ChevronRight, 
   Clock, Edit3, Save, Layers, ArrowUpRight, TrendingUp,
   FileCheck2, Check, Zap, Sparkles, LogOut, LayoutDashboard,
-  BarChart3, PieChart, Award, Mail, Phone
+  BarChart3, PieChart, Award, Mail, Phone, FileText, Printer,
+  Download, Eye, AlertTriangle
 } from 'lucide-react';
+import api from '../../services/api';
 
 const WEEKDAYS = [
   { id: 'MONDAY', label: 'Mon' },
@@ -89,6 +91,18 @@ export default function AdminDashboard() {
   const [auditTotalElements, setAuditTotalElements] = useState(0);
   const [auditLoading, setAuditLoading] = useState(false);
 
+  // 5. Doctor-Patient Clinical Relationships & Prescriptions
+  const [doctorInsights, setDoctorInsights] = useState([]);
+  const [allAppointments, setAllAppointments] = useState([]);
+  const [allPrescriptions, setAllPrescriptions] = useState([]);
+  const [relationshipSearch, setRelationshipSearch] = useState('');
+  const [relationshipFilter, setRelationshipFilter] = useState('ALL'); // 'ALL' | 'RX_ISSUED' | 'RX_PENDING' | 'COMPLETED' | 'CONFIRMED'
+  const [relationshipViewMode, setRelationshipViewMode] = useState('doctors'); // 'doctors' | 'consultations'
+  const [selectedDoctorForModal, setSelectedDoctorForModal] = useState(null);
+  const [viewingRx, setViewingRx] = useState(null);
+  const [loadingRxDetails, setLoadingRxDetails] = useState(false);
+  const [selectedApptDetail, setSelectedApptDetail] = useState(null);
+
   useEffect(() => {
     loadAllAdminData();
   }, []);
@@ -101,11 +115,44 @@ export default function AdminDashboard() {
         fetchMetrics(),
         fetchDepartments(),
         fetchDoctors(),
-        fetchAuditLogs(0)
+        fetchAuditLogs(0),
+        fetchDoctorInsights(),
+        fetchAllAppointments(),
+        fetchAllPrescriptions()
       ]);
     } finally {
       setIsSyncing(false);
       setLoading(false);
+    }
+  };
+
+  const fetchDoctorInsights = async () => {
+    try {
+      const res = await adminApi.getDoctorInsights();
+      const list = res.data?.data || res.data;
+      if (Array.isArray(list)) setDoctorInsights(list);
+    } catch (err) {
+      console.warn("Doctor insights fetch fallback:", err);
+    }
+  };
+
+  const fetchAllAppointments = async () => {
+    try {
+      const res = await adminApi.getAllAppointments();
+      const list = res.data?.data || res.data;
+      if (Array.isArray(list)) setAllAppointments(list);
+    } catch (err) {
+      console.warn("All appointments fetch fallback:", err);
+    }
+  };
+
+  const fetchAllPrescriptions = async () => {
+    try {
+      const res = await adminApi.getAllPrescriptions();
+      const list = res.data?.data || res.data;
+      if (Array.isArray(list)) setAllPrescriptions(list);
+    } catch (err) {
+      console.warn("All prescriptions fetch fallback:", err);
     }
   };
 
@@ -164,7 +211,197 @@ export default function AdminDashboard() {
     }
   };
 
-  const getDoctorDisplayName = (doc) => {
+  // Extract items from prescription
+  const extractItems = (rx) => {
+    if (!rx) return [];
+    let raw = rx.items || rx.prescriptionItems || rx.medicines || rx.medicationItems || [];
+    if (typeof raw === 'string') {
+      try {
+        raw = JSON.parse(raw);
+      } catch (e) {
+        return raw.split(',').map((name) => ({ name: name.trim() }));
+      }
+    }
+    return Array.isArray(raw) ? raw : [];
+  };
+
+  const normalizeItem = (item, idx) => {
+    if (!item) return null;
+    if (typeof item === 'string') {
+      return {
+        name: item,
+        dosage: 'As directed',
+        frequency: '1-0-1',
+        duration: '5 days',
+        instructions: 'After meals'
+      };
+    }
+    return {
+      name: item.name || item.medicineName || item.medicationName || item.drugName || item.medicine?.name || `Medication #${idx + 1}`,
+      dosage: item.dosage || item.dose || item.strength || item.dosageAmount || item.mg || item.amount || 'As directed',
+      frequency: item.frequency || item.freq || item.timing || item.schedule || item.dosageFrequency || '1-0-1',
+      duration: item.duration || (item.durationDays ? `${item.durationDays} days` : '') || (item.days ? `${item.days} days` : '') || '5 days',
+      instructions: item.instructions || item.instruction || item.notes || item.specialInstructions || item.directions || 'After meals'
+    };
+  };
+
+  const handleOpenViewingRx = async (rxOrAppt) => {
+    if (!rxOrAppt) return;
+    let rx = rxOrAppt;
+
+    // If an appointment was passed, find its matching prescription
+    if (!rx.items && !rx.diagnosis) {
+      const found = allPrescriptions.find(
+        (p) => Number(p.appointmentId) === Number(rxOrAppt.id) || 
+               (rxOrAppt.prescriptionId && Number(p.id) === Number(rxOrAppt.prescriptionId))
+      );
+      if (found) {
+        rx = found;
+      } else if (rxOrAppt.prescriptionId || rxOrAppt.id) {
+        setLoadingRxDetails(true);
+        try {
+          const id = rxOrAppt.prescriptionId || rxOrAppt.id;
+          const res = await api.get(`/prescriptions/${id}`).catch(() =>
+            api.get(`/prescriptions/appointment/${rxOrAppt.id}`)
+          );
+          const data = res?.data?.data || res?.data;
+          if (data && typeof data === 'object') {
+            rx = { ...rxOrAppt, ...data };
+          }
+        } catch (e) {
+          console.warn("Prescription fetch fallback:", e);
+        } finally {
+          setLoadingRxDetails(false);
+        }
+      }
+    }
+
+    setViewingRx(rx);
+  };
+
+  const handleDownloadSlip = () => {
+    if (!viewingRx) return;
+    const activeItems = extractItems(viewingRx).map(normalizeItem).filter(Boolean);
+    const docName = viewingRx.doctorName || getDoctorDisplayName(viewingRx);
+    const patName = viewingRx.patientName || `Patient #${viewingRx.patientId || 'Record'}`;
+    const deptName = viewingRx.departmentName || viewingRx.specialty || 'General Consultation';
+
+    const rowsHtml = activeItems.map((m, idx) => `
+      <tr style="border-bottom: 1px solid #e2e8f0;">
+        <td style="padding: 10px; font-weight: bold; color: #64748b;">${idx + 1}</td>
+        <td style="padding: 10px; font-weight: bold; color: #0f172a;">${m.name}</td>
+        <td style="padding: 10px; color: #00A896; font-weight: bold;">${m.dosage}</td>
+        <td style="padding: 10px; color: #334155;">${m.frequency}</td>
+        <td style="padding: 10px; color: #334155;">${m.duration}</td>
+        <td style="padding: 10px; color: #475569; font-style: italic;">${m.instructions}</td>
+      </tr>
+    `).join('');
+
+    const slipDocument = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Curix-Prescription-Rx#${viewingRx.id || 'Slip'}</title>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; color: #1e293b; background: #fff; }
+          .header { border-bottom: 2px solid #00A896; padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; }
+          .title { font-size: 24px; font-weight: 900; color: #0A1C35; margin: 0; }
+          .box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 20px; display: flex; justify-content: space-between; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+          th { background: #f1f5f9; padding: 10px; text-align: left; font-size: 11px; text-transform: uppercase; color: #475569; }
+          .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; font-size: 12px; color: #64748b; }
+          .seal { border-bottom: 1px solid #94a3b8; width: 180px; text-align: center; padding-bottom: 4px; font-weight: bold; color: #0f172a; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <h1 class="title">CURIX HEALTHCARE SYSTEM</h1>
+            <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">Outpatient Department (OPD) · Administrative Master Copy</p>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 14px; font-weight: bold; color: #00A896;">Rx ID: #${viewingRx.id || 'N/A'}</div>
+            ${viewingRx.appointmentId ? `<div style="font-size: 11px; font-family: monospace; color: #64748b; margin-top: 2px;">Consultation Ref: #${viewingRx.appointmentId}</div>` : ''}
+            <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Date: ${viewingRx.createdAt ? new Date(viewingRx.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}</div>
+          </div>
+        </div>
+
+        <div class="box">
+          <div>
+            <span style="font-size: 10px; text-transform: uppercase; color: #94a3b8; font-weight: bold; display: block;">Patient Record</span>
+            <strong style="font-size: 15px; color: #0f172a;">${patName}</strong>
+            <div style="font-size: 12px; color: #64748b; margin-top: 2px;">
+              Patient Ref: #${viewingRx.patientId || 'N/A'}
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <span style="font-size: 10px; text-transform: uppercase; color: #94a3b8; font-weight: bold; display: block;">Attending Physician</span>
+            <strong style="font-size: 15px; color: #0f172a;">${docName}</strong>
+            <div style="font-size: 12px; color: #00A896; font-weight: 600;">${deptName}</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <span style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #64748b;">Clinical Diagnosis</span>
+          <div style="background: #fff; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 6px;">
+            ${viewingRx.diagnosis || 'Routine Clinical Consultation'}
+          </div>
+        </div>
+
+        <div>
+          <span style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #64748b;">℞ Prescribed Medications</span>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Medication</th>
+                <th>Dosage / Strength</th>
+                <th>Frequency</th>
+                <th>Duration</th>
+                <th>Instructions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        </div>
+
+        ${viewingRx.notes ? `
+          <div style="margin-top: 20px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px;">
+            <span style="font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase;">Doctor's Notes & Advice:</span>
+            <p style="margin: 4px 0 0; font-size: 12px; color: #334155;">${viewingRx.notes}</p>
+          </div>
+        ` : ''}
+
+        <div class="footer">
+          <span>Curix Administrative Digital Medical Record Copy</span>
+          <div>
+            <div class="seal">Digitally Authorized</div>
+            <div style="font-size: 10px; text-transform: uppercase; text-align: center; margin-top: 4px;">Medical Officer Seal</div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob([slipDocument], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Curix-Prescription-Rx#${viewingRx.id || 'Slip'}.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+  
+    const getDoctorDisplayName = (doc) => {
     if (!doc) return 'Attending Physician';
     if (doc.firstName && doc.lastName) return `Dr. ${doc.firstName} ${doc.lastName}`;
     if (doc.fullName) return doc.fullName.startsWith('Dr.') ? doc.fullName : `Dr. ${doc.fullName}`;
@@ -329,6 +566,89 @@ export default function AdminDashboard() {
     return nameMatch && deptMatch;
   });
 
+  // Merged Doctor Insights (from backend API + live fallback computation)
+  const computedDoctorInsights = React.useMemo(() => {
+    if (doctorInsights && doctorInsights.length > 0) return doctorInsights;
+    
+    // Dynamic fallback calculation
+    return doctors.map((doc) => {
+      const docAppts = allAppointments.filter((a) => Number(a.doctorId) === Number(doc.id));
+      const completed = docAppts.filter((a) => a.status === 'COMPLETED').length;
+      const rxIssued = docAppts.filter((a) => a.hasPrescription || a.prescriptionId).length;
+      const active = docAppts.filter((a) => a.status !== 'COMPLETED' && a.status !== 'CANCELLED').length;
+      const cancelled = docAppts.filter((a) => a.status === 'CANCELLED').length;
+      const uniquePatients = new Set(docAppts.map((a) => a.patientId).filter(Boolean)).size;
+      const totalRev = docAppts
+        .filter((a) => a.status === 'COMPLETED')
+        .reduce((sum, a) => sum + Number(a.consultationFee || doc.consultationFee || 0), 0);
+      
+      const pendingRx = Math.max(0, completed - rxIssued);
+      const rxRate = completed > 0 ? Math.round((rxIssued * 100.0 / completed) * 10) / 10 : 0;
+
+      return {
+        doctorId: doc.id,
+        doctorName: getDoctorDisplayName(doc),
+        email: doc.email || (doc.user && doc.user.email) || '',
+        departmentName: doc.department?.name || doc.departmentName || 'General Medicine',
+        specialty: doc.specialty || 'General Practitioner',
+        licenseNumber: doc.licenseNumber || 'LIC-VERIFIED',
+        consultationFee: doc.consultationFee,
+        totalAppointments: docAppts.length,
+        completedAppointments: completed,
+        prescriptionsIssued: rxIssued,
+        pendingPrescriptions: pendingRx,
+        prescriptionRate: rxRate,
+        activeAppointments: active,
+        cancelledAppointments: cancelled,
+        uniquePatientsCount: uniquePatients,
+        totalRevenue: totalRev,
+        appointments: docAppts
+      };
+    }).sort((a, b) => b.totalAppointments - a.totalAppointments);
+  }, [doctorInsights, doctors, allAppointments]);
+
+  // Overall Relationship Stats
+  const totalConsultationsCount = allAppointments.length > 0 ? allAppointments.length : (metrics?.totalAppointments || 0);
+  const totalPrescriptionsIssuedCount = allAppointments.filter((a) => a.hasPrescription || a.prescriptionId).length || 
+                                       allPrescriptions.length || 
+                                       Number(metrics?.totalPrescriptions || 0);
+  const totalPendingPrescriptionsCount = allAppointments.filter((a) => a.status === 'COMPLETED' && !a.hasPrescription && !a.prescriptionId).length;
+  const overallRxRate = totalConsultationsCount > 0 
+    ? Math.round((totalPrescriptionsIssuedCount / totalConsultationsCount) * 100) 
+    : 0;
+
+  // Filtered consultations for Relationship stream
+  const filteredConsultations = allAppointments.filter((appt) => {
+    const q = relationshipSearch.toLowerCase();
+    const docMatch = (appt.doctorName || '').toLowerCase().includes(q) ||
+                     (appt.departmentName || '').toLowerCase().includes(q);
+    const patMatch = (appt.patientName || '').toLowerCase().includes(q) ||
+                     (appt.patientNumber || '').toLowerCase().includes(q);
+    const reasonMatch = (appt.reasonForVisit || '').toLowerCase().includes(q);
+    const matchesSearch = !q || docMatch || patMatch || reasonMatch;
+
+    if (!matchesSearch) return false;
+
+    if (relationshipFilter === 'ALL') return true;
+    if (relationshipFilter === 'RX_ISSUED') return appt.hasPrescription || appt.prescriptionId;
+    if (relationshipFilter === 'RX_PENDING') return appt.status === 'COMPLETED' && !appt.hasPrescription && !appt.prescriptionId;
+    if (relationshipFilter === 'COMPLETED') return appt.status === 'COMPLETED';
+    if (relationshipFilter === 'ACTIVE') return appt.status !== 'COMPLETED' && appt.status !== 'CANCELLED';
+    if (relationshipFilter === 'CANCELLED') return appt.status === 'CANCELLED';
+
+    return true;
+  });
+
+  // Filtered Doctors for Relationship Doctors view
+  const filteredRelationshipDoctors = computedDoctorInsights.filter((doc) => {
+    const q = relationshipSearch.toLowerCase();
+    return !q || 
+      (doc.doctorName || '').toLowerCase().includes(q) ||
+      (doc.departmentName || '').toLowerCase().includes(q) ||
+      (doc.specialty || '').toLowerCase().includes(q) ||
+      (doc.licenseNumber || '').toLowerCase().includes(q);
+  });
+
   // Computed Metrics
   const completedAppts = Number(metrics?.completedAppointments ?? metrics?.statusCounts?.COMPLETED ?? 0);
   const activeAppts = Number(metrics?.pendingOrConfirmedAppointments ?? metrics?.statusCounts?.CONFIRMED ?? 0);
@@ -374,6 +694,7 @@ export default function AdminDashboard() {
             <span className="text-[10px] uppercase font-black tracking-wider text-slate-400 px-3 block mb-2">Main Menu</span>
             {[
               { id: 'analytics', label: 'Dashboard', icon: LayoutDashboard },
+              { id: 'relationships', label: 'Doctor-Patient Matrix', icon: Users, count: allAppointments.length || undefined },
               { id: 'departments', label: 'Clinical Units', icon: Building2, count: departments.length },
               { id: 'doctors', label: 'Physicians', icon: Stethoscope, count: doctors.length },
               { id: 'audit', label: 'Audit Trail', icon: Layers }
@@ -625,6 +946,368 @@ export default function AdminDashboard() {
               </div>
             )}
 
+            {/* TAB 1.5: DOCTOR-PATIENT RELATIONSHIP MATRIX & CLINICAL PRESCRIPTION LEDGER */}
+            {activeTab === 'relationships' && (
+              <div className="space-y-6">
+                
+                {/* Header with View Toggle */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <span className="text-[11px] font-black tracking-widest text-[#00A896] uppercase block mb-1">
+                      CLINICAL GOVERNANCE & RELATIONSHIPS
+                    </span>
+                    <h2 className="text-2xl font-black text-[#0A1C35] tracking-tight">Doctor & Patient Matrix</h2>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Monitor physician appointment load, patient consults, and prescription fulfillment across all departments.
+                    </p>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <div className="flex p-1 bg-white border border-slate-200/85 rounded-2xl shadow-2xs">
+                      <button
+                        type="button"
+                        onClick={() => setRelationshipViewMode('doctors')}
+                        className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                          relationshipViewMode === 'doctors'
+                            ? 'bg-[#00A896] text-white shadow-xs'
+                            : 'text-slate-600 hover:text-[#00A896]'
+                        }`}
+                      >
+                        <Stethoscope size={13} />
+                        <span>Physicians Ledger</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setRelationshipViewMode('consultations')}
+                        className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                          relationshipViewMode === 'consultations'
+                            ? 'bg-[#00A896] text-white shadow-xs'
+                            : 'text-slate-600 hover:text-[#00A896]'
+                        }`}
+                      >
+                        <Calendar size={13} />
+                        <span>All Consultations ({allAppointments.length})</span>
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={loadAllAdminData}
+                      disabled={isSyncing}
+                      className="p-2.5 rounded-2xl bg-white border border-slate-200 text-slate-600 hover:text-[#00A896] transition cursor-pointer shadow-2xs"
+                      title="Sync Clinical Matrix"
+                    >
+                      <RefreshCw size={14} className={isSyncing ? 'animate-spin text-[#00A896]' : ''} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* 4 TOP RELATIONSHIP STATS */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                  <div className="p-6 rounded-3xl bg-white border border-slate-200/85 shadow-sm flex flex-col justify-between hover:border-[#00A896]/30 transition">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Hospital Consultations</span>
+                      <div className="w-10 h-10 rounded-2xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center">
+                        <Calendar size={18} />
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <span className="text-3xl font-black text-[#0A1C35] font-mono">
+                        {totalConsultationsCount}
+                      </span>
+                    </div>
+                    <div className="mt-2 text-[11px] text-[#00A896] font-semibold flex items-center gap-1">
+                      <CheckCircle2 size={12} /> {completedAppts} Completed Visits
+                    </div>
+                  </div>
+
+                  <div className="p-6 rounded-3xl bg-white border border-slate-200/85 shadow-sm flex flex-col justify-between hover:border-[#00A896]/30 transition">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Prescriptions Issued</span>
+                      <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                        <FileCheck2 size={18} />
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <span className="text-3xl font-black text-emerald-700 font-mono">
+                        {totalPrescriptionsIssuedCount}
+                      </span>
+                    </div>
+                    <div className="mt-2 text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
+                      <Sparkles size={12} /> {overallRxRate}% Overall Rx Rate
+                    </div>
+                  </div>
+
+                  <div className="p-6 rounded-3xl bg-white border border-slate-200/85 shadow-sm flex flex-col justify-between hover:border-amber-400/40 transition">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Pending Doctor Rx</span>
+                      <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                        <AlertTriangle size={18} />
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <span className={`text-3xl font-black font-mono ${totalPendingPrescriptionsCount > 0 ? 'text-amber-600' : 'text-slate-700'}`}>
+                        {totalPendingPrescriptionsCount}
+                      </span>
+                    </div>
+                    <div className="mt-2 text-[11px] text-amber-600 font-semibold flex items-center gap-1">
+                      <Clock size={12} /> Awaiting Physician Finalization
+                    </div>
+                  </div>
+
+                  <div className="p-6 rounded-3xl bg-white border border-slate-200/85 shadow-sm flex flex-col justify-between hover:border-[#00A896]/30 transition">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Consulting Physicians</span>
+                      <div className="w-10 h-10 rounded-2xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center">
+                        <Stethoscope size={18} />
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <span className="text-3xl font-black text-[#0A1C35] font-mono">
+                        {computedDoctorInsights.filter((d) => d.totalAppointments > 0).length} / {doctors.length}
+                      </span>
+                    </div>
+                    <div className="mt-2 text-[11px] text-slate-500 font-semibold flex items-center gap-1">
+                      <Users size={12} className="text-[#00A896]" /> Active Clinical Roster
+                    </div>
+                  </div>
+                </div>
+
+                {/* Filter & Search Bar */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="relative flex-1">
+                    <Search size={15} className="absolute left-4 top-3.5 text-slate-400" />
+                    <input
+                      type="text"
+                      placeholder="Search doctor, patient name, patient record #, or diagnosis..."
+                      value={relationshipSearch}
+                      onChange={(e) => setRelationshipSearch(e.target.value)}
+                      className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200/85 rounded-2xl text-xs focus:outline-none focus:border-[#00A896] shadow-2xs"
+                    />
+                  </div>
+
+                  {relationshipViewMode === 'consultations' && (
+                    <div className="sm:w-60">
+                      <select
+                        value={relationshipFilter}
+                        onChange={(e) => setRelationshipFilter(e.target.value)}
+                        className="w-full px-4 py-3 bg-white border border-slate-200/85 rounded-2xl text-xs font-bold text-[#0A1C35] focus:outline-none focus:border-[#00A896] shadow-2xs"
+                      >
+                        <option value="ALL">All Consultations ({allAppointments.length})</option>
+                        <option value="RX_ISSUED">✓ Prescriptions Issued</option>
+                        <option value="RX_PENDING">⚠ Pending Rx (Completed)</option>
+                        <option value="COMPLETED">Completed Visits</option>
+                        <option value="ACTIVE">Upcoming / Scheduled</option>
+                        <option value="CANCELLED">Cancelled</option>
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                {/* VIEW 1: PHYSICIANS CONSULTATION & PRESCRIPTION LEDGER */}
+                {relationshipViewMode === 'doctors' && (
+                  <div className="space-y-4">
+                    {filteredRelationshipDoctors.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        {filteredRelationshipDoctors.map((doc) => {
+                          const initials = (doc.doctorName || '').replace('Dr. ', '').split(' ').map((n) => n[0]).join('');
+                          const hasAppts = doc.totalAppointments > 0;
+                          return (
+                            <div
+                              key={doc.doctorId}
+                              className="p-6 rounded-3xl bg-white border border-slate-200/85 shadow-sm hover:border-[#00A896]/40 transition flex flex-col justify-between space-y-4"
+                            >
+                              <div>
+                                <div className="flex items-start justify-between">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 rounded-2xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center font-extrabold text-sm shadow-xs">
+                                      {initials || 'DR'}
+                                    </div>
+                                    <div>
+                                      <h4 className="text-sm font-extrabold text-[#0A1C35]">{doc.doctorName}</h4>
+                                      <span className="text-[11px] text-[#00A896] font-bold block">{doc.specialty} · {doc.departmentName}</span>
+                                      <span className="text-[10px] text-slate-400 font-mono block">Lic: {doc.licenseNumber}</span>
+                                    </div>
+                                  </div>
+
+                                  <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${
+                                    doc.pendingPrescriptions > 0
+                                      ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                      : hasAppts
+                                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                      : 'bg-slate-50 text-slate-500 border border-slate-200'
+                                  }`}>
+                                    {doc.pendingPrescriptions > 0 ? `${doc.pendingPrescriptions} Rx Pending` : hasAppts ? 'Rx Compliant' : 'No Visits'}
+                                  </span>
+                                </div>
+
+                                {/* Appointment & Prescription Stats Matrix */}
+                                <div className="mt-4 grid grid-cols-3 gap-2.5 p-3.5 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+                                  <div>
+                                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Appts</span>
+                                    <span className="text-base font-black text-[#0A1C35] font-mono mt-0.5 block">{doc.totalAppointments}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Completed</span>
+                                    <span className="text-base font-black text-emerald-700 font-mono mt-0.5 block">{doc.completedAppointments}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Prescriptions</span>
+                                    <span className="text-base font-black text-[#00A896] font-mono mt-0.5 block">{doc.prescriptionsIssued}</span>
+                                  </div>
+                                </div>
+
+                                <div className="mt-3 flex items-center justify-between text-xs text-slate-600 px-1">
+                                  <span className="flex items-center gap-1.5 font-medium">
+                                    <Users size={13} className="text-[#00A896]" />
+                                    <span>{doc.uniquePatientsCount} Unique Patients</span>
+                                  </span>
+                                  <span className="font-mono font-bold text-slate-700">
+                                    Revenue: <span className="text-emerald-700 font-black">${doc.totalRevenue}</span>
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                                <span className="text-[11px] font-bold text-slate-500">
+                                  Rx Issuance Rate: <strong className="text-[#00A896] font-mono">{doc.prescriptionRate}%</strong>
+                                </span>
+                                
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedDoctorForModal(doc)}
+                                  className="px-4 py-2 rounded-xl bg-[#0A1C35] hover:bg-[#132d4e] text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                                >
+                                  <Eye size={13} />
+                                  <span>View Patients & Visits ({doc.totalAppointments})</span>
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="py-16 text-center bg-white rounded-3xl border border-slate-200/85 shadow-sm">
+                        <Stethoscope size={36} className="mx-auto text-slate-300 mb-2" />
+                        <p className="text-sm font-bold text-[#0A1C35]">No doctors match your query</p>
+                        <p className="text-xs text-slate-400 mt-1">Try clearing the search input above.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* VIEW 2: ALL CONSULTATIONS STREAM */}
+                {relationshipViewMode === 'consultations' && (
+                  <div className="bg-white rounded-3xl border border-slate-200/85 shadow-sm overflow-hidden">
+                    {filteredConsultations.length > 0 ? (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left text-xs">
+                          <thead>
+                            <tr className="bg-slate-50 border-b border-slate-200 text-[10px] uppercase font-bold text-slate-500">
+                              <th className="p-4">Ref # & Date</th>
+                              <th className="p-4">Attending Doctor</th>
+                              <th className="p-4">Patient Dossier</th>
+                              <th className="p-4">Reason for Visit</th>
+                              <th className="p-4">Status</th>
+                              <th className="p-4">Prescription Status</th>
+                              <th className="p-4 text-right">Fee / Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 font-medium">
+                            {filteredConsultations.map((appt) => {
+                              const isCompleted = appt.status === 'COMPLETED';
+                              const hasRx = Boolean(appt.hasPrescription || appt.prescriptionId);
+                              return (
+                                <tr key={appt.id} className="hover:bg-slate-50/80 transition">
+                                  <td className="p-4">
+                                    <span className="font-mono font-bold text-[#0A1C35] block">#{appt.id}</span>
+                                    <span className="text-[11px] text-slate-400 block mt-0.5">
+                                      {appt.appointmentDate} · {String(appt.startTime || '').slice(0, 5)}
+                                    </span>
+                                  </td>
+
+                                  <td className="p-4">
+                                    <div className="font-bold text-[#0A1C35] flex items-center gap-1.5">
+                                      <Stethoscope size={13} className="text-[#00A896]" />
+                                      <span>{appt.doctorName || 'Attending Doctor'}</span>
+                                    </div>
+                                    <span className="text-[11px] text-slate-400 block mt-0.5">{appt.departmentName || 'General'}</span>
+                                  </td>
+
+                                  <td className="p-4">
+                                    <span className="font-bold text-[#0A1C35] block">{appt.patientName || `Patient #${appt.patientId}`}</span>
+                                    {appt.patientNumber && (
+                                      <span className="text-[10px] font-mono text-slate-400 block mt-0.5">Rec: {appt.patientNumber}</span>
+                                    )}
+                                  </td>
+
+                                  <td className="p-4 max-w-xs truncate text-slate-600">
+                                    {appt.reasonForVisit || 'Routine Consultation'}
+                                  </td>
+
+                                  <td className="p-4">
+                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${
+                                      appt.status === 'COMPLETED'
+                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                        : appt.status === 'CANCELLED'
+                                        ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                                        : 'bg-[#E6F8F5] text-[#00A896] border border-teal-200'
+                                    }`}>
+                                      {appt.status}
+                                    </span>
+                                  </td>
+
+                                  <td className="p-4">
+                                    {hasRx ? (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleOpenViewingRx(appt)}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[11px] font-bold border border-emerald-200 transition cursor-pointer"
+                                        title="View official prescription slip"
+                                      >
+                                        <FileText size={12} className="text-emerald-600" />
+                                        <span>✓ Rx Issued {appt.prescriptionId ? `(#${appt.prescriptionId})` : ''}</span>
+                                      </button>
+                                    ) : isCompleted ? (
+                                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-50 text-amber-700 text-[11px] font-bold border border-amber-200">
+                                        <AlertTriangle size={12} />
+                                        <span>⚠ Rx Pending Upload</span>
+                                      </span>
+                                    ) : (
+                                      <span className="text-[11px] text-slate-400 italic">Upcoming</span>
+                                    )}
+                                  </td>
+
+                                  <td className="p-4 text-right">
+                                    <span className="font-mono font-bold text-slate-700 block mb-1">
+                                      ${appt.consultationFee !== undefined ? appt.consultationFee : '50.00'}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => setSelectedApptDetail(appt)}
+                                      className="text-[11px] font-bold text-[#00A896] hover:underline cursor-pointer"
+                                    >
+                                      Inspect Dossier
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <div className="py-16 text-center">
+                        <Calendar size={36} className="mx-auto text-slate-300 mb-2" />
+                        <p className="text-sm font-bold text-[#0A1C35]">No consultations found</p>
+                        <p className="text-xs text-slate-400 mt-1">Adjust search parameters or filter options.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+              </div>
+            )}
+
             {/* TAB 2: DEPARTMENTS */}
             {activeTab === 'departments' && (
               <div className="space-y-6">
@@ -729,20 +1412,63 @@ export default function AdminDashboard() {
                                 <span className="font-mono text-slate-700">{doc.licenseNumber || 'LIC-VERIFIED'}</span>
                               </div>
                             </div>
+
+                            {/* Clinical Performance & Rx Fulfillment Badge */}
+                            {(() => {
+                              const insight = computedDoctorInsights.find((i) => Number(i.doctorId) === Number(doc.id));
+                              const totalApptsForDoc = insight ? insight.totalAppointments : 0;
+                              const completedForDoc = insight ? insight.completedAppointments : 0;
+                              const rxCount = insight ? insight.prescriptionsIssued : 0;
+                              const pendingRx = insight ? insight.pendingPrescriptions : 0;
+                              const rate = insight ? insight.prescriptionRate : 0;
+
+                              return (
+                                <div className="mt-3 p-2.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between text-[11px]">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-bold text-[#0A1C35]">{totalApptsForDoc} Appts</span>
+                                    <span className="text-slate-300">·</span>
+                                    <span className="text-emerald-700 font-bold">{completedForDoc} Completed</span>
+                                  </div>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className={`px-2 py-0.5 rounded-md font-mono font-bold text-[10px] ${
+                                      pendingRx > 0 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
+                                    }`}>
+                                      {rxCount} Rx ({rate}%)
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })()}
                           </div>
 
-                          <div className="pt-4 flex items-center justify-between">
+                          <div className="pt-4 flex items-center justify-between gap-2">
                             <div>
                               <span className="text-[10px] font-bold text-slate-400 uppercase block">Consultation Fee</span>
                               <span className="text-base font-black text-[#00A896] font-mono">${doc.consultationFee !== undefined ? doc.consultationFee : '50.00'}</span>
                             </div>
-                            <button
-                              onClick={() => handleOpenEditDoctor(doc)}
-                              className="px-4 py-2 rounded-xl bg-[#F4F8FB] hover:bg-[#E6F8F5] text-[#0A1C35] hover:text-[#00A896] text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border border-slate-200"
-                            >
-                              <Edit3 size={13} />
-                              <span>Edit Profile</span>
-                            </button>
+                            
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const ins = computedDoctorInsights.find((i) => Number(i.doctorId) === Number(doc.id));
+                                  setSelectedDoctorForModal(ins || doc);
+                                }}
+                                className="px-3.5 py-2 rounded-xl bg-[#E6F8F5] hover:bg-[#cbf1eb] text-[#00A896] text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                                title="View patient consultations & prescriptions"
+                              >
+                                <Users size={13} />
+                                <span>Patients & Rx</span>
+                              </button>
+
+                              <button
+                                onClick={() => handleOpenEditDoctor(doc)}
+                                className="px-3.5 py-2 rounded-xl bg-[#F4F8FB] hover:bg-[#E6F8F5] text-[#0A1C35] hover:text-[#00A896] text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border border-slate-200"
+                              >
+                                <Edit3 size={13} />
+                                <span>Edit</span>
+                              </button>
+                            </div>
                           </div>
                         </div>
                       );
@@ -944,6 +1670,386 @@ export default function AdminDashboard() {
                 <button type="submit" disabled={doctorSaving} className="px-6 py-2.5 bg-[#00A896] hover:bg-[#079181] text-white rounded-full font-bold shadow-md cursor-pointer">Provision Account</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 4: DOCTOR'S PATIENT CONSULTATIONS & PRESCRIPTIONS DOSSIER */}
+      {selectedDoctorForModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A1C35]/50 backdrop-blur-xs">
+          <div className="relative w-full max-w-4xl bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto space-y-6">
+            <button
+              onClick={() => setSelectedDoctorForModal(null)}
+              className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+
+            {/* Doctor Profile Banner */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-[#00A896] text-white flex items-center justify-center font-black text-sm shadow-md shadow-[#00A896]/20">
+                  <Stethoscope size={22} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-[#0A1C35]">{selectedDoctorForModal.doctorName || getDoctorDisplayName(selectedDoctorForModal)}</h3>
+                  <p className="text-xs text-[#00A896] font-bold">
+                    {selectedDoctorForModal.specialty} · {selectedDoctorForModal.departmentName}
+                  </p>
+                </div>
+              </div>
+
+              <div className="text-right">
+                <span className="text-[10px] font-bold uppercase text-slate-400 block">Consultation Fee</span>
+                <span className="text-base font-black text-[#0A1C35] font-mono">${selectedDoctorForModal.consultationFee || '50.00'}</span>
+              </div>
+            </div>
+
+            {/* Stats Overview Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Visits</span>
+                <span className="text-lg font-black text-[#0A1C35] font-mono mt-0.5 block">{selectedDoctorForModal.totalAppointments || (selectedDoctorForModal.appointments ? selectedDoctorForModal.appointments.length : 0)}</span>
+              </div>
+              <div className="p-3.5 bg-emerald-50 rounded-2xl border border-emerald-100 text-center">
+                <span className="text-[10px] uppercase font-bold text-emerald-600 block">Completed</span>
+                <span className="text-lg font-black text-emerald-800 font-mono mt-0.5 block">{selectedDoctorForModal.completedAppointments || 0}</span>
+              </div>
+              <div className="p-3.5 bg-[#E6F8F5] rounded-2xl border border-teal-100 text-center">
+                <span className="text-[10px] uppercase font-bold text-[#00A896] block">Rx Issued</span>
+                <span className="text-lg font-black text-[#00A896] font-mono mt-0.5 block">{selectedDoctorForModal.prescriptionsIssued || 0}</span>
+              </div>
+              <div className="p-3.5 bg-amber-50 rounded-2xl border border-amber-100 text-center">
+                <span className="text-[10px] uppercase font-bold text-amber-600 block">Pending Rx</span>
+                <span className="text-lg font-black text-amber-700 font-mono mt-0.5 block">{selectedDoctorForModal.pendingPrescriptions || 0}</span>
+              </div>
+            </div>
+
+            {/* Patient Appointments Table */}
+            <div>
+              <h4 className="text-xs font-black uppercase text-[#0A1C35] tracking-wider mb-3">
+                Patient Consultations & Prescriptions History
+              </h4>
+
+              {(() => {
+                const appts = selectedDoctorForModal.appointments || 
+                              allAppointments.filter((a) => Number(a.doctorId) === Number(selectedDoctorForModal.doctorId || selectedDoctorForModal.id));
+
+                if (!appts || appts.length === 0) {
+                  return (
+                    <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-100">
+                      <Users size={28} className="mx-auto text-slate-300 mb-2" />
+                      <p className="text-xs font-bold text-[#0A1C35]">No patient consultations recorded for this doctor</p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="border border-slate-200 rounded-2xl overflow-hidden">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="bg-slate-50 border-b border-slate-200 text-[10px] uppercase font-bold text-slate-500">
+                          <th className="p-3">Ref & Date</th>
+                          <th className="p-3">Patient Name</th>
+                          <th className="p-3">Clinical Reason</th>
+                          <th className="p-3">Status</th>
+                          <th className="p-3">Prescription Status</th>
+                          <th className="p-3 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {appts.map((appt) => {
+                          const hasRx = Boolean(appt.hasPrescription || appt.prescriptionId);
+                          const isCompleted = appt.status === 'COMPLETED';
+                          return (
+                            <tr key={appt.id} className="hover:bg-slate-50/70">
+                              <td className="p-3">
+                                <span className="font-mono font-bold text-[#0A1C35] block">#{appt.id}</span>
+                                <span className="text-[10px] text-slate-400 block mt-0.5">
+                                  {appt.appointmentDate} · {String(appt.startTime || '').slice(0, 5)}
+                                </span>
+                              </td>
+                              <td className="p-3">
+                                <span className="font-bold text-[#0A1C35] block">{appt.patientName || `Patient #${appt.patientId}`}</span>
+                                {appt.patientNumber && (
+                                  <span className="text-[10px] font-mono text-slate-400 block">Rec: {appt.patientNumber}</span>
+                                )}
+                              </td>
+                              <td className="p-3 max-w-[200px] truncate text-slate-600">
+                                {appt.reasonForVisit || 'Routine Consultation'}
+                              </td>
+                              <td className="p-3">
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                                  appt.status === 'COMPLETED'
+                                    ? 'bg-emerald-50 text-emerald-700'
+                                    : appt.status === 'CANCELLED'
+                                    ? 'bg-rose-50 text-rose-700'
+                                    : 'bg-[#E6F8F5] text-[#00A896]'
+                                }`}>
+                                  {appt.status}
+                                </span>
+                              </td>
+                              <td className="p-3">
+                                {hasRx ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenViewingRx(appt)}
+                                    className="px-2.5 py-1 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[11px] font-bold border border-emerald-200 transition cursor-pointer flex items-center gap-1"
+                                  >
+                                    <FileText size={11} className="text-emerald-600" />
+                                    <span>✓ Rx Issued {appt.prescriptionId ? `(#${appt.prescriptionId})` : ''}</span>
+                                  </button>
+                                ) : isCompleted ? (
+                                  <span className="px-2 py-0.5 rounded-xl bg-amber-50 text-amber-700 text-[10px] font-bold border border-amber-200 flex items-center gap-1 w-max">
+                                    <AlertTriangle size={11} />
+                                    <span>Pending Upload</span>
+                                  </span>
+                                ) : (
+                                  <span className="text-[10px] text-slate-400 italic">Not due</span>
+                                )}
+                              </td>
+                              <td className="p-3 text-right">
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedApptDetail(appt)}
+                                  className="text-[11px] font-bold text-[#00A896] hover:underline cursor-pointer"
+                                >
+                                  Details
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })()}
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => setSelectedDoctorForModal(null)}
+                className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-xs font-bold cursor-pointer"
+              >
+                Close Ledger
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 5: SINGLE APPOINTMENT DOSSIER */}
+      {selectedApptDetail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A1C35]/50 backdrop-blur-xs">
+          <div className="relative w-full max-w-lg bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-4">
+            <button
+              onClick={() => setSelectedApptDetail(null)}
+              className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
+              <div className="w-10 h-10 rounded-2xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center">
+                <Calendar size={18} />
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-[#0A1C35]">Consultation Record #{selectedApptDetail.id}</h3>
+                <span className="text-xs text-slate-400">{selectedApptDetail.appointmentDate} · {String(selectedApptDetail.startTime || '').slice(0, 5)}</span>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-2 text-xs">
+              <div className="flex justify-between">
+                <span className="text-slate-400">Doctor:</span>
+                <span className="font-bold text-[#0A1C35]">{selectedApptDetail.doctorName || 'Attending Doctor'} ({selectedApptDetail.departmentName || 'General'})</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Patient:</span>
+                <span className="font-bold text-[#0A1C35]">{selectedApptDetail.patientName || `Patient #${selectedApptDetail.patientId}`}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Patient Record #:</span>
+                <span className="font-mono text-slate-700">{selectedApptDetail.patientNumber || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Status:</span>
+                <span className="font-black text-[#00A896]">{selectedApptDetail.status}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Consultation Fee:</span>
+                <span className="font-bold text-emerald-700 font-mono">${selectedApptDetail.consultationFee || '50.00'}</span>
+              </div>
+              <div className="pt-2 border-t border-slate-200/80">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Reason for Visit</span>
+                <p className="text-slate-700 font-medium">{selectedApptDetail.reasonForVisit || 'General Clinical Consultation'}</p>
+              </div>
+              {selectedApptDetail.cancellationReason && (
+                <div className="pt-2 border-t border-rose-100 text-rose-700">
+                  <span className="text-[10px] uppercase font-bold block mb-1">Cancellation Reason:</span>
+                  <p>{selectedApptDetail.cancellationReason}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setSelectedApptDetail(null)}
+                className="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+              >
+                Close
+              </button>
+              {(selectedApptDetail.hasPrescription || selectedApptDetail.prescriptionId) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const appt = selectedApptDetail;
+                    setSelectedApptDetail(null);
+                    handleOpenViewingRx(appt);
+                  }}
+                  className="px-4 py-2 bg-[#00A896] hover:bg-[#079181] text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                >
+                  <FileText size={13} />
+                  <span>View Official Slip</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 6: OFFICIAL PRESCRIPTION SLIP VIEWER & DOWNLOADER */}
+      {viewingRx && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A1C35]/50 backdrop-blur-xs">
+          <div className="relative w-full max-w-3xl bg-white border border-slate-200 rounded-3xl p-8 shadow-2xl max-h-[92vh] overflow-y-auto space-y-6">
+            <button
+              onClick={() => setViewingRx(null)}
+              className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="border-b-2 border-[#00A896] pb-4 flex justify-between items-start">
+              <div>
+                <h1 className="text-xl font-black text-[#0A1C35]">CURIX HEALTHCARE SYSTEM</h1>
+                <p className="text-xs text-slate-500">Outpatient Department (OPD) · Master Prescription Record</p>
+              </div>
+              <div className="text-right">
+                <span className="text-xs font-mono font-bold text-[#00A896] block">Rx ID: #{viewingRx.id || 'N/A'}</span>
+                {viewingRx.appointmentId && (
+                  <span className="text-[11px] font-mono text-slate-500 block">Consultation Ref: #{viewingRx.appointmentId}</span>
+                )}
+                <span className="text-xs text-slate-500">
+                  Date: {viewingRx.createdAt ? new Date(viewingRx.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-[#E6F8F5] text-xs">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">Patient Record</span>
+                <strong className="text-sm font-extrabold text-[#0A1C35] block mt-0.5">
+                  {viewingRx.patientName || `Patient #${viewingRx.patientId || 'Record'}`}
+                </strong>
+                <span className="text-slate-600 font-mono text-[11px]">
+                  Ref: #{viewingRx.patientId || 'N/A'} {viewingRx.patientNumber ? `· ${viewingRx.patientNumber}` : ''}
+                </span>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">Attending Physician</span>
+                <strong className="text-sm font-extrabold text-[#0A1C35] block mt-0.5">
+                  {viewingRx.doctorName || getDoctorDisplayName(viewingRx)}
+                </strong>
+                <span className="text-[#00A896] font-bold">
+                  {viewingRx.departmentName || viewingRx.specialty || 'General Medicine'}
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <span className="text-[11px] font-bold uppercase text-slate-400 block mb-1">Clinical Diagnosis</span>
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-[#0A1C35]">
+                {viewingRx.diagnosis || 'Routine General Consultation'}
+              </div>
+            </div>
+
+            <div>
+              <span className="text-[11px] font-bold uppercase text-slate-400 block mb-2">℞ Prescribed Medications</span>
+              <div className="border border-slate-200 rounded-2xl overflow-hidden">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-200 text-[10px] uppercase font-bold text-slate-500">
+                      <th className="p-3">#</th>
+                      <th className="p-3">Medication</th>
+                      <th className="p-3">Dosage / Strength</th>
+                      <th className="p-3">Frequency</th>
+                      <th className="p-3">Duration</th>
+                      <th className="p-3">Instructions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {(() => {
+                      const items = extractItems(viewingRx).map(normalizeItem).filter(Boolean);
+                      if (items.length === 0) {
+                        return (
+                          <tr>
+                            <td colSpan="6" className="p-6 text-center text-slate-400">
+                              {loadingRxDetails ? 'Loading medication details...' : 'No line-item medications recorded.'}
+                            </td>
+                          </tr>
+                        );
+                      }
+                      return items.map((m, idx) => (
+                        <tr key={idx} className="hover:bg-slate-50">
+                          <td className="p-3 font-mono font-bold text-slate-400">{idx + 1}</td>
+                          <td className="p-3 font-extrabold text-[#0A1C35]">{m.name}</td>
+                          <td className="p-3 font-bold text-[#00A896]">{m.dosage}</td>
+                          <td className="p-3 text-slate-600">{m.frequency}</td>
+                          <td className="p-3 text-slate-600">{m.duration}</td>
+                          <td className="p-3 italic text-slate-500">{m.instructions}</td>
+                        </tr>
+                      ));
+                    })()}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {viewingRx.notes && (
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs">
+                <span className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Doctor's Clinical Notes</span>
+                <p className="font-medium text-slate-700">{viewingRx.notes}</p>
+              </div>
+            )}
+
+            <div className="pt-4 border-t border-slate-200 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setViewingRx(null)}
+                className="px-5 py-2.5 border border-slate-200 rounded-full text-xs font-bold cursor-pointer"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={handleDownloadSlip}
+                className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-full text-xs font-bold flex items-center gap-2 cursor-pointer shadow-xs"
+              >
+                <Download size={14} className="text-[#00A896]" />
+                <span>Download Slip</span>
+              </button>
+              <button
+                type="button"
+                onClick={handlePrint}
+                className="px-6 py-2.5 bg-[#00A896] hover:bg-[#079181] text-white rounded-full text-xs font-bold shadow-md flex items-center gap-2 cursor-pointer"
+              >
+                <Printer size={14} />
+                <span>Print Official Slip</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

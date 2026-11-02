@@ -87,6 +87,12 @@ export const adminApi = {
     api.post('/departments', payload),
   getAuditLogs: (page = 0, size = 15) => 
     api.get('/admin/audit-logs', { params: { page, size } }),
+  getDoctorInsights: () =>
+    api.get('/admin/doctor-insights'),
+  getAllAppointments: () =>
+    api.get('/admin/appointments'),
+  getAllPrescriptions: () =>
+    api.get('/admin/prescriptions'),
 };
 
 export default api;
