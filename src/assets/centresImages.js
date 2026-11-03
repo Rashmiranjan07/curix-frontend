@@ -7,5 +7,4 @@ export const neuroImage = 'https://images.unsplash.com/photo-1559757175-5700dde6
 export const renalImage = 'https://images.unsplash.com/photo-1559757175-053139280de2?auto=format&fit=crop&w=600&q=85';
 export const transplantImage = 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=600&q=85';
 export const motherChildImage = 'https://images.unsplash.com/photo-1555252333-9f8e92e65df9?auto=format&fit=crop&w=600&q=85';
-
 export const emergencyImage = 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=600&q=85';
