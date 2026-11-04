@@ -6,8 +6,6 @@ import {
 } from 'lucide-react';
 
 export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) {
-  if (!isOpen) return null;
-
   const [activeRole, setActiveRole] = useState(initialRole);
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -31,12 +29,16 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
   const [formData, setFormData] = useState(emptyForm);
 
   useEffect(() => {
-    setActiveRole(initialRole);
-    setIsRegisterMode(false);
-    setFormData(emptyForm);
-    setError('');
-    setSuccessMsg('');
+    if (isOpen) {
+      setActiveRole(initialRole);
+      setIsRegisterMode(false);
+      setFormData(emptyForm);
+      setError('');
+      setSuccessMsg('');
+    }
   }, [isOpen, initialRole]);
+
+  if (!isOpen) return null;
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -86,11 +88,17 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
       }
     } catch (err) {
       console.error("Auth action failed:", err);
-      const serverMessage = 
-        err.message || 
+      let serverMessage = 
         err.response?.data?.message || 
-        err.response?.data?.error || 
-        'Authentication failed. Please verify your credentials.';
+        err.response?.data?.error;
+
+      if (!serverMessage) {
+        if (err.message && (err.message.includes('Network Error') || err.code === 'ERR_NETWORK')) {
+          serverMessage = 'Cannot connect to backend server. Please ensure the Spring Boot application is running on port 8080.';
+        } else {
+          serverMessage = err.message || 'Authentication failed. Please verify your credentials.';
+        }
+      }
 
       setError(serverMessage);
     } finally {
@@ -227,14 +235,16 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#071524] mb-1">Password *</label>
+                  <label className="block text-xs font-bold text-[#071524] mb-1">
+                    Password * <span className="text-[10px] text-slate-400 font-normal">(Min 8 characters)</span>
+                  </label>
                   <div className="relative">
                     <input
                       type={showPassword ? 'text' : 'password'}
                       name="password"
                       required
-                      minLength={6}
-                      placeholder="Password123"
+                      minLength={8}
+                      placeholder="Min 8 chars (e.g. Password123)"
                       value={formData.password}
                       onChange={handleChange}
                       className="w-full pl-4 pr-10 py-2.5 rounded-2xl bg-slate-50/70 border border-slate-200 text-sm text-[#0A1C35] placeholder:text-slate-400 focus:bg-white focus:border-[#00A896] focus:ring-4 focus:ring-[#00A896]/10 focus:outline-none transition-all font-medium"

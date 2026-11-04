@@ -9,6 +9,25 @@ import {
   Shield, ChevronLeft
 } from 'lucide-react';
 
+
+// 14 Verified Hospital Faculty Doctors
+const defaultFacultyDoctors = [
+  { id: 1, firstName: 'Edward', lastName: 'Smith', fullName: 'Dr. Edward Smith', specialty: 'Interventional Cardiology', departmentName: 'Cardiology', departmentId: 1, gender: 'MALE', consultationFee: 50.00 },
+  { id: 2, firstName: 'Sarah', lastName: 'Conor', fullName: 'Dr. Sarah Conor', specialty: 'Neurologist', departmentName: 'Neurology', departmentId: 2, gender: 'FEMALE', consultationFee: 55.00 },
+  { id: 3, firstName: 'Arjun', lastName: 'Sharma', fullName: 'Dr. Arjun Sharma', specialty: 'General Physician & Diabetologist', departmentName: 'General Medicine', departmentId: 3, gender: 'MALE', consultationFee: 40.00 },
+  { id: 4, firstName: 'Vikram', lastName: 'Singh', fullName: 'Dr. Vikram Singh', specialty: 'ENT Surgeon', departmentName: 'ENT', departmentId: 4, gender: 'MALE', consultationFee: 45.00 },
+  { id: 5, firstName: 'Aditi', lastName: 'Das', fullName: 'Dr. Aditi Das', specialty: 'Orthodontist & Dental Specialist', departmentName: 'Dentistry', departmentId: 5, gender: 'FEMALE', consultationFee: 35.00 },
+  { id: 6, firstName: 'Kishan', lastName: 'Malhotra', fullName: 'Dr. Kishan Malhotra', specialty: 'Clinical Nephrologist', departmentName: 'Nephrology', departmentId: 6, gender: 'MALE', consultationFee: 60.00 },
+  { id: 7, firstName: 'Sanya', lastName: 'Patel', fullName: 'Dr. Sanya Patel', specialty: 'Respiratory Medicine Specialist', departmentName: 'Pulmonology', departmentId: 7, gender: 'FEMALE', consultationFee: 50.00 },
+  { id: 8, firstName: 'Rajesh', lastName: 'Iyer', fullName: 'Dr. Rajesh Iyer', specialty: 'Senior Joint Replacement Surgeon', departmentName: 'Orthopaedics', departmentId: 8, gender: 'MALE', consultationFee: 65.00 },
+  { id: 9, firstName: 'Meera', lastName: 'Nair', fullName: 'Dr. Meera Nair', specialty: 'Gastroenterologist & Hepatologist', departmentName: 'Gastrosciences', departmentId: 9, gender: 'FEMALE', consultationFee: 55.00 },
+  { id: 10, firstName: 'Amitav', lastName: 'Roy', fullName: 'Dr. Amitav Roy', specialty: 'Precision Oncology Specialist', departmentName: 'Oncology', departmentId: 10, gender: 'MALE', consultationFee: 70.00 },
+  { id: 11, firstName: 'Pooja', lastName: 'Verma', fullName: 'Dr. Pooja Verma', specialty: 'High-Risk Obstetrics & Gynaecology', departmentName: 'Mother & Child', departmentId: 11, gender: 'FEMALE', consultationFee: 50.00 },
+  { id: 12, firstName: 'Devendra', lastName: 'Joshi', fullName: 'Dr. Devendra Joshi', specialty: 'Emergency & Critical Trauma Surgeon', departmentName: 'Emergency Medicine', departmentId: 12, gender: 'MALE', consultationFee: 60.00 },
+  { id: 13, firstName: 'Ananya', lastName: 'Sen', fullName: 'Dr. Ananya Sen', specialty: 'Dermatologist & Cosmetologist', departmentName: 'Dermatology', departmentId: 13, gender: 'FEMALE', consultationFee: 45.00 },
+  { id: 14, firstName: 'Farhan', lastName: 'Akhtar', fullName: 'Dr. Farhan Akhtar', specialty: 'Multi-Organ Transplant Surgeon', departmentName: 'Transplant Surgery', departmentId: 14, gender: 'MALE', consultationFee: 75.00 }
+];
+
 export default function PatientDashboard() {
   const { user, logout } = useAuth();
 
@@ -26,6 +45,18 @@ export default function PatientDashboard() {
   const [doctors, setDoctors] = useState([]);
   const [selectedDept, setSelectedDept] = useState('ALL');
   const [doctorSearch, setDoctorSearch] = useState('');
+
+  // Merge live registered doctors from backend with faculty roster so all 14 official doctors are always listed
+  const allAvailableDoctors = React.useMemo(() => {
+    if (doctors && doctors.length >= 14) return doctors;
+    if (doctors && doctors.length > 0) {
+      const existingNames = new Set(doctors.map(d => getDoctorName(d).toLowerCase().replace(/^dr\.\s*/i, '')));
+      const extra = defaultFacultyDoctors.filter(d => !existingNames.has(d.fullName.toLowerCase().replace(/^dr\.\s*/i, '')));
+      return [...doctors, ...extra];
+    }
+    return defaultFacultyDoctors;
+  }, [doctors]);
+
 
   // Booking Modal State
   const [selectedDoctor, setSelectedDoctor] = useState(null);
@@ -395,7 +426,7 @@ export default function PatientDashboard() {
     return `Doctor #${doc.id || input.doctorId || 'Specialist'}`;
   };
 
-  const filteredDoctors = doctors.filter((doc) => {
+  const filteredDoctors = allAvailableDoctors.filter((doc) => {
     const nameMatch = getDoctorName(doc).toLowerCase().includes(doctorSearch.toLowerCase()) ||
                     (doc.specialty || '').toLowerCase().includes(doctorSearch.toLowerCase());
     const deptMatch = selectedDept === 'ALL' || String(doc.departmentId || doc.department?.id) === String(selectedDept);
@@ -1242,29 +1273,48 @@ export default function PatientDashboard() {
               </div>
             </div>
 
-            {/* Available Physicians Widget */}
+            {/* Available Physicians Widget - ALL 14 FACULTY SPECIALISTS */}
             <div className="bg-white rounded-3xl border border-slate-200/85 p-6 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
-                <h4 className="text-xs font-extrabold uppercase text-[#0A1C35] tracking-wider">Available Physicians</h4>
-                <span className="text-[11px] text-[#00A896] font-bold cursor-pointer hover:underline" onClick={() => setActiveTab('book')}>Book</span>
+                <div>
+                  <h4 className="text-xs font-extrabold uppercase text-[#0A1C35] tracking-wider">Available Physicians</h4>
+                  <span className="text-[10px] text-slate-400 font-bold block">{allAvailableDoctors.length} Hospital Specialists</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('book')}
+                  className="text-[11px] text-[#00A896] hover:text-[#079181] font-bold cursor-pointer hover:underline"
+                >
+                  Book Slot &rarr;
+                </button>
               </div>
 
-              <div className="space-y-3.5">
-                {doctors.slice(0, 4).map((doc, idx) => {
+              {/* Scrollable List of ALL Doctors */}
+              <div className="max-h-[390px] overflow-y-auto pr-1 space-y-2 divide-y divide-slate-100">
+                {allAvailableDoctors.map((doc, idx) => {
                   const name = getDoctorName(doc);
-                  const initials = name.replace('Dr. ', '').split(' ').map(n => n[0]).join('');
+                  const initials = name.replace(/^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'DR';
+                  const specialty = doc.specialty || doc.specialization || doc.departmentName || 'Specialist';
                   return (
-                    <div key={doc.id || idx} className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-2xl bg-[#E6F8F5] text-[#00A896] font-bold text-xs flex items-center justify-center">
-                          {initials || 'DR'}
+                    <div 
+                      key={doc.id || `doc-${idx}`} 
+                      onClick={() => handleOpenBooking(doc)}
+                      className="pt-2 first:pt-0 flex items-center justify-between group cursor-pointer hover:bg-[#E6F8F5]/50 -mx-1.5 px-2 py-1.5 rounded-2xl transition-all"
+                      title={`Click to book appointment with ${name}`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-9 h-9 shrink-0 rounded-2xl bg-[#E6F8F5] text-[#00A896] group-hover:bg-[#00A896] group-hover:text-white font-bold text-xs flex items-center justify-center transition-colors shadow-2xs">
+                          {initials}
                         </div>
-                        <div>
-                          <span className="text-xs font-bold text-[#0A1C35] block truncate max-w-[130px]">{name}</span>
-                          <span className="text-[10px] text-slate-400 block truncate max-w-[130px]">{doc.specialty || 'General Practitioner'}</span>
+                        <div className="min-w-0">
+                          <span className="text-xs font-bold text-[#0A1C35] group-hover:text-[#00A896] block truncate transition-colors max-w-[135px]">{name}</span>
+                          <span className="text-[10px] text-slate-400 block truncate max-w-[135px]">{specialty}</span>
                         </div>
                       </div>
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs" title="Available" />
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="text-[10px] font-extrabold text-[#00A896] opacity-0 group-hover:opacity-100 transition-opacity">Book</span>
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs" title="Available for consultation" />
+                      </div>
                     </div>
                   );
                 })}

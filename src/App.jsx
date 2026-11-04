@@ -22,11 +22,13 @@ function MainContent() {
       )}
 
       {/* Multi-Role Authentication Modal */}
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-        initialRole="PATIENT"
-      />
+      {authModalOpen && (
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+          initialRole="PATIENT"
+        />
+      )}
     </div>
   );
 }
