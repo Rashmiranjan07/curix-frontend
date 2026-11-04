@@ -2,12 +2,41 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { doctorApi } from '../../services/api';
 import api from '../../services/api';
+import maleDoctor3d from '../../assets/male_doctor_3d.jpg';
+import femaleDoctor3d from '../../assets/female_doctor_3d.jpg';
 import { 
   Stethoscope, Calendar, Clock, CheckCircle2, AlertCircle, 
   Plus, Search, RefreshCw, X, FileText, User, 
   Trash2, Shield, Activity, Layers, ArrowUpRight, Check, Sparkles, Filter, Printer, Download, Loader2,
   ChevronLeft, ChevronRight, LogOut
 } from 'lucide-react';
+
+// Gender & 3D Emoji Avatar Resolvers
+const getDoctorGender = (doc) => {
+  if (!doc) return 'MALE';
+  if (doc.gender) {
+    const g = String(doc.gender).toUpperCase();
+    if (g.includes('FEMALE') || g === 'F') return 'FEMALE';
+    if (g.includes('MALE') || g === 'M') return 'MALE';
+  }
+  const name = `${doc.firstName || ''} ${doc.name || ''} ${doc.doctorName || ''} ${doc.fullName || ''}`.toLowerCase();
+  const femaleNames = [
+    'sarah', 'priya', 'emily', 'anita', 'mary', 'jessica', 'claire', 'elizabeth',
+    'lisa', 'emma', 'olivia', 'sophia', 'rachel', 'neha', 'pooja', 'sneha', 'anjali',
+    'aarti', 'kavita', 'sunita', 'meera', 'deepa', 'conor', 'fatima', 'aisha', 'maya', 'aditi', 'sanya', 'ananya'
+  ];
+  if (femaleNames.some((fn) => name.includes(fn))) return 'FEMALE';
+  return 'MALE';
+};
+
+const getDoctor3dImage = (doc) => {
+  if (doc?.image || doc?.profileImage) return doc.image || doc.profileImage;
+  return getDoctorGender(doc) === 'FEMALE' ? femaleDoctor3d : maleDoctor3d;
+};
+
+const getDoctor3dEmoji = (doc) => {
+  return getDoctorGender(doc) === 'FEMALE' ? '👩‍⚕️' : '👨‍⚕️';
+};
 
 export default function DoctorDashboard() {
   const { user, logout } = useAuth();
@@ -654,14 +683,29 @@ export default function DoctorDashboard() {
             {activeTab === 'queue' && (
               <div className="space-y-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-1">
-                  <div>
-                    <span className="text-[11px] font-black tracking-widest text-[#00A896] uppercase block mb-1">CLINICAL PRACTICE DESK</span>
+                  <div className="flex items-center gap-4">
+                    <div className="relative shrink-0">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full p-0.5 bg-gradient-to-b from-slate-50 to-slate-100 border-2 border-[#00A896]/30 shadow-md flex items-center justify-center overflow-hidden">
+                        <img
+                          src={getDoctor3dImage(profile)}
+                          alt={doctorDisplayName}
+                          className="w-full h-full object-cover rounded-full"
+                        />
+                      </div>
+                      <span className="absolute -bottom-1 -right-1 text-xs bg-white/95 backdrop-blur-xs rounded-full px-1.5 py-0.5 shadow-xs border border-slate-100 flex items-center justify-center">
+                        {getDoctor3dEmoji(profile)}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-[11px] font-black tracking-widest text-[#00A896] uppercase block mb-1">CLINICAL PRACTICE DESK</span>
                     <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0A1C35] tracking-tight">{doctorDisplayName}</h2>
                     <p className="text-xs sm:text-sm text-slate-500 mt-0.5 font-medium">
                       {profile?.specialty || 'General Medicine'} · Consultation Rate: <strong className="text-[#00A896] font-mono">${profile?.consultationFee || '50.00'}</strong>
                     </p>
                   </div>
                 </div>
+              </div>
 
                 {/* METRICS STRIP */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -925,10 +969,36 @@ export default function DoctorDashboard() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div className="p-8 rounded-3xl bg-white border border-slate-200/85 shadow-sm space-y-4">
+                  <div className="relative p-8 rounded-3xl bg-white border border-slate-200/85 shadow-sm space-y-5 overflow-hidden">
+                    {/* Top Glowing Gradient Accent */}
+                    <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#00A896] via-[#0BC2A8] to-sky-400" />
+
+                    <div className="flex items-center gap-4 pb-3 border-b border-slate-100">
+                      <div className="relative shrink-0">
+                        <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-b from-slate-50 to-slate-100 border-2 border-[#00A896]/30 shadow-xs flex items-center justify-center overflow-hidden">
+                          <img
+                            src={getDoctor3dImage(profile)}
+                            alt={doctorDisplayName}
+                            className="w-full h-full object-cover rounded-full"
+                          />
+                        </div>
+                        <span className="absolute -bottom-1 -right-1 text-xs bg-white rounded-full px-1.5 py-0.5 shadow-xs border border-slate-100 flex items-center justify-center">
+                          {getDoctor3dEmoji(profile)}
+                        </span>
+                      </div>
+                      <div>
+                        <h4 className="text-base font-extrabold text-[#0A1C35]">{doctorDisplayName}</h4>
+                        <span className="text-xs text-[#00A896] font-bold block">{profile?.specialty || 'General Practitioner'}</span>
+                        <span className="inline-flex items-center gap-1 text-[10px] text-emerald-700 font-extrabold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 mt-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          Licensed Hospital Faculty
+                        </span>
+                      </div>
+                    </div>
+
                     <h3 className="text-xs font-black text-[#0A1C35] uppercase tracking-wider flex items-center gap-2">
                       <Shield size={16} className="text-[#00A896]" />
-                      <span>Licensed Medical Credentials</span>
+                      <span>Verified Credentials & License</span>
                     </h3>
 
                     <div className="space-y-3 text-xs">

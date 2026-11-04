@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api, { patientApi, adminApi } from '../../services/api';
+import maleDoctor3d from '../../assets/male_doctor_3d.jpg';
+import femaleDoctor3d from '../../assets/female_doctor_3d.jpg';
 import { 
   Heart, Calendar, Stethoscope, Clock, FileText, User, 
   Search, CheckCircle2, AlertCircle, X, ChevronRight, 
@@ -27,6 +29,34 @@ const defaultFacultyDoctors = [
   { id: 13, firstName: 'Ananya', lastName: 'Sen', fullName: 'Dr. Ananya Sen', specialty: 'Dermatologist & Cosmetologist', departmentName: 'Dermatology', departmentId: 13, gender: 'FEMALE', consultationFee: 45.00 },
   { id: 14, firstName: 'Farhan', lastName: 'Akhtar', fullName: 'Dr. Farhan Akhtar', specialty: 'Multi-Organ Transplant Surgeon', departmentName: 'Transplant Surgery', departmentId: 14, gender: 'MALE', consultationFee: 75.00 }
 ];
+
+
+// Gender & 3D Emoji Avatar Resolvers
+const getDoctorGender = (doc) => {
+  if (!doc) return 'MALE';
+  if (doc.gender) {
+    const g = String(doc.gender).toUpperCase();
+    if (g.includes('FEMALE') || g === 'F') return 'FEMALE';
+    if (g.includes('MALE') || g === 'M') return 'MALE';
+  }
+  const name = `${doc.firstName || ''} ${doc.name || ''} ${doc.doctorName || ''} ${doc.fullName || ''}`.toLowerCase();
+  const femaleNames = [
+    'sarah', 'priya', 'emily', 'anita', 'mary', 'jessica', 'claire', 'elizabeth',
+    'lisa', 'emma', 'olivia', 'sophia', 'rachel', 'neha', 'pooja', 'sneha', 'anjali',
+    'aarti', 'kavita', 'sunita', 'meera', 'deepa', 'conor', 'fatima', 'aisha', 'maya', 'aditi', 'sanya', 'ananya'
+  ];
+  if (femaleNames.some((fn) => name.includes(fn))) return 'FEMALE';
+  return 'MALE';
+};
+
+const getDoctor3dImage = (doc) => {
+  if (doc?.image || doc?.profileImage) return doc.image || doc.profileImage;
+  return getDoctorGender(doc) === 'FEMALE' ? femaleDoctor3d : maleDoctor3d;
+};
+
+const getDoctor3dEmoji = (doc) => {
+  return getDoctorGender(doc) === 'FEMALE' ? '👩‍⚕️' : '👨‍⚕️';
+};
 
 export default function PatientDashboard() {
   const { user, logout } = useAuth();
@@ -890,36 +920,71 @@ export default function PatientDashboard() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     {filteredDoctors.map((doc) => {
                       const docName = getDoctorName(doc);
-                      const initials = docName.replace('Dr. ', '').split(' ').map(n => n[0]).join('');
                       return (
-                        <div key={doc.id} className="p-6 rounded-[28px] bg-white border border-slate-200/80 shadow-2xs hover:shadow-xl hover:border-[#00A896]/40 transition-all duration-300 flex flex-col justify-between">
+                        <div 
+                          key={doc.id} 
+                          className="relative p-6 rounded-[28px] bg-white border border-slate-200/80 shadow-xs hover:shadow-2xl hover:border-[#00A896]/50 transition-all duration-400 flex flex-col justify-between overflow-hidden group hover:-translate-y-1"
+                        >
+                          {/* Top Animated Glowing Accent Line */}
+                          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#00A896] via-[#0BC2A8] to-sky-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          
+                          {/* Shimmer Light Sweep on Hover */}
+                          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none z-10" />
+
                           <div>
-                            <div className="flex items-start justify-between mb-4">
-                              <div className="w-12 h-12 rounded-2xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center font-extrabold text-sm shadow-xs">
-                                {initials || 'DR'}
+                            {/* Card Header: 3D Doctor Avatar with Emoji + Verified Badge */}
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center gap-3.5">
+                                <div className="relative">
+                                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full p-0.5 bg-gradient-to-b from-slate-50 to-slate-100 border-2 border-slate-100 group-hover:border-[#00A896]/40 shadow-xs flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:scale-105">
+                                    <img
+                                      src={getDoctor3dImage(doc)}
+                                      alt={docName}
+                                      className="w-full h-full object-cover rounded-full"
+                                    />
+                                  </div>
+                                  {/* 3D Gender Emoji Badge */}
+                                  <span className="absolute -bottom-1 -right-1 text-xs bg-white/95 backdrop-blur-xs rounded-full px-1.5 py-0.5 shadow-xs border border-slate-100 flex items-center justify-center">
+                                    {getDoctor3dEmoji(doc)}
+                                  </span>
+                                </div>
+
+                                <div className="min-w-0">
+                                  <h4 className="text-base font-extrabold text-[#0A1C35] group-hover:text-[#00A896] transition-colors truncate">
+                                    {docName}
+                                  </h4>
+                                  <span className="text-xs text-[#00A896] font-bold block mt-0.5 truncate">
+                                    {doc.specialty || doc.departmentName || 'General Practitioner'}
+                                  </span>
+                                </div>
                               </div>
-                              <span className="px-3 py-1 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
-                                Available
-                              </span>
+
+                              {/* Verified Specialist Badge */}
+                              <div className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#E6F8F5] text-[#00A896] text-[10px] font-extrabold shadow-2xs shrink-0">
+                                <span className="relative flex h-2 w-2">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00A896] opacity-75"></span>
+                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00A896]"></span>
+                                </span>
+                                <span>Verified</span>
+                              </div>
                             </div>
 
-                            <h4 className="text-sm font-extrabold text-[#0A1C35]">{docName}</h4>
-                            <span className="text-[11px] text-[#00A896] font-bold block mt-0.5">{doc.specialty || 'General Practitioner'}</span>
-
-                            <p className="text-xs text-slate-500 mt-3 font-medium">
-                              {doc.qualification || 'MBBS, MD'} · {doc.experienceYears || 3} years practice
+                            <p className="text-xs text-slate-500 font-medium">
+                              {doc.qualification || 'MBBS, MD'} · {doc.experienceYears || 5} years practice
                             </p>
                           </div>
 
                           <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
                             <div>
-                              <span className="text-[10px] text-slate-400 uppercase font-bold block">Fee</span>
-                              <span className="text-base font-black text-[#00A896] font-mono">${doc.consultationFee !== undefined ? doc.consultationFee : '50.00'}</span>
+                              <span className="text-[10px] text-slate-400 uppercase font-bold block">Consultation Fee</span>
+                              <span className="text-base font-black text-[#00A896] font-mono">
+                                $${doc.consultationFee !== undefined ? doc.consultationFee : '50.00'}
+                              </span>
                             </div>
 
                             <button
                               onClick={() => handleOpenBooking(doc)}
-                              className="px-5 py-2.5 rounded-xl btn-curix-primary text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                              className="px-5 py-2.5 rounded-xl btn-curix-primary text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-md shadow-[#00A896]/20 active:scale-95"
                             >
                               <Calendar size={13} />
                               <span>Book Slot</span>
@@ -1303,8 +1368,17 @@ export default function PatientDashboard() {
                       title={`Click to book appointment with ${name}`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-9 h-9 shrink-0 rounded-2xl bg-[#E6F8F5] text-[#00A896] group-hover:bg-[#00A896] group-hover:text-white font-bold text-xs flex items-center justify-center transition-colors shadow-2xs">
-                          {initials}
+                        <div className="relative shrink-0">
+                          <div className="w-10 h-10 rounded-full p-0.5 bg-slate-50 border border-slate-200 group-hover:border-[#00A896]/50 shadow-2xs overflow-hidden flex items-center justify-center transition-transform group-hover:scale-105">
+                            <img
+                              src={getDoctor3dImage(doc)}
+                              alt={name}
+                              className="w-full h-full object-cover rounded-full"
+                            />
+                          </div>
+                          <span className="absolute -bottom-1 -right-1 text-[10px] bg-white rounded-full px-1 shadow-2xs border border-slate-100 flex items-center justify-center">
+                            {getDoctor3dEmoji(doc)}
+                          </span>
                         </div>
                         <div className="min-w-0">
                           <span className="text-xs font-bold text-[#0A1C35] group-hover:text-[#00A896] block truncate transition-colors max-w-[135px]">{name}</span>

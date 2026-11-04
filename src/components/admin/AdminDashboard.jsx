@@ -11,6 +11,8 @@ import {
   Download, Eye, AlertTriangle
 } from 'lucide-react';
 import api from '../../services/api';
+import maleDoctor3d from '../../assets/male_doctor_3d.jpg';
+import femaleDoctor3d from '../../assets/female_doctor_3d.jpg';
 
 const WEEKDAYS = [
   { id: 'MONDAY', label: 'Mon' },
@@ -20,6 +22,34 @@ const WEEKDAYS = [
   { id: 'FRIDAY', label: 'Fri' },
   { id: 'SATURDAY', label: 'Sat' },
 ];
+
+
+// Gender & 3D Emoji Avatar Resolvers
+const getDoctorGender = (doc) => {
+  if (!doc) return 'MALE';
+  if (doc.gender) {
+    const g = String(doc.gender).toUpperCase();
+    if (g.includes('FEMALE') || g === 'F') return 'FEMALE';
+    if (g.includes('MALE') || g === 'M') return 'MALE';
+  }
+  const name = `${doc.firstName || ''} ${doc.name || ''} ${doc.doctorName || ''} ${doc.fullName || ''}`.toLowerCase();
+  const femaleNames = [
+    'sarah', 'priya', 'emily', 'anita', 'mary', 'jessica', 'claire', 'elizabeth',
+    'lisa', 'emma', 'olivia', 'sophia', 'rachel', 'neha', 'pooja', 'sneha', 'anjali',
+    'aarti', 'kavita', 'sunita', 'meera', 'deepa', 'conor', 'fatima', 'aisha', 'maya', 'aditi', 'sanya', 'ananya'
+  ];
+  if (femaleNames.some((fn) => name.includes(fn))) return 'FEMALE';
+  return 'MALE';
+};
+
+const getDoctor3dImage = (doc) => {
+  if (doc?.image || doc?.profileImage) return doc.image || doc.profileImage;
+  return getDoctorGender(doc) === 'FEMALE' ? femaleDoctor3d : maleDoctor3d;
+};
+
+const getDoctor3dEmoji = (doc) => {
+  return getDoctorGender(doc) === 'FEMALE' ? '👩‍⚕️' : '👨‍⚕️';
+};
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth();
@@ -1381,21 +1411,45 @@ export default function AdminDashboard() {
                       const docDisplayName = getDoctorDisplayName(doc);
                       const initials = docDisplayName.replace('Dr. ', '').split(' ').map(n => n[0]).join('');
                       return (
-                        <div key={doc.id} className="p-6 rounded-3xl bg-white border border-slate-200/85 shadow-sm hover:border-[#00A896]/40 transition flex flex-col justify-between">
+                        <div key={doc.id} className="relative p-6 rounded-3xl bg-white border border-slate-200/85 shadow-xs hover:shadow-xl hover:border-[#00A896]/50 transition-all duration-300 flex flex-col justify-between overflow-hidden group">
+                          {/* Top Animated Glowing Accent Line */}
+                          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#00A896] via-[#0BC2A8] to-sky-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          {/* Shimmer Light Sweep on Hover */}
+                          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none z-10" />
                           <div>
                             <div className="flex items-start justify-between mb-4">
-                              <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-2xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center font-extrabold text-sm shadow-xs">
-                                  {initials || 'DR'}
+                              <div className="flex items-center gap-3.5">
+                                <div className="relative">
+                                  <div className="w-14 h-14 rounded-full p-0.5 bg-gradient-to-b from-slate-50 to-slate-100 border-2 border-slate-100 group-hover:border-[#00A896]/40 shadow-xs flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:scale-105">
+                                    <img
+                                      src={getDoctor3dImage(doc)}
+                                      alt={docDisplayName}
+                                      className="w-full h-full object-cover rounded-full"
+                                    />
+                                  </div>
+                                  {/* 3D Gender Emoji Badge */}
+                                  <span className="absolute -bottom-1 -right-1 text-xs bg-white/95 backdrop-blur-xs rounded-full px-1.5 py-0.5 shadow-xs border border-slate-100 flex items-center justify-center">
+                                    {getDoctor3dEmoji(doc)}
+                                  </span>
                                 </div>
-                                <div>
-                                  <h4 className="text-sm font-extrabold text-[#0A1C35]">{docDisplayName}</h4>
-                                  <span className="text-[11px] text-[#00A896] font-bold block">{doc.specialty || 'General Practitioner'}</span>
+
+                                <div className="min-w-0">
+                                  <h4 className="text-sm sm:text-base font-extrabold text-[#0A1C35] group-hover:text-[#00A896] transition-colors truncate">
+                                    {docDisplayName}
+                                  </h4>
+                                  <span className="text-xs text-[#00A896] font-bold block mt-0.5 truncate">
+                                    {doc.specialty || doc.departmentName || 'General Practitioner'}
+                                  </span>
                                 </div>
                               </div>
-                              <span className="px-3 py-1 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
-                                Verified
-                              </span>
+
+                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#E6F8F5] text-[#00A896] text-[10px] font-extrabold shadow-2xs shrink-0">
+                                <span className="relative flex h-2 w-2">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00A896] opacity-75"></span>
+                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00A896]"></span>
+                                </span>
+                                <span>Verified</span>
+                              </div>
                             </div>
 
                             <div className="space-y-2 text-xs text-slate-600 py-3 border-y border-slate-100">
@@ -1547,29 +1601,41 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Doctor Availability Widget */}
+            {/* Doctor Availability Widget - All Specialists */}
             <div className="bg-white rounded-3xl border border-slate-200/85 p-6 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
-                <h4 className="text-xs font-extrabold uppercase text-[#0A1C35] tracking-wider">Doctor Availability</h4>
-                <span className="text-[11px] text-[#00A896] font-bold cursor-pointer hover:underline" onClick={() => setActiveTab('doctors')}>View All</span>
+                <div>
+                  <h4 className="text-xs font-extrabold uppercase text-[#0A1C35] tracking-wider">Doctor Availability</h4>
+                  <span className="text-[10px] text-slate-400 font-bold block">{doctors.length} Hospital Specialists</span>
+                </div>
+                <span className="text-[11px] text-[#00A896] hover:text-[#079181] font-bold cursor-pointer hover:underline" onClick={() => setActiveTab('doctors')}>View All &rarr;</span>
               </div>
 
-              <div className="space-y-3.5">
-                {doctors.slice(0, 4).map((doc, idx) => {
+              <div className="max-h-[390px] overflow-y-auto pr-1 space-y-2 divide-y divide-slate-100">
+                {doctors.map((doc, idx) => {
                   const name = getDoctorDisplayName(doc);
-                  const initials = name.replace('Dr. ', '').split(' ').map(n => n[0]).join('');
+                  const specialty = doc.specialty || doc.departmentName || 'Specialist';
                   return (
-                    <div key={doc.id || idx} className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-2xl bg-[#E6F8F5] text-[#00A896] font-bold text-xs flex items-center justify-center">
-                          {initials || 'DR'}
+                    <div key={doc.id || `doc-${idx}`} className="pt-2 first:pt-0 flex items-center justify-between group hover:bg-[#E6F8F5]/40 -mx-1 px-1.5 py-1 rounded-2xl transition-all">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="relative shrink-0">
+                          <div className="w-9 h-9 rounded-full p-0.5 bg-slate-50 border border-slate-200 group-hover:border-[#00A896]/50 shadow-2xs overflow-hidden flex items-center justify-center transition-transform group-hover:scale-105">
+                            <img
+                              src={getDoctor3dImage(doc)}
+                              alt={name}
+                              className="w-full h-full object-cover rounded-full"
+                            />
+                          </div>
+                          <span className="absolute -bottom-1 -right-1 text-[9px] bg-white rounded-full px-1 shadow-2xs border border-slate-100 flex items-center justify-center">
+                            {getDoctor3dEmoji(doc)}
+                          </span>
                         </div>
-                        <div>
-                          <span className="text-xs font-bold text-[#0A1C35] block truncate max-w-[130px]">{name}</span>
-                          <span className="text-[10px] text-slate-400 block truncate max-w-[130px]">{doc.specialty || 'General Practitioner'}</span>
+                        <div className="min-w-0">
+                          <span className="text-xs font-bold text-[#0A1C35] group-hover:text-[#00A896] block truncate transition-colors max-w-[130px]">{name}</span>
+                          <span className="text-[10px] text-slate-400 block truncate max-w-[130px]">{specialty}</span>
                         </div>
                       </div>
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs" title="Available" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs shrink-0" title="Active on Faculty" />
                     </div>
                   );
                 })}
