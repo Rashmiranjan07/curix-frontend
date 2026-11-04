@@ -1799,7 +1799,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
                 return (
                   <div
                     key={`doc-infinite-${idx}-${doc.id || docName}`}
-                    className="w-full sm:w-1/2 lg:w-1/4 shrink-0 px-3"
+                    className="w-full sm:w-1/2 lg:w-1/4 shrink-0 px-3 sm:px-4"
                   >
                     <div className="relative bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/70 hover:border-[#00A896]/60 shadow-xs hover:shadow-2xl hover:shadow-[#00A896]/15 hover:-translate-y-2.5 transition-all duration-400 ease-out flex flex-col items-center text-center group cursor-pointer overflow-hidden h-full">
                       {/* Shimmer Light Sweep on Hover */}

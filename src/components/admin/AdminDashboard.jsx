@@ -1137,7 +1137,7 @@ export default function AdminDashboard() {
                 {relationshipViewMode === 'doctors' && (
                   <div className="space-y-4">
                     {filteredRelationshipDoctors.length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                         {filteredRelationshipDoctors.map((doc) => {
                           const initials = (doc.doctorName || '').replace('Dr. ', '').split(' ').map((n) => n[0]).join('');
                           const hasAppts = doc.totalAppointments > 0;
@@ -1406,7 +1406,7 @@ export default function AdminDashboard() {
 
                 {/* Restructured Physician Cards Grid */}
                 {filteredDoctors.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                     {filteredDoctors.map((doc) => {
                       const docDisplayName = getDoctorDisplayName(doc);
                       const initials = docDisplayName.replace('Dr. ', '').split(' ').map(n => n[0]).join('');

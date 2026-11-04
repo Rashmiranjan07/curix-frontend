@@ -917,7 +917,7 @@ export default function PatientDashboard() {
 
                 {/* DOCTORS GRID */}
                 {filteredDoctors.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                     {filteredDoctors.map((doc) => {
                       const docName = getDoctorName(doc);
                       return (
@@ -978,7 +978,7 @@ export default function PatientDashboard() {
                             <div>
                               <span className="text-[10px] text-slate-400 uppercase font-bold block">Consultation Fee</span>
                               <span className="text-base font-black text-[#00A896] font-mono">
-                                $${doc.consultationFee !== undefined ? doc.consultationFee : '50.00'}
+                                ${doc.consultationFee !== undefined ? doc.consultationFee : '50.00'}
                               </span>
                             </div>
 
