@@ -324,7 +324,7 @@ export default function PatientDashboard() {
       };
 
       await patientApi.bookAppointment(payload);
-      setSuccessNotice(`Consultation booked with ${getDoctorName(selectedDoctor)} on ${bookingDate} at ${selectedSlot}.`);
+      setSuccessNotice(`Consultation booked with ${getDoctorName(selectedDoctor)} on ${bookingDate} at ${selectedSlot}. A confirmation email has been sent to your registered email address.`);
       setSelectedDoctor(null);
       await fetchMyAppointments();
       setActiveTab('appointments');
