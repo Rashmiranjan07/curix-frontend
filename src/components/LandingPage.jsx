@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import doctorImage from '../assets/doctor.png';
 import heart3dImage from '../assets/heart3d.jpg';
+import maleDoctor3d from '../assets/male_doctor_3d.jpg';
+import femaleDoctor3d from '../assets/female_doctor_3d.jpg';
 import { 
   cancerImage, orthoImage, cardiacImage, gastroImage, 
   neuroImage, renalImage, transplantImage, motherChildImage, emergencyImage 
@@ -12,7 +14,7 @@ import {
   FileText, ArrowRight, Search, LogIn, Star,
   Sparkles, Check, ChevronRight, Zap, ChevronDown,
   HelpCircle, UserCheck, CheckCircle, Video, Home,
-  RefreshCw, AlertCircle, Filter
+  RefreshCw, AlertCircle, Filter, ChevronUp, Play, Pause
 } from 'lucide-react';
 
 export default function LandingPage({ onOpenAuth = () => {} }) {
@@ -20,8 +22,6 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
   const [registeredDoctors, setRegisteredDoctors] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loadingDoctors, setLoadingDoctors] = useState(true);
-  const [doctorSearchTerm, setDoctorSearchTerm] = useState('');
-  const [selectedDeptFilter, setSelectedDeptFilter] = useState('ALL');
 
   // Interactive Tabs
   const [searchQuery, setSearchQuery] = useState('');
@@ -89,19 +89,111 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
     return 'DR';
   };
 
-  // Filter Registered Doctors based on explicit database attributes
-  const filteredRegisteredDoctors = registeredDoctors.filter((doc) => {
-    const docName = getDoctorDisplayName(doc).toLowerCase();
-    const specialty = (doc.specialty || doc.specialization || '').toLowerCase();
-    const query = (doctorSearchTerm || searchQuery).toLowerCase();
-    const matchesSearch = !query || docName.includes(query) || specialty.includes(query);
+  // Helper: Resolve Doctor Gender for 3D Emoji Avatar
+  const getDoctorGender = (doc) => {
+    if (!doc) return 'MALE';
+    if (doc.gender) {
+      const g = String(doc.gender).toUpperCase();
+      if (g.includes('FEMALE') || g === 'F') return 'FEMALE';
+      if (g.includes('MALE') || g === 'M') return 'MALE';
+    }
+    const name = `${doc.firstName || ''} ${doc.name || ''} ${doc.doctorName || ''} ${doc.fullName || ''}`.toLowerCase();
+    const femaleNames = [
+      'sarah', 'priya', 'emily', 'anita', 'mary', 'jessica', 'claire', 'elizabeth',
+      'lisa', 'emma', 'olivia', 'sophia', 'rachel', 'neha', 'pooja', 'sneha', 'anjali',
+      'aarti', 'kavita', 'sunita', 'meera', 'deepa', 'conor', 'fatima', 'aisha', 'maya'
+    ];
+    if (femaleNames.some((fn) => name.includes(fn))) return "FEMALE";
+    return 'MALE';
+  };
 
-    const matchesDept = selectedDeptFilter === 'ALL' || 
-      String(doc.departmentId || doc.department?.id || '') === String(selectedDeptFilter) ||
-      (doc.department?.name && doc.department.name.toLowerCase() === selectedDeptFilter.toLowerCase());
+  const getDoctor3dImage = (doc) => {
+    if (doc?.image || doc?.profileImage) return doc.image || doc.profileImage;
+    return getDoctorGender(doc) === 'FEMALE' ? femaleDoctor3d : maleDoctor3d;
+  };
 
-    return matchesSearch && matchesDept;
-  });
+  const getDoctor3dEmoji = (doc) => {
+    return getDoctorGender(doc) === 'FEMALE' ? '👩‍⚕️' : '👨‍⚕️';
+  };
+
+  // Default Sample Doctors for Top Doctors Showcase
+  const defaultSampleDoctors = [
+    {
+      id: 'sample-1',
+      firstName: 'Emily',
+      lastName: 'Carter',
+      fullName: 'Dr. Emily Carter',
+      specialty: 'Cardiologist',
+      departmentName: 'Cardiology',
+      gender: 'FEMALE'
+    },
+    {
+      id: 'sample-2',
+      firstName: 'James',
+      lastName: 'Wilson',
+      fullName: 'Dr. James Wilson',
+      specialty: 'Orthopedic Specialist',
+      departmentName: 'Orthopaedics',
+      gender: 'MALE'
+    },
+    {
+      id: 'sample-3',
+      firstName: 'Priya',
+      lastName: 'Sharma',
+      fullName: 'Dr. Priya Sharma',
+      specialty: 'Dermatologist',
+      departmentName: 'Dermatology',
+      gender: 'FEMALE'
+    },
+    {
+      id: 'sample-4',
+      firstName: 'Ahmed',
+      lastName: 'Rahman',
+      fullName: 'Dr. Ahmed Rahman',
+      specialty: 'General Physician',
+      departmentName: 'General Medicine',
+      gender: 'MALE'
+    }
+  ];
+
+  // Helper: Get Doctor Specialty display
+  const getDoctorSpecialtyDisplay = (doc) => {
+    if (doc?.specialty) return doc.specialty;
+    if (doc?.specialization) return doc.specialization;
+    if (doc?.department?.name) return doc.department.name;
+    if (doc?.departmentName) return doc.departmentName;
+    return 'General Physician';
+  };
+
+  // Top doctors list (uses registered doctors if available, padded with sample doctors to guarantee 4 cards)
+  const topDoctorsList = React.useMemo(() => {
+    if (registeredDoctors && registeredDoctors.length >= 4) {
+      return registeredDoctors.slice(0, 4);
+    }
+    if (registeredDoctors && registeredDoctors.length > 0) {
+      const combined = [...registeredDoctors];
+      for (const sample of defaultSampleDoctors) {
+        if (combined.length >= 4) break;
+        const exists = combined.some(d => getDoctorDisplayName(d).toLowerCase() === sample.fullName.toLowerCase());
+        if (!exists) combined.push(sample);
+      }
+      return combined.slice(0, 4);
+    }
+    return defaultSampleDoctors;
+  }, [registeredDoctors]);
+
+  // Filtered Top Doctors (incorporates quick search from hero bar if entered)
+  const displayTopDoctors = React.useMemo(() => {
+    if (!searchQuery.trim()) return topDoctorsList;
+    const q = searchQuery.toLowerCase();
+    const pool = (registeredDoctors.length > 0 ? registeredDoctors : defaultSampleDoctors);
+    const matches = pool.filter((doc) => {
+      const name = getDoctorDisplayName(doc).toLowerCase();
+      const spec = getDoctorSpecialtyDisplay(doc).toLowerCase();
+      return name.includes(q) || spec.includes(q);
+    });
+    return matches.length > 0 ? matches.slice(0, 4) : topDoctorsList;
+  }, [searchQuery, topDoctorsList, registeredDoctors]);
 
   // 9 Centres of Excellence & Specialized Clinical Care
   const centresOfExcellence = [
@@ -1438,262 +1530,108 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
         </div>
       </section>
 
-      {/* 3. REGISTERED ATTENDING PHYSICIANS & SPECIALISTS DIRECTORY (EXPLICIT ADMIN DATA) */}
-      <section id="specialties" className="w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 py-14 sm:py-16 lg:py-14 sm:py-16 lg:py-18 border-t border-slate-100/80">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+      {/* 3. MEET OUR TOP DOCTORS (ANIMATED SHOWCASE - NO RATINGS, NO AUTO-SLIDE) */}
+      <section id="specialties" className="scroll-mt-20 w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 py-16 sm:py-20 lg:py-24 border-t border-slate-100/80 relative overflow-hidden">
+        <span id="doctors" className="scroll-mt-24 absolute -top-10" />
+
+        {/* Ambient Glow in Background */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-[#00A896]/5 blur-3xl rounded-full pointer-events-none" />
+
+        {/* Section Header: Title + Subtitle on Left, View All Doctors on Right */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 sm:mb-14 relative z-10">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-[11px] font-black tracking-widest uppercase text-[#00A896] bg-[#E6F8F5] px-3.5 py-1 rounded-full border border-[#00A896]/20">
-                OFFICIAL MEDICAL FACULTY
-              </span>
-              <span className="text-[10px] font-extrabold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
-                Admin Registered
-              </span>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#E6F8F5] text-[#00A896] text-[11px] font-extrabold uppercase tracking-wider mb-2.5 border border-[#00A896]/20">
+              <Sparkles size={12} className="animate-spin" style={{ animationDuration: '6s' }} />
+              <span>Medical Faculty & Specialists</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#0A1C35] tracking-tight">
-              Attending Physicians & Specialists
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#0A1C35] tracking-tight">
+              Meet Our Top Doctors
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-3xl font-medium">
-              Verified clinical physicians provisioned and certified by hospital administration. Browse active doctor profiles, consultation fees, and reserve your direct clinical appointment.
+            <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1.5">
+              Certified medical specialists across all hospital disciplines. Always here for your family.
             </p>
           </div>
 
-          <div className="flex items-center gap-3 self-start md:self-auto">
-            <button 
-              type="button"
-              onClick={fetchRegisteredDoctors}
-              className="px-4 py-2.5 rounded-xl bg-white border border-slate-200/90 hover:border-slate-300 text-xs font-bold text-slate-700 transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
-              title="Refresh Directory"
-            >
-              <RefreshCw size={13} className={loadingDoctors ? 'animate-spin text-[#00A896]' : ''} />
-              <span>Refresh</span>
-            </button>
-            <button 
-              type="button"
-              onClick={() => onOpenAuth?.()}
-              className="px-5 py-2.5 rounded-xl btn-curix-primary text-xs font-extrabold tracking-wide flex items-center gap-1.5 shadow-md cursor-pointer"
-            >
-              <span>Patient Portal</span>
-              <ChevronRight size={14} />
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => onOpenAuth?.()}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white hover:bg-[#E6F8F5] text-xs sm:text-sm font-bold text-[#00A896] border border-[#00A896]/30 shadow-2xs hover:shadow-md transition-all group cursor-pointer self-start sm:self-auto"
+          >
+            <span>View All Doctors</span>
+            <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+          </button>
         </div>
 
-        {/* Real-time Search & Department Filtering Controls */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm mb-8 flex flex-col sm:flex-row gap-3 items-center justify-between">
-          <div className="relative w-full sm:flex-1">
-            <Search size={15} className="absolute left-4 top-3.5 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search registered doctor by name or specialty..."
-              value={doctorSearchTerm}
-              onChange={(e) => setDoctorSearchTerm(e.target.value)}
-              className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200/90 rounded-xl text-xs focus:outline-none focus:border-[#00A896] focus:bg-white text-slate-800 transition"
-            />
-            {doctorSearchTerm && (
-              <button 
-                type="button" 
-                onClick={() => setDoctorSearchTerm('')} 
-                className="absolute right-3 top-2.5 text-xs text-slate-400 hover:text-slate-600 cursor-pointer"
+        {/* 4 Cards Responsive Animated Grid (No auto-slide, interactive animations) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+          {displayTopDoctors.map((doc, idx) => {
+            const docName = getDoctorDisplayName(doc);
+            const specialty = getDoctorSpecialtyDisplay(doc);
+
+            return (
+              <div
+                key={doc.id || `${docName}-${idx}`}
+                className="relative bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/70 hover:border-[#00A896]/60 shadow-xs hover:shadow-2xl hover:shadow-[#00A896]/15 hover:-translate-y-2.5 transition-all duration-400 ease-out flex flex-col items-center text-center group cursor-pointer overflow-hidden"
               >
-                Clear
-              </button>
-            )}
-          </div>
+                {/* Shimmer Light Sweep on Hover */}
+                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none z-20" />
 
-          {departments.length > 0 && (
-            <div className="w-full sm:w-64">
-              <select
-                value={selectedDeptFilter}
-                onChange={(e) => setSelectedDeptFilter(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200/90 rounded-xl text-xs font-bold text-[#0A1C35] focus:outline-none focus:border-[#00A896] focus:bg-white transition cursor-pointer"
-              >
-                <option value="ALL">All Departments ({departments.length})</option>
-                {departments.map((d) => (
-                  <option key={d.id} value={d.id}>{d.name}</option>
-                ))}
-              </select>
-            </div>
-          )}
-        </div>
+                {/* Top Animated Glowing Border Accent */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#00A896] via-[#0BC2A8] to-sky-400 opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
 
-        {/* DOCTORS DIRECTORY CARDS GRID */}
-        {loadingDoctors ? (
-          /* Shimmer Loading Skeletons */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((n) => (
-              <div key={n} className="p-6 rounded-[28px] bg-white border border-slate-200/70 shadow-sm animate-pulse space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-slate-200" />
-                  <div className="space-y-2 flex-1">
-                    <div className="h-4 bg-slate-200 rounded w-3/4" />
-                    <div className="h-3 bg-slate-100 rounded w-1/2" />
+                {/* Ambient Soft Glow Behind Card */}
+                <div className="absolute -bottom-10 -right-10 w-32 h-32 rounded-full bg-[#00A896]/5 group-hover:bg-[#00A896]/15 blur-2xl transition-all duration-500 pointer-events-none" />
+
+                {/* Centered Circular Doctor Avatar with 3D Float Animation */}
+                <div className="relative mb-4">
+                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full p-1 bg-gradient-to-b from-slate-50 to-slate-100 border-2 border-slate-100 group-hover:border-[#00A896]/40 shadow-xs flex items-center justify-center overflow-hidden transition-all duration-400 group-hover:shadow-lg group-hover:shadow-[#00A896]/20">
+                    <img
+                      src={getDoctor3dImage(doc)}
+                      alt={docName}
+                      className="w-full h-full object-cover rounded-full group-hover:scale-110 group-hover:rotate-2 transition-transform duration-500 ease-out"
+                    />
                   </div>
+
+                  {/* 3D Emoji Avatar Pill with Hover Scale */}
+                  <span className="absolute -bottom-1 -right-1 text-xs sm:text-sm bg-white/95 backdrop-blur-xs rounded-full px-1.5 py-0.5 shadow-sm border border-slate-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    {getDoctor3dEmoji(doc)}
+                  </span>
                 </div>
-                <div className="h-10 bg-slate-100 rounded-xl" />
-                <div className="h-10 bg-slate-200 rounded-xl mt-4" />
-              </div>
-            ))}
-          </div>
-        ) : filteredRegisteredDoctors.length > 0 ? (
-          /* Real Registered Doctors Cards */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredRegisteredDoctors.map((doc) => {
-              const docName = getDoctorDisplayName(doc);
-              const initials = getDoctorInitials(doc);
-              const specialty = doc.specialty || doc.specialization || 'Clinical Specialist';
-              const department = doc.department?.name || doc.departmentName || '';
-              const qualification = doc.qualification || 'Licensed Physician';
-              const experience = doc.experienceYears !== undefined && doc.experienceYears !== null ? `${doc.experienceYears} Years Exp.` : '';
-              const fee = doc.consultationFee !== undefined && doc.consultationFee !== null ? `$${parseFloat(doc.consultationFee).toFixed(2)}` : '$50.00';
-              const licenseNumber = doc.licenseNumber || '';
-              const doctorImgSrc = doc.image || doc.profileImage || null;
 
-              return (
-                <div 
-                  key={doc.id || docName} 
-                  className="p-6 rounded-[28px] bg-white border border-slate-200/90 shadow-2xs hover:shadow-xl hover:border-[#00A896]/50 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden"
-                >
-                  {/* Subtle top light bar */}
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#00A896]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                {/* Doctor Name */}
+                <h3 className="text-base sm:text-lg font-extrabold text-[#0A1C35] mb-1 group-hover:text-[#00A896] transition-colors duration-300 truncate w-full">
+                  {docName}
+                </h3>
 
-                  <div>
-                    {/* Header Row: Doctor Image/Avatar + Verification Badge */}
-                    <div className="flex items-start justify-between gap-4 mb-4">
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#E6F8F5] via-teal-50 to-teal-100 text-[#00A896] border border-[#00A896]/20 shadow-xs flex items-center justify-center font-black text-base shrink-0 overflow-hidden">
-                        {doctorImgSrc ? (
-                          <img src={doctorImgSrc} alt={docName} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="flex flex-col items-center justify-center leading-tight">
-                            <span>{initials}</span>
-                            <span className="text-[9px] font-bold opacity-70">MD</span>
-                          </div>
-                        )}
-                      </div>
+                {/* Specification / Specialty */}
+                <p className="text-xs sm:text-sm font-semibold text-slate-500 mb-3 truncate w-full">
+                  {specialty}
+                </p>
 
-                      <div className="flex flex-col items-end">
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-                          <CheckCircle2 size={11} className="stroke-[2.5]" />
-                          <span>Admin Verified</span>
-                        </span>
-                        {licenseNumber && (
-                          <span className="text-[10px] font-mono text-slate-400 font-bold mt-1">
-                            Lic: #{licenseNumber}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Doctor Name & Specialty */}
-                    <div>
-                      <h3 className="text-base font-black text-[#0A1C35] group-hover:text-[#00A896] transition-colors">
-                        {docName}
-                      </h3>
-                      <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                        <span className="text-xs font-bold text-[#00A896]">
-                          {specialty}
-                        </span>
-                        {department && (
-                          <>
-                            <span className="text-slate-300">·</span>
-                            <span className="text-xs text-slate-500 font-medium">
-                              {department}
-                            </span>
-                          </>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Credentials & Experience */}
-                    <div className="mt-3.5 pt-3 border-t border-slate-100 flex flex-wrap items-center gap-2 text-xs text-slate-600 font-medium">
-                      <div className="flex items-center gap-1">
-                        <Award size={13} className="text-[#00A896]" />
-                        <span>{qualification}</span>
-                      </div>
-                      {experience && (
-                        <>
-                          <span className="text-slate-300">·</span>
-                          <span className="text-slate-500">{experience}</span>
-                        </>
-                      )}
-                    </div>
-
-                    {/* Availabilities / Shifts Preview (if registered) */}
-                    {Array.isArray(doc.availabilities) && doc.availabilities.length > 0 && (
-                      <div className="mt-3 flex flex-wrap gap-1">
-                        {doc.availabilities.slice(0, 4).map((av, idx) => (
-                          <span key={idx} className="px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200 text-[10px] font-bold text-slate-600">
-                            {av.dayOfWeek ? av.dayOfWeek.slice(0, 3) : `Shift ${idx + 1}`}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Card Bottom: Consultation Fee & Booking CTA */}
-                  <div className="pt-4 mt-5 border-t border-slate-100 flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-                        Consultation Fee
-                      </span>
-                      <span className="text-lg font-black text-[#00A896] font-mono">
-                        {fee}
-                      </span>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => onOpenAuth?.()}
-                      className="px-5 py-2.5 rounded-xl btn-curix-primary text-xs font-extrabold tracking-wide flex items-center gap-1.5 shadow-sm group-hover:shadow-md transition-all cursor-pointer"
-                    >
-                      <Calendar size={13} />
-                      <span>Book Slot</span>
-                      <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
-                    </button>
-                  </div>
+                {/* Animated Verified Specialist Badge (Replacing Ratings) */}
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E6F8F5] text-[#00A896] text-[11px] font-extrabold mb-6 group-hover:bg-[#00A896] group-hover:text-white transition-all duration-300 shadow-2xs">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00A896] group-hover:bg-white opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00A896] group-hover:bg-white"></span>
+                  </span>
+                  <span>Verified Specialist</span>
                 </div>
-              );
-            })}
-          </div>
-        ) : (
-          /* Clean Empty State when no registered doctors match */
-          <div className="p-12 sm:p-16 rounded-[32px] bg-slate-50/70 border border-slate-200/90 text-center max-w-3xl mx-auto">
-            <div className="w-16 h-16 rounded-3xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center mx-auto mb-4 shadow-xs">
-              <Stethoscope size={30} />
-            </div>
-            <h3 className="text-lg font-black text-[#0A1C35]">
-              No Registered Physicians Found
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-500 mt-2 font-medium leading-relaxed">
-              {doctorSearchTerm || selectedDeptFilter !== 'ALL'
-                ? 'No registered doctors match your current search query or department filter.'
-                : 'No attending physicians have been provisioned in the hospital system yet. Hospital administrators can register doctors with their license and shift schedules via the Admin Portal.'}
-            </p>
-            <div className="pt-5 flex items-center justify-center gap-3">
-              {(doctorSearchTerm || selectedDeptFilter !== 'ALL') ? (
-                <button
-                  type="button"
-                  onClick={() => { setDoctorSearchTerm(''); setSelectedDeptFilter('ALL'); }}
-                  className="px-5 py-2.5 rounded-full bg-white border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-700 transition shadow-2xs cursor-pointer"
-                >
-                  Clear Filters
-                </button>
-              ) : (
+
+                {/* Rounded Pill Book Now Button with Sliding Arrow */}
                 <button
                   type="button"
                   onClick={() => onOpenAuth?.()}
-                  className="px-6 py-2.5 rounded-full btn-curix-primary text-xs font-extrabold tracking-wide shadow-md cursor-pointer flex items-center gap-1.5"
+                  className="w-full py-2.5 sm:py-3 px-6 rounded-full bg-[#00A896] hover:bg-[#079181] group-hover:shadow-lg group-hover:shadow-[#00A896]/30 text-white text-xs sm:text-sm font-extrabold tracking-wide transition-all duration-300 cursor-pointer active:scale-95 mt-auto flex items-center justify-center gap-2 group/btn"
                 >
-                  <span>Admin / Staff Sign In</span>
-                  <ArrowRight size={13} />
+                  <span>Book Now</span>
+                  <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
                 </button>
-              )}
-            </div>
-          </div>
-        )}
+              </div>
+            );
+          })}
+        </div>
       </section>
 
-      
       {/* 4. HOW CURIX WORKS (Interactive Step Switcher) */}
       <section className="w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 py-20 border-t border-slate-100">
         <div className="text-center mb-14">
