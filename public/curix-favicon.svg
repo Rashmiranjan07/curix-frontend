@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1.5 1 45 45.5" fill="none">
+  <defs>
+    <!-- Ambient Teal Glow -->
+    <radialGradient id="curix-ambient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#2CE0C2" stop-opacity="0.35"/>
+      <stop offset="65%" stop-color="#00A896" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#00A896" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Teal Sculpted Shell Gradient -->
+    <linearGradient id="curix-shell" x1="6" y1="4" x2="42" y2="45" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A7FFF0"/>
+      <stop offset="0.22" stop-color="#2CE0C2"/>
+      <stop offset="0.65" stop-color="#00A896"/>
+      <stop offset="1" stop-color="#087D87"/>
+    </linearGradient>
+
+    <!-- Deep 3D Edge Gradient -->
+    <linearGradient id="curix-edge" x1="12" y1="8" x2="40" y2="42" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1B4968"/>
+      <stop offset="0.55" stop-color="#0A2945"/>
+      <stop offset="1" stop-color="#041424"/>
+    </linearGradient>
+
+    <!-- Glass Surface Highlight -->
+    <linearGradient id="curix-glass" x1="12" y1="5" x2="36" y2="40" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="0.45" stop-color="#D8FFF8" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.05"/>
+    </linearGradient>
+
+    <!-- Medical Cross Gradient -->
+    <linearGradient id="curix-cross" x1="18" y1="14" x2="31" y2="34" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E0FFF9"/>
+    </linearGradient>
+
+    <filter id="curix-shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" flood-color="#03283A" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Ambient Teal Glow directly centered behind emblem -->
+  <circle cx="21" cy="24" r="22" fill="url(#curix-ambient)"/>
+
+  <!-- Rear structural layer for raised 3D depth -->
+  <path d="M31 8.5C25.5 5.3 17.8 6.2 12.7 10.5C6.3 15.8 5.8 25.6 10.5 32.3C14.9 38.5 23.4 40.4 30.1 36.1L35 32.5" stroke="url(#curix-edge)" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round" transform="translate(0 1.7)"/>
+
+  <!-- Main sculpted Curix C silhouette -->
+  <path d="M32 9.5C26.3 5.7 18.8 6.8 13.8 11.1C7.5 16.5 7.1 25.7 11.8 32.1C16.5 38.4 25.3 39.5 31.5 34.4L35.1 31.1" stroke="url(#curix-shell)" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#curix-shadow)"/>
+
+  <!-- Glass highlight along upper curve -->
+  <path d="M29.5 10.3C24.8 7.9 18.7 9 14.6 12.7" stroke="url(#curix-glass)" stroke-width="2.2" stroke-linecap="round"/>
+
+  <!-- Medical cross dimensional backing -->
+  <path d="M21.5 14.8H26.5V19.8H31.5V24.8H26.5V29.8H21.5V24.8H16.5V19.8H21.5V14.8Z" fill="url(#curix-edge)" transform="translate(0 1.2)"/>
+
+  <!-- Medical cross -->
+  <path d="M21.5 14H26.5V19H31.5V24H26.5V29H21.5V24H16.5V19H21.5V14Z" fill="url(#curix-cross)"/>
+
+  <!-- Cross highlight -->
+  <path d="M22.5 15H25.5" stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round"/>
+
+  <!-- Pulse detail -->
+  <path d="M11.8 27H16L18.1 24.5L20.1 28.1" stroke="#E8FFFB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>
+
+  <!-- Precision finishing highlight -->
+  <circle cx="35.1" cy="31.1" r="1.6" fill="#C6FFF5"/>
+</svg>
