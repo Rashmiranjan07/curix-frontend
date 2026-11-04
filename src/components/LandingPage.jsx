@@ -121,7 +121,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
     const femaleNames = [
       'sarah', 'priya', 'emily', 'anita', 'mary', 'jessica', 'claire', 'elizabeth',
       'lisa', 'emma', 'olivia', 'sophia', 'rachel', 'neha', 'pooja', 'sneha', 'anjali',
-      'aarti', 'kavita', 'sunita', 'meera', 'deepa', 'conor', 'fatima', 'aisha', 'maya', 'aditi', 'sanya'
+      'aarti', 'kavita', 'sunita', 'meera', 'deepa', 'conor', 'fatima', 'aisha', 'maya', 'aditi', 'sanya', 'ananya'
     ];
     if (femaleNames.some((fn) => name.includes(fn))) return "FEMALE";
     return 'MALE';
@@ -136,14 +136,14 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
     return getDoctorGender(doc) === 'FEMALE' ? '👩‍⚕️' : '👨‍⚕️';
   };
 
-  // Website's Official Doctors (Default list matching the website database)
+  // Website's Official Doctors (Complete 14 Doctors Faculty matching the website database)
   const defaultSampleDoctors = [
     {
       id: 1,
       firstName: 'Edward',
       lastName: 'Smith',
       fullName: 'Dr. Edward Smith',
-      specialty: 'Cardiologist',
+      specialty: 'Interventional Cardiology',
       departmentName: 'Cardiology',
       gender: 'MALE',
       qualification: 'MBBS, MD (Cardiology)',
@@ -214,6 +214,83 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
       gender: 'FEMALE',
       qualification: 'MBBS, MD (Pulmonary Medicine)',
       experienceYears: 10
+    },
+    {
+      id: 8,
+      firstName: 'Rajesh',
+      lastName: 'Iyer',
+      fullName: 'Dr. Rajesh Iyer',
+      specialty: 'Orthopaedic & Joint Replacement',
+      departmentName: 'Orthopaedics',
+      gender: 'MALE',
+      qualification: 'MS (Ortho), M.Ch',
+      experienceYears: 15
+    },
+    {
+      id: 9,
+      firstName: 'Meera',
+      lastName: 'Nair',
+      fullName: 'Dr. Meera Nair',
+      specialty: 'Gastroenterologist & Hepatologist',
+      departmentName: 'Gastrosciences',
+      gender: 'FEMALE',
+      qualification: 'MBBS, DM (Gastroenterology)',
+      experienceYears: 11
+    },
+    {
+      id: 10,
+      firstName: 'Amitav',
+      lastName: 'Roy',
+      fullName: 'Dr. Amitav Roy',
+      specialty: 'Precision Oncology Specialist',
+      departmentName: 'Oncology',
+      gender: 'MALE',
+      qualification: 'MD, DM (Medical Oncology)',
+      experienceYears: 13
+    },
+    {
+      id: 11,
+      firstName: 'Pooja',
+      lastName: 'Verma',
+      fullName: 'Dr. Pooja Verma',
+      specialty: 'High-Risk Obstetrics & Gynaecology',
+      departmentName: 'Mother & Child',
+      gender: 'FEMALE',
+      qualification: 'MS (OBG), FICOG',
+      experienceYears: 9
+    },
+    {
+      id: 12,
+      firstName: 'Devendra',
+      lastName: 'Joshi',
+      fullName: 'Dr. Devendra Joshi',
+      specialty: 'Emergency & Critical Trauma Surgeon',
+      departmentName: 'Emergency Medicine',
+      gender: 'MALE',
+      qualification: 'MBBS, MEM (Emergency)',
+      experienceYears: 12
+    },
+    {
+      id: 13,
+      firstName: 'Ananya',
+      lastName: 'Sen',
+      fullName: 'Dr. Ananya Sen',
+      specialty: 'Dermatologist & Cosmetologist',
+      departmentName: 'Dermatology',
+      gender: 'FEMALE',
+      qualification: 'MD (Dermatology), DNB',
+      experienceYears: 8
+    },
+    {
+      id: 14,
+      firstName: 'Farhan',
+      lastName: 'Akhtar',
+      fullName: 'Dr. Farhan Akhtar',
+      specialty: 'Multi-Organ Transplant Surgeon',
+      departmentName: 'Transplant Surgery',
+      gender: 'MALE',
+      qualification: 'MS, M.Ch (Surgical Gastroenterology)',
+      experienceYears: 16
     }
   ];
 
@@ -1617,13 +1694,13 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
           <div>
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#E6F8F5] text-[#00A896] text-[11px] font-extrabold uppercase tracking-wider mb-2.5 border border-[#00A896]/20">
               <Sparkles size={12} className="animate-spin" style={{ animationDuration: '6s' }} />
-              <span>Medical Faculty & Specialists</span>
+              <span>Medical Faculty ({displayDoctorsList.length} Verified Doctors)</span>
             </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#0A1C35] tracking-tight">
               Meet Our Top Doctors
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1.5">
-              Certified medical specialists across all hospital disciplines. Always here for your family.
+              Browse all {displayDoctorsList.length} certified medical specialists across our hospital departments. Always here for your family.
             </p>
           </div>
 
@@ -1640,11 +1717,13 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
                 <ChevronLeft size={18} />
               </button>
 
-              {/* Position Indicator */}
-              <div className="px-2.5 py-1 text-xs font-mono font-bold text-slate-600 flex items-center gap-1">
-                <span className="text-[#00A896]">{doctorSlideIndex + 1}</span>
-                <span className="text-slate-300">/</span>
-                <span>{maxSlideIndex + 1}</span>
+              {/* Doctor Position & Total Doctors Indicator: e.g. 1–4 of 14 Doctors */}
+              <div className="px-3 py-1 text-xs font-mono font-bold text-slate-700 flex items-center gap-1">
+                <span className="text-[#00A896] font-black">
+                  {doctorSlideIndex + 1}–{Math.min(doctorSlideIndex + itemsPerView, displayDoctorsList.length)}
+                </span>
+                <span className="text-slate-400">of</span>
+                <span className="text-[#0A1C35] font-black">{displayDoctorsList.length} Doctors</span>
               </div>
 
               <button
@@ -1787,22 +1866,30 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
             </div>
           </div>
 
-          {/* Pagination Pill Dots */}
-          {maxSlideIndex > 0 && (
-            <div className="flex items-center justify-center gap-2 pt-4">
-              {Array.from({ length: maxSlideIndex + 1 }).map((_, dotIdx) => (
-                <button
-                  key={dotIdx}
-                  type="button"
-                  onClick={() => setDoctorSlideIndex(dotIdx)}
-                  className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                    doctorSlideIndex === dotIdx
-                      ? 'w-7 bg-[#00A896]'
-                      : 'w-2 bg-slate-200 hover:bg-slate-300'
-                  }`}
-                  title={`Go to slide ${dotIdx + 1}`}
-                />
-              ))}
+          {/* Pagination Dots for all Doctors in the website */}
+          {displayDoctorsList.length > 1 && (
+            <div className="flex flex-col items-center gap-2 pt-5">
+              <div className="flex items-center justify-center gap-1.5 flex-wrap max-w-lg">
+                {displayDoctorsList.map((doc, dotIdx) => {
+                  const isVisible = dotIdx >= doctorSlideIndex && dotIdx < doctorSlideIndex + itemsPerView;
+                  return (
+                    <button
+                      key={dotIdx}
+                      type="button"
+                      onClick={() => setDoctorSlideIndex(Math.min(dotIdx, maxSlideIndex))}
+                      className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                        isVisible
+                          ? 'w-6 bg-[#00A896] shadow-xs'
+                          : 'w-2 bg-slate-200 hover:bg-slate-300'
+                      }`}
+                      title={`Doctor ${dotIdx + 1}: ${getDoctorDisplayName(doc)}`}
+                    ></button>
+                  );
+                })}
+              </div>
+              <span className="text-[11px] font-bold text-slate-400">
+                Showing {doctorSlideIndex + 1}–{Math.min(doctorSlideIndex + itemsPerView, displayDoctorsList.length)} of all {displayDoctorsList.length} Doctors
+              </span>
             </div>
           )}
         </div>
