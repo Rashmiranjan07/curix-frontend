@@ -1704,61 +1704,15 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
             </p>
           </div>
 
-          {/* Right Controls: Prev / Next Slide Arrows + AutoPlay Toggle + View All */}
-          <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
-            {/* Slide Navigation Buttons */}
-            <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
-              <button
-                type="button"
-                onClick={handlePrevDoctorSlide}
-                className="w-9 h-9 rounded-xl bg-slate-50 hover:bg-[#E6F8F5] text-slate-600 hover:text-[#00A896] flex items-center justify-center transition-all cursor-pointer shadow-2xs active:scale-95"
-                title="Slide Previous (Left)"
-              >
-                <ChevronLeft size={18} />
-              </button>
-
-              {/* Doctor Position & Total Doctors Indicator: e.g. 1–4 of 14 Doctors */}
-              <div className="px-3 py-1 text-xs font-mono font-bold text-slate-700 flex items-center gap-1">
-                <span className="text-[#00A896] font-black">
-                  {doctorSlideIndex + 1}–{Math.min(doctorSlideIndex + itemsPerView, displayDoctorsList.length)}
-                </span>
-                <span className="text-slate-400">of</span>
-                <span className="text-[#0A1C35] font-black">{displayDoctorsList.length} Doctors</span>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleNextDoctorSlide}
-                className="w-9 h-9 rounded-xl bg-slate-50 hover:bg-[#E6F8F5] text-slate-600 hover:text-[#00A896] flex items-center justify-center transition-all cursor-pointer shadow-2xs active:scale-95"
-                title="Slide Next (Right)"
-              >
-                <ChevronRight size={18} />
-              </button>
-
-              {/* Autoplay Pause/Play button */}
-              <button
-                type="button"
-                onClick={() => setDoctorSliderAutoPlay(!doctorSliderAutoPlay)}
-                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
-                  doctorSliderAutoPlay
-                    ? 'bg-[#E6F8F5] text-[#00A896]'
-                    : 'bg-slate-50 text-slate-400 hover:text-slate-600'
-                }`}
-                title={doctorSliderAutoPlay ? 'Pause auto-sliding' : 'Resume auto-sliding'}
-              >
-                {doctorSliderAutoPlay ? <Pause size={14} /> : <Play size={14} />}
-              </button>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => onOpenAuth?.()}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white hover:bg-[#E6F8F5] text-xs sm:text-sm font-bold text-[#00A896] border border-[#00A896]/30 shadow-2xs hover:shadow-md transition-all group cursor-pointer"
-            >
-              <span>View All</span>
-              <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
+          {/* Right Action: View All Doctors */}
+          <button
+            type="button"
+            onClick={() => onOpenAuth?.()}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white hover:bg-[#E6F8F5] text-xs sm:text-sm font-bold text-[#00A896] border border-[#00A896]/30 shadow-2xs hover:shadow-md transition-all group cursor-pointer self-start sm:self-auto"
+          >
+            <span>View All Doctors</span>
+            <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+          </button>
         </div>
 
         {/* Horizontal Slider Viewport Container */}
