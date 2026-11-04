@@ -12,7 +12,7 @@ import {
   Calendar, Stethoscope, Building2, ShieldCheck, CheckCircle2, 
   Heart, Activity, Lock, PhoneCall, Clock, Award, 
   FileText, ArrowRight, Search, LogIn, Star,
-  Sparkles, Check, ChevronRight, Zap, ChevronDown,
+  Sparkles, Check, ChevronLeft, ChevronRight, Zap, ChevronDown,
   HelpCircle, UserCheck, CheckCircle, Video, Home,
   RefreshCw, AlertCircle, Filter, ChevronUp, Play, Pause
 } from 'lucide-react';
@@ -22,6 +22,26 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
   const [registeredDoctors, setRegisteredDoctors] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loadingDoctors, setLoadingDoctors] = useState(true);
+
+  // Horizontal Doctor Slider States
+  const [doctorSlideIndex, setDoctorSlideIndex] = useState(0);
+  const [isDoctorSliderHovered, setIsDoctorSliderHovered] = useState(false);
+  const [doctorSliderAutoPlay, setDoctorSliderAutoPlay] = useState(true);
+  const [itemsPerView, setItemsPerView] = useState(4);
+
+  // Responsive Items Per View Listener
+  useEffect(() => {
+    const updateItemsPerView = () => {
+      if (typeof window !== 'undefined') {
+        if (window.innerWidth < 640) setItemsPerView(1);
+        else if (window.innerWidth < 1024) setItemsPerView(2);
+        else setItemsPerView(4);
+      }
+    };
+    updateItemsPerView();
+    window.addEventListener('resize', updateItemsPerView);
+    return () => window.removeEventListener('resize', updateItemsPerView);
+  }, []);
 
   // Interactive Tabs
   const [searchQuery, setSearchQuery] = useState('');
@@ -101,7 +121,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
     const femaleNames = [
       'sarah', 'priya', 'emily', 'anita', 'mary', 'jessica', 'claire', 'elizabeth',
       'lisa', 'emma', 'olivia', 'sophia', 'rachel', 'neha', 'pooja', 'sneha', 'anjali',
-      'aarti', 'kavita', 'sunita', 'meera', 'deepa', 'conor', 'fatima', 'aisha', 'maya'
+      'aarti', 'kavita', 'sunita', 'meera', 'deepa', 'conor', 'fatima', 'aisha', 'maya', 'aditi', 'sanya'
     ];
     if (femaleNames.some((fn) => name.includes(fn))) return "FEMALE";
     return 'MALE';
@@ -116,43 +136,84 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
     return getDoctorGender(doc) === 'FEMALE' ? '👩‍⚕️' : '👨‍⚕️';
   };
 
-  // Default Sample Doctors for Top Doctors Showcase
+  // Website's Official Doctors (Default list matching the website database)
   const defaultSampleDoctors = [
     {
-      id: 'sample-1',
-      firstName: 'Emily',
-      lastName: 'Carter',
-      fullName: 'Dr. Emily Carter',
+      id: 1,
+      firstName: 'Edward',
+      lastName: 'Smith',
+      fullName: 'Dr. Edward Smith',
       specialty: 'Cardiologist',
       departmentName: 'Cardiology',
-      gender: 'FEMALE'
+      gender: 'MALE',
+      qualification: 'MBBS, MD (Cardiology)',
+      experienceYears: 12
     },
     {
-      id: 'sample-2',
-      firstName: 'James',
-      lastName: 'Wilson',
-      fullName: 'Dr. James Wilson',
-      specialty: 'Orthopedic Specialist',
-      departmentName: 'Orthopaedics',
-      gender: 'MALE'
+      id: 2,
+      firstName: 'Sarah',
+      lastName: 'Conor',
+      fullName: 'Dr. Sarah Conor',
+      specialty: 'Neurologist',
+      departmentName: 'Neurology',
+      gender: 'FEMALE',
+      qualification: 'MBBS, DM (Neurology)',
+      experienceYears: 9
     },
     {
-      id: 'sample-3',
-      firstName: 'Priya',
+      id: 3,
+      firstName: 'Arjun',
       lastName: 'Sharma',
-      fullName: 'Dr. Priya Sharma',
-      specialty: 'Dermatologist',
-      departmentName: 'Dermatology',
-      gender: 'FEMALE'
-    },
-    {
-      id: 'sample-4',
-      firstName: 'Ahmed',
-      lastName: 'Rahman',
-      fullName: 'Dr. Ahmed Rahman',
+      fullName: 'Dr. Arjun Sharma',
       specialty: 'General Physician',
       departmentName: 'General Medicine',
-      gender: 'MALE'
+      gender: 'MALE',
+      qualification: 'MBBS, MD (Internal Medicine)',
+      experienceYears: 8
+    },
+    {
+      id: 4,
+      firstName: 'Vikram',
+      lastName: 'Singh',
+      fullName: 'Dr. Vikram Singh',
+      specialty: 'ENT Surgeon',
+      departmentName: 'ENT',
+      gender: 'MALE',
+      qualification: 'MS (ENT), DNB',
+      experienceYears: 14
+    },
+    {
+      id: 5,
+      firstName: 'Aditi',
+      lastName: 'Das',
+      fullName: 'Dr. Aditi Das',
+      specialty: 'Orthodontist & Dental Surgeon',
+      departmentName: 'Dentistry',
+      gender: 'FEMALE',
+      qualification: 'BDS, MDS (Orthodontics)',
+      experienceYears: 7
+    },
+    {
+      id: 6,
+      firstName: 'Kishan',
+      lastName: 'Malhotra',
+      fullName: 'Dr. Kishan Malhotra',
+      specialty: 'Clinical Nephrologist',
+      departmentName: 'Nephrology',
+      gender: 'MALE',
+      qualification: 'MBBS, DM (Nephrology)',
+      experienceYears: 11
+    },
+    {
+      id: 7,
+      firstName: 'Sanya',
+      lastName: 'Patel',
+      fullName: 'Dr. Sanya Patel',
+      specialty: 'Respiratory Medicine Specialist',
+      departmentName: 'Pulmonology',
+      gender: 'FEMALE',
+      qualification: 'MBBS, MD (Pulmonary Medicine)',
+      experienceYears: 10
     }
   ];
 
@@ -160,40 +221,54 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
   const getDoctorSpecialtyDisplay = (doc) => {
     if (doc?.specialty) return doc.specialty;
     if (doc?.specialization) return doc.specialization;
-    if (doc?.department?.name) return doc.department.name;
     if (doc?.departmentName) return doc.departmentName;
+    if (doc?.department?.name) return doc.department.name;
     return 'General Physician';
   };
 
-  // Top doctors list (uses registered doctors if available, padded with sample doctors to guarantee 4 cards)
-  const topDoctorsList = React.useMemo(() => {
-    if (registeredDoctors && registeredDoctors.length >= 4) {
-      return registeredDoctors.slice(0, 4);
-    }
+  // Real doctors present in the website: when registeredDoctors are loaded from the database, use ONLY those doctors!
+  const allDoctorsList = React.useMemo(() => {
     if (registeredDoctors && registeredDoctors.length > 0) {
-      const combined = [...registeredDoctors];
-      for (const sample of defaultSampleDoctors) {
-        if (combined.length >= 4) break;
-        const exists = combined.some(d => getDoctorDisplayName(d).toLowerCase() === sample.fullName.toLowerCase());
-        if (!exists) combined.push(sample);
-      }
-      return combined.slice(0, 4);
+      return registeredDoctors;
     }
     return defaultSampleDoctors;
   }, [registeredDoctors]);
 
-  // Filtered Top Doctors (incorporates quick search from hero bar if entered)
-  const displayTopDoctors = React.useMemo(() => {
-    if (!searchQuery.trim()) return topDoctorsList;
+  // Filtered doctors if hero search query entered
+  const displayDoctorsList = React.useMemo(() => {
+    if (!searchQuery.trim()) return allDoctorsList;
     const q = searchQuery.toLowerCase();
-    const pool = (registeredDoctors.length > 0 ? registeredDoctors : defaultSampleDoctors);
-    const matches = pool.filter((doc) => {
+    const matches = allDoctorsList.filter((doc) => {
       const name = getDoctorDisplayName(doc).toLowerCase();
       const spec = getDoctorSpecialtyDisplay(doc).toLowerCase();
-      return name.includes(q) || spec.includes(q);
+      const dept = (doc.departmentName || doc.department?.name || '').toLowerCase();
+      return name.includes(q) || spec.includes(q) || dept.includes(q);
     });
-    return matches.length > 0 ? matches.slice(0, 4) : topDoctorsList;
-  }, [searchQuery, topDoctorsList, registeredDoctors]);
+    return matches.length > 0 ? matches : allDoctorsList;
+  }, [searchQuery, allDoctorsList]);
+
+  const maxSlideIndex = Math.max(0, displayDoctorsList.length - itemsPerView);
+
+  // Auto-play timer for horizontal slider (slides left to right bringing in new doctors)
+  useEffect(() => {
+    if (!doctorSliderAutoPlay || isDoctorSliderHovered || displayDoctorsList.length <= itemsPerView) return;
+    const interval = setInterval(() => {
+      setDoctorSlideIndex((prev) => (prev >= maxSlideIndex ? 0 : prev + 1));
+    }, 3800);
+    return () => clearInterval(interval);
+  }, [doctorSliderAutoPlay, isDoctorSliderHovered, displayDoctorsList.length, maxSlideIndex, itemsPerView]);
+
+  useEffect(() => {
+    setDoctorSlideIndex(0);
+  }, [searchQuery]);
+
+  const handleNextDoctorSlide = () => {
+    setDoctorSlideIndex((prev) => (prev >= maxSlideIndex ? 0 : prev + 1));
+  };
+
+  const handlePrevDoctorSlide = () => {
+    setDoctorSlideIndex((prev) => (prev <= 0 ? maxSlideIndex : prev - 1));
+  };
 
   // 9 Centres of Excellence & Specialized Clinical Care
   const centresOfExcellence = [
@@ -1530,15 +1605,15 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
         </div>
       </section>
 
-      {/* 3. MEET OUR TOP DOCTORS (ANIMATED SHOWCASE - NO RATINGS, NO AUTO-SLIDE) */}
+      {/* 3. MEET OUR TOP DOCTORS (HORIZONTAL CAROUSEL SLIDER: 4 CARDS WITH SMOOTH SLIDE) */}
       <section id="specialties" className="scroll-mt-20 w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 py-16 sm:py-20 lg:py-24 border-t border-slate-100/80 relative overflow-hidden">
         <span id="doctors" className="scroll-mt-24 absolute -top-10" />
 
         {/* Ambient Glow in Background */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-[#00A896]/5 blur-3xl rounded-full pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] h-[380px] bg-[#00A896]/5 blur-3xl rounded-full pointer-events-none" />
 
-        {/* Section Header: Title + Subtitle on Left, View All Doctors on Right */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 sm:mb-14 relative z-10">
+        {/* Section Header: Title + Subtitle on Left; Controls & View All Doctors on Right */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 sm:mb-10 relative z-10">
           <div>
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#E6F8F5] text-[#00A896] text-[11px] font-extrabold uppercase tracking-wider mb-2.5 border border-[#00A896]/20">
               <Sparkles size={12} className="animate-spin" style={{ animationDuration: '6s' }} />
@@ -1552,83 +1627,184 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => onOpenAuth?.()}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white hover:bg-[#E6F8F5] text-xs sm:text-sm font-bold text-[#00A896] border border-[#00A896]/30 shadow-2xs hover:shadow-md transition-all group cursor-pointer self-start sm:self-auto"
-          >
-            <span>View All Doctors</span>
-            <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
-          </button>
+          {/* Right Controls: Prev / Next Slide Arrows + AutoPlay Toggle + View All */}
+          <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
+            {/* Slide Navigation Buttons */}
+            <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
+              <button
+                type="button"
+                onClick={handlePrevDoctorSlide}
+                className="w-9 h-9 rounded-xl bg-slate-50 hover:bg-[#E6F8F5] text-slate-600 hover:text-[#00A896] flex items-center justify-center transition-all cursor-pointer shadow-2xs active:scale-95"
+                title="Slide Previous (Left)"
+              >
+                <ChevronLeft size={18} />
+              </button>
+
+              {/* Position Indicator */}
+              <div className="px-2.5 py-1 text-xs font-mono font-bold text-slate-600 flex items-center gap-1">
+                <span className="text-[#00A896]">{doctorSlideIndex + 1}</span>
+                <span className="text-slate-300">/</span>
+                <span>{maxSlideIndex + 1}</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleNextDoctorSlide}
+                className="w-9 h-9 rounded-xl bg-slate-50 hover:bg-[#E6F8F5] text-slate-600 hover:text-[#00A896] flex items-center justify-center transition-all cursor-pointer shadow-2xs active:scale-95"
+                title="Slide Next (Right)"
+              >
+                <ChevronRight size={18} />
+              </button>
+
+              {/* Autoplay Pause/Play button */}
+              <button
+                type="button"
+                onClick={() => setDoctorSliderAutoPlay(!doctorSliderAutoPlay)}
+                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
+                  doctorSliderAutoPlay
+                    ? 'bg-[#E6F8F5] text-[#00A896]'
+                    : 'bg-slate-50 text-slate-400 hover:text-slate-600'
+                }`}
+                title={doctorSliderAutoPlay ? 'Pause auto-sliding' : 'Resume auto-sliding'}
+              >
+                {doctorSliderAutoPlay ? <Pause size={14} /> : <Play size={14} />}
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => onOpenAuth?.()}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white hover:bg-[#E6F8F5] text-xs sm:text-sm font-bold text-[#00A896] border border-[#00A896]/30 shadow-2xs hover:shadow-md transition-all group cursor-pointer"
+            >
+              <span>View All</span>
+              <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
         </div>
 
-        {/* 4 Cards Responsive Animated Grid (No auto-slide, interactive animations) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
-          {displayTopDoctors.map((doc, idx) => {
-            const docName = getDoctorDisplayName(doc);
-            const specialty = getDoctorSpecialtyDisplay(doc);
+        {/* Horizontal Slider Viewport Container */}
+        <div 
+          className="relative group/carousel"
+          onMouseEnter={() => setIsDoctorSliderHovered(true)}
+          onMouseLeave={() => setIsDoctorSliderHovered(false)}
+        >
+          {/* Floating Left Nav Arrow */}
+          <button
+            type="button"
+            onClick={handlePrevDoctorSlide}
+            className="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-white/95 backdrop-blur-md border border-slate-200 shadow-md hover:shadow-xl text-slate-700 hover:text-[#00A896] items-center justify-center transition-all hover:scale-110 cursor-pointer active:scale-95"
+            title="Previous Doctor"
+          >
+            <ChevronLeft size={20} />
+          </button>
 
-            return (
-              <div
-                key={doc.id || `${docName}-${idx}`}
-                className="relative bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/70 hover:border-[#00A896]/60 shadow-xs hover:shadow-2xl hover:shadow-[#00A896]/15 hover:-translate-y-2.5 transition-all duration-400 ease-out flex flex-col items-center text-center group cursor-pointer overflow-hidden"
-              >
-                {/* Shimmer Light Sweep on Hover */}
-                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none z-20" />
+          {/* Floating Right Nav Arrow */}
+          <button
+            type="button"
+            onClick={handleNextDoctorSlide}
+            className="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-white/95 backdrop-blur-md border border-slate-200 shadow-md hover:shadow-xl text-slate-700 hover:text-[#00A896] items-center justify-center transition-all hover:scale-110 cursor-pointer active:scale-95"
+            title="Next Doctor"
+          >
+            <ChevronRight size={20} />
+          </button>
 
-                {/* Top Animated Glowing Border Accent */}
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#00A896] via-[#0BC2A8] to-sky-400 opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
+          {/* Overflow Window */}
+          <div className="overflow-hidden -mx-3 py-4">
+            {/* Sliding Track: Translates horizontally from left to right */}
+            <div
+              className="flex transition-transform duration-500 ease-out"
+              style={{
+                transform: `translateX(-${doctorSlideIndex * (100 / itemsPerView)}%)`
+              }}
+            >
+              {displayDoctorsList.map((doc, idx) => {
+                const docName = getDoctorDisplayName(doc);
+                const specialty = getDoctorSpecialtyDisplay(doc);
 
-                {/* Ambient Soft Glow Behind Card */}
-                <div className="absolute -bottom-10 -right-10 w-32 h-32 rounded-full bg-[#00A896]/5 group-hover:bg-[#00A896]/15 blur-2xl transition-all duration-500 pointer-events-none" />
+                return (
+                  <div
+                    key={doc.id || `${docName}-${idx}`}
+                    className="w-full sm:w-1/2 lg:w-1/4 shrink-0 px-3"
+                  >
+                    <div className="relative bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/70 hover:border-[#00A896]/60 shadow-xs hover:shadow-2xl hover:shadow-[#00A896]/15 hover:-translate-y-2.5 transition-all duration-400 ease-out flex flex-col items-center text-center group cursor-pointer overflow-hidden h-full">
+                      {/* Shimmer Light Sweep on Hover */}
+                      <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none z-20" />
 
-                {/* Centered Circular Doctor Avatar with 3D Float Animation */}
-                <div className="relative mb-4">
-                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full p-1 bg-gradient-to-b from-slate-50 to-slate-100 border-2 border-slate-100 group-hover:border-[#00A896]/40 shadow-xs flex items-center justify-center overflow-hidden transition-all duration-400 group-hover:shadow-lg group-hover:shadow-[#00A896]/20">
-                    <img
-                      src={getDoctor3dImage(doc)}
-                      alt={docName}
-                      className="w-full h-full object-cover rounded-full group-hover:scale-110 group-hover:rotate-2 transition-transform duration-500 ease-out"
-                    />
+                      {/* Top Animated Glowing Border Accent */}
+                      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#00A896] via-[#0BC2A8] to-sky-400 opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
+
+                      {/* Ambient Soft Glow Behind Card */}
+                      <div className="absolute -bottom-10 -right-10 w-32 h-32 rounded-full bg-[#00A896]/5 group-hover:bg-[#00A896]/15 blur-2xl transition-all duration-500 pointer-events-none" />
+
+                      {/* Centered Circular Doctor Avatar with 3D Dynamics */}
+                      <div className="relative mb-4">
+                        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full p-1 bg-gradient-to-b from-slate-50 to-slate-100 border-2 border-slate-100 group-hover:border-[#00A896]/40 shadow-xs flex items-center justify-center overflow-hidden transition-all duration-400 group-hover:shadow-lg group-hover:shadow-[#00A896]/20">
+                          <img
+                            src={getDoctor3dImage(doc)}
+                            alt={docName}
+                            className="w-full h-full object-cover rounded-full group-hover:scale-110 group-hover:rotate-2 transition-transform duration-500 ease-out"
+                          />
+                        </div>
+
+                        {/* 3D Emoji Avatar Pill with Hover Scale */}
+                        <span className="absolute -bottom-1 -right-1 text-xs sm:text-sm bg-white/95 backdrop-blur-xs rounded-full px-1.5 py-0.5 shadow-sm border border-slate-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                          {getDoctor3dEmoji(doc)}
+                        </span>
+                      </div>
+
+                      {/* Doctor Name */}
+                      <h3 className="text-base sm:text-lg font-extrabold text-[#0A1C35] mb-1 group-hover:text-[#00A896] transition-colors duration-300 truncate w-full">
+                        {docName}
+                      </h3>
+
+                      {/* Specification / Specialty */}
+                      <p className="text-xs sm:text-sm font-semibold text-slate-500 mb-3 truncate w-full">
+                        {specialty}
+                      </p>
+
+                      {/* Animated Verified Specialist Badge (No Ratings) */}
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E6F8F5] text-[#00A896] text-[11px] font-extrabold mb-6 group-hover:bg-[#00A896] group-hover:text-white transition-all duration-300 shadow-2xs">
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00A896] group-hover:bg-white opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00A896] group-hover:bg-white"></span>
+                        </span>
+                        <span>Verified Specialist</span>
+                      </div>
+
+                      {/* Rounded Pill Book Now Button with Sliding Arrow */}
+                      <button
+                        type="button"
+                        onClick={() => onOpenAuth?.()}
+                        className="w-full py-2.5 sm:py-3 px-6 rounded-full bg-[#00A896] hover:bg-[#079181] group-hover:shadow-lg group-hover:shadow-[#00A896]/30 text-white text-xs sm:text-sm font-extrabold tracking-wide transition-all duration-300 cursor-pointer active:scale-95 mt-auto flex items-center justify-center gap-2 group/btn"
+                      >
+                        <span>Book Now</span>
+                        <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
+                      </button>
+                    </div>
                   </div>
+                );
+              })}
+            </div>
+          </div>
 
-                  {/* 3D Emoji Avatar Pill with Hover Scale */}
-                  <span className="absolute -bottom-1 -right-1 text-xs sm:text-sm bg-white/95 backdrop-blur-xs rounded-full px-1.5 py-0.5 shadow-sm border border-slate-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    {getDoctor3dEmoji(doc)}
-                  </span>
-                </div>
-
-                {/* Doctor Name */}
-                <h3 className="text-base sm:text-lg font-extrabold text-[#0A1C35] mb-1 group-hover:text-[#00A896] transition-colors duration-300 truncate w-full">
-                  {docName}
-                </h3>
-
-                {/* Specification / Specialty */}
-                <p className="text-xs sm:text-sm font-semibold text-slate-500 mb-3 truncate w-full">
-                  {specialty}
-                </p>
-
-                {/* Animated Verified Specialist Badge (Replacing Ratings) */}
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E6F8F5] text-[#00A896] text-[11px] font-extrabold mb-6 group-hover:bg-[#00A896] group-hover:text-white transition-all duration-300 shadow-2xs">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00A896] group-hover:bg-white opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00A896] group-hover:bg-white"></span>
-                  </span>
-                  <span>Verified Specialist</span>
-                </div>
-
-                {/* Rounded Pill Book Now Button with Sliding Arrow */}
+          {/* Pagination Pill Dots */}
+          {maxSlideIndex > 0 && (
+            <div className="flex items-center justify-center gap-2 pt-4">
+              {Array.from({ length: maxSlideIndex + 1 }).map((_, dotIdx) => (
                 <button
+                  key={dotIdx}
                   type="button"
-                  onClick={() => onOpenAuth?.()}
-                  className="w-full py-2.5 sm:py-3 px-6 rounded-full bg-[#00A896] hover:bg-[#079181] group-hover:shadow-lg group-hover:shadow-[#00A896]/30 text-white text-xs sm:text-sm font-extrabold tracking-wide transition-all duration-300 cursor-pointer active:scale-95 mt-auto flex items-center justify-center gap-2 group/btn"
-                >
-                  <span>Book Now</span>
-                  <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
-                </button>
-              </div>
-            );
-          })}
+                  onClick={() => setDoctorSlideIndex(dotIdx)}
+                  className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                    doctorSlideIndex === dotIdx
+                      ? 'w-7 bg-[#00A896]'
+                      : 'w-2 bg-slate-200 hover:bg-slate-300'
+                  }`}
+                  title={`Go to slide ${dotIdx + 1}`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
