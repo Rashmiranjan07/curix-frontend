@@ -23,8 +23,9 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
   const [departments, setDepartments] = useState([]);
   const [loadingDoctors, setLoadingDoctors] = useState(true);
 
-  // Horizontal Doctor Slider States
-  const [doctorSlideIndex, setDoctorSlideIndex] = useState(0);
+  // Horizontal Doctor Slider States (Infinite Loop)
+  const [doctorSlideIndex, setDoctorSlideIndex] = useState(14);
+  const [isSlideTransitioning, setIsSlideTransitioning] = useState(true);
   const [isDoctorSliderHovered, setIsDoctorSliderHovered] = useState(false);
   const [doctorSliderAutoPlay, setDoctorSliderAutoPlay] = useState(true);
   const [itemsPerView, setItemsPerView] = useState(4);
@@ -324,27 +325,66 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
     return matches.length > 0 ? matches : allDoctorsList;
   }, [searchQuery, allDoctorsList]);
 
-  const maxSlideIndex = Math.max(0, displayDoctorsList.length - itemsPerView);
+  const docCount = displayDoctorsList.length;
 
-  // Auto-play timer for horizontal slider (slides left to right bringing in new doctors)
+  // Infinite repeating doctors buffer: 3 sets [0..N-1, 0..N-1, 0..N-1]
+  const infiniteDoctors = React.useMemo(() => {
+    if (docCount === 0) return [];
+    return [...displayDoctorsList, ...displayDoctorsList, ...displayDoctorsList];
+  }, [displayDoctorsList, docCount]);
+
+  // Initialize slideIndex to the middle set (docCount) so we can loop infinitely in both directions
   useEffect(() => {
-    if (!doctorSliderAutoPlay || isDoctorSliderHovered || displayDoctorsList.length <= itemsPerView) return;
+    if (docCount > 0) {
+      setIsSlideTransitioning(false);
+      setDoctorSlideIndex(docCount);
+    }
+  }, [docCount, searchQuery]);
+
+  // Re-enable CSS transition after a seamless jump
+  useEffect(() => {
+    if (!isSlideTransitioning) {
+      const raf = requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setIsSlideTransitioning(true);
+        });
+      });
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [isSlideTransitioning]);
+
+  // Handle transition end on the sliding track for seamless continuous loop (11-14 -> 12-1 -> 13-2 -> 14-3 -> 1-4)
+  const handleSlideTransitionEnd = () => {
+    if (docCount <= itemsPerView) return;
+    if (doctorSlideIndex >= 2 * docCount) {
+      setIsSlideTransitioning(false);
+      setDoctorSlideIndex(doctorSlideIndex - docCount);
+    } else if (doctorSlideIndex < docCount) {
+      setIsSlideTransitioning(false);
+      setDoctorSlideIndex(doctorSlideIndex + docCount);
+    }
+  };
+
+  // Auto-play timer for infinite continuous loop
+  useEffect(() => {
+    if (!doctorSliderAutoPlay || isDoctorSliderHovered || docCount <= itemsPerView) return;
     const interval = setInterval(() => {
-      setDoctorSlideIndex((prev) => (prev >= maxSlideIndex ? 0 : prev + 1));
+      setIsSlideTransitioning(true);
+      setDoctorSlideIndex((prev) => prev + 1);
     }, 3800);
     return () => clearInterval(interval);
-  }, [doctorSliderAutoPlay, isDoctorSliderHovered, displayDoctorsList.length, maxSlideIndex, itemsPerView]);
-
-  useEffect(() => {
-    setDoctorSlideIndex(0);
-  }, [searchQuery]);
+  }, [doctorSliderAutoPlay, isDoctorSliderHovered, docCount, itemsPerView]);
 
   const handleNextDoctorSlide = () => {
-    setDoctorSlideIndex((prev) => (prev >= maxSlideIndex ? 0 : prev + 1));
+    if (docCount <= itemsPerView) return;
+    setIsSlideTransitioning(true);
+    setDoctorSlideIndex((prev) => prev + 1);
   };
 
   const handlePrevDoctorSlide = () => {
-    setDoctorSlideIndex((prev) => (prev <= 0 ? maxSlideIndex : prev - 1));
+    if (docCount <= itemsPerView) return;
+    setIsSlideTransitioning(true);
+    setDoctorSlideIndex((prev) => prev - 1);
   };
 
   // 9 Centres of Excellence & Specialized Clinical Care
@@ -1743,20 +1783,22 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
           {/* Overflow Window */}
           <div className="overflow-hidden -mx-3 py-4">
-            {/* Sliding Track: Translates horizontally from left to right */}
+            {/* Sliding Track: Continuous Infinite Loop (1..14 -> 1..14) */}
             <div
-              className="flex transition-transform duration-500 ease-out"
+              className="flex"
               style={{
-                transform: `translateX(-${doctorSlideIndex * (100 / itemsPerView)}%)`
+                transform: `translateX(-${doctorSlideIndex * (100 / itemsPerView)}%)`,
+                transition: isSlideTransitioning ? 'transform 500ms cubic-bezier(0.25, 1, 0.5, 1)' : 'none'
               }}
+              onTransitionEnd={handleSlideTransitionEnd}
             >
-              {displayDoctorsList.map((doc, idx) => {
+              {infiniteDoctors.map((doc, idx) => {
                 const docName = getDoctorDisplayName(doc);
                 const specialty = getDoctorSpecialtyDisplay(doc);
 
                 return (
                   <div
-                    key={doc.id || `${docName}-${idx}`}
+                    key={`doc-infinite-${idx}-${doc.id || docName}`}
                     className="w-full sm:w-1/2 lg:w-1/4 shrink-0 px-3"
                   >
                     <div className="relative bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/70 hover:border-[#00A896]/60 shadow-xs hover:shadow-2xl hover:shadow-[#00A896]/15 hover:-translate-y-2.5 transition-all duration-400 ease-out flex flex-col items-center text-center group cursor-pointer overflow-hidden h-full">
@@ -1820,19 +1862,22 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
             </div>
           </div>
 
-          {/* Pagination Dots for all Doctors in the website */}
-          {displayDoctorsList.length > 1 && (
+          {/* Pagination Dots for all Doctors in Seamless Loop */}
+          {docCount > 1 && (
             <div className="flex flex-col items-center gap-2 pt-5">
               <div className="flex items-center justify-center gap-1.5 flex-wrap max-w-lg">
                 {displayDoctorsList.map((doc, dotIdx) => {
-                  const isVisible = dotIdx >= doctorSlideIndex && dotIdx < doctorSlideIndex + itemsPerView;
+                  const currentDoctorActive = (((doctorSlideIndex % docCount) + docCount) % docCount) === dotIdx;
                   return (
                     <button
                       key={dotIdx}
                       type="button"
-                      onClick={() => setDoctorSlideIndex(Math.min(dotIdx, maxSlideIndex))}
+                      onClick={() => {
+                        setIsSlideTransitioning(true);
+                        setDoctorSlideIndex(docCount + dotIdx);
+                      }}
                       className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                        isVisible
+                        currentDoctorActive
                           ? 'w-6 bg-[#00A896] shadow-xs'
                           : 'w-2 bg-slate-200 hover:bg-slate-300'
                       }`}
@@ -1842,7 +1887,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
                 })}
               </div>
               <span className="text-[11px] font-bold text-slate-400">
-                Showing {doctorSlideIndex + 1}–{Math.min(doctorSlideIndex + itemsPerView, displayDoctorsList.length)} of all {displayDoctorsList.length} Doctors
+                Doctor {(((doctorSlideIndex % docCount) + docCount) % docCount) + 1} of all {docCount} Doctors · Continuous Loop
               </span>
             </div>
           )}
