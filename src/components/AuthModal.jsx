@@ -120,7 +120,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#071524]/75 backdrop-blur-md transition-all duration-300">
-      <div className="relative w-full max-w-lg bg-white border border-slate-200/90 rounded-[32px] p-7 sm:p-9 shadow-2xl max-h-[92vh] overflow-y-auto">
+      <div className="relative w-full max-w-lg bg-white border border-slate-200/90 rounded-[32px] p-5 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
         
         {/* Ambient Top Glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-2 rounded-full bg-gradient-to-r from-transparent via-[#00A896] to-transparent opacity-80" />
@@ -160,7 +160,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = 'PATIENT' }) 
                 key={r.id}
                 type="button"
                 onClick={() => switchRole(r.id)}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-xs font-extrabold transition-all duration-200 cursor-pointer ${
+                className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-2.5 px-1 rounded-full text-[11px] sm:text-xs font-extrabold transition-all duration-200 cursor-pointer ${
                   isActive
                     ? 'bg-white text-[#0A1C35] shadow-sm shadow-slate-900/10'
                     : 'text-slate-600 hover:text-[#0A1C35]'

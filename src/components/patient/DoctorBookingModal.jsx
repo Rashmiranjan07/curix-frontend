@@ -139,7 +139,7 @@ export default function DoctorBookingModal({ doctor, isOpen, onClose, onBookingS
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1e3a5f]/40 backdrop-blur-sm transition-opacity">
-      <div className="relative w-full max-w-xl bg-white border border-sky-100 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
+      <div className="relative w-full max-w-xl bg-white border border-sky-100 rounded-3xl p-5 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
         
         <button
           onClick={onClose}
@@ -159,7 +159,7 @@ export default function DoctorBookingModal({ doctor, isOpen, onClose, onBookingS
             Schedule Consultation
           </h2>
           
-          <div className="mt-4 p-4 rounded-2xl bg-sky-50/60 border border-sky-100 flex items-center justify-between">
+          <div className="mt-4 p-4 rounded-2xl bg-sky-50/60 border border-sky-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-xl bg-white border border-sky-200 flex items-center justify-center text-[#0ea5e9] shadow-xs">
                 <Stethoscope size={20} />
@@ -220,7 +220,7 @@ export default function DoctorBookingModal({ doctor, isOpen, onClose, onBookingS
                 <span className="text-xs font-medium">Calculating available slots from database...</span>
               </div>
             ) : availableSlots.length > 0 ? (
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto p-1">
+              <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto p-1">
                 {availableSlots.map((slotObj, idx) => {
                   const displayTime = 
                     typeof slotObj === 'string' ? slotObj : 

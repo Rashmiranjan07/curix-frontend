@@ -269,10 +269,10 @@ export default function PrescriptionModal({ prescription: initialPrescription, i
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md transition-opacity">
       
       {/* Modal Surface - Dark Pine Frosted Glass */}
-      <div className="relative w-full max-w-3xl rounded-3xl p-6 sm:p-9 bg-[#043a3b]/95 border border-teal-400/30 shadow-2xl backdrop-blur-xl text-white max-h-[92vh] overflow-y-auto print:bg-white print:text-black print:p-0 print:border-none print:shadow-none">
+      <div className="relative w-full max-w-3xl rounded-3xl p-4 sm:p-8 bg-[#043a3b]/95 border border-teal-400/30 shadow-2xl backdrop-blur-xl text-white max-h-[92vh] overflow-y-auto print:bg-white print:text-black print:p-0 print:border-none print:shadow-none">
         
         {/* Top Actions: Title, Download, Print, Close */}
-        <div className="flex items-center justify-between pb-5 border-b border-teal-400/20 no-print">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-teal-400/20 no-print">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[#00a896] text-white flex items-center justify-center font-bold text-sm shadow-md shadow-[#00a896]/30">
               Rx
@@ -385,8 +385,8 @@ export default function PrescriptionModal({ prescription: initialPrescription, i
               )}
             </div>
 
-            <div className="border border-teal-400/20 rounded-2xl overflow-hidden shadow-xs print:border-slate-300">
-              <table className="w-full text-left border-collapse text-xs">
+            <div className="border border-teal-400/20 rounded-2xl overflow-x-auto shadow-xs print:border-slate-300">
+              <table className="w-full min-w-[550px] text-left border-collapse text-xs">
                 <thead>
                   <tr className="bg-white/10 border-b border-teal-400/20 text-[11px] font-bold text-teal-200 uppercase tracking-wider print:bg-slate-100 print:text-slate-700 print:border-slate-300">
                     <th className="py-3 px-4">#</th>

@@ -802,6 +802,30 @@ export default function AdminDashboard() {
           </div>
         </header>
 
+        {/* MOBILE HORIZONTAL TABS */}
+        <div className="flex lg:hidden overflow-x-auto gap-2 p-3 sm:p-4 bg-white border-b border-slate-200/90 shadow-2xs">
+          {[
+            { id: 'analytics', label: 'Dashboard' },
+            { id: 'relationships', label: `Matrix (${allAppointments.length || 0})` },
+            { id: 'departments', label: `Units (${departments.length})` },
+            { id: 'doctors', label: `Physicians (${doctors.length})` },
+            { id: 'audit', label: 'Audit Trail' }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => {
+                setActiveTab(tab.id);
+                if (tab.id === 'audit') fetchAuditLogs(0);
+              }}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer ${
+                activeTab === tab.id ? 'bg-[#00A896] text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         {/* WORKSPACE CONTENT AREA */}
         <div className="flex-1 p-6 sm:p-8 grid grid-cols-1 xl:grid-cols-4 gap-8 items-start">
           
@@ -1812,8 +1836,8 @@ export default function AdminDashboard() {
                 }
 
                 return (
-                  <div className="border border-slate-200 rounded-2xl overflow-hidden">
-                    <table className="w-full text-left text-xs">
+                  <div className="border border-slate-200 rounded-2xl overflow-x-auto">
+                    <table className="w-full min-w-[650px] text-left text-xs">
                       <thead>
                         <tr className="bg-slate-50 border-b border-slate-200 text-[10px] uppercase font-bold text-slate-500">
                           <th className="p-3">Ref & Date</th>
@@ -2045,8 +2069,8 @@ export default function AdminDashboard() {
 
             <div>
               <span className="text-[11px] font-bold uppercase text-slate-400 block mb-2">℞ Prescribed Medications</span>
-              <div className="border border-slate-200 rounded-2xl overflow-hidden">
-                <table className="w-full text-left text-xs">
+              <div className="border border-slate-200 rounded-2xl overflow-x-auto">
+                <table className="w-full min-w-[550px] text-left text-xs">
                   <thead>
                     <tr className="bg-slate-50 border-b border-slate-200 text-[10px] uppercase font-bold text-slate-500">
                       <th className="p-3">#</th>

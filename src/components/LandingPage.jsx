@@ -1293,11 +1293,11 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
               </div>
 
               {/* Quick Action Buttons */}
-              <div className="pt-2 flex flex-wrap items-center gap-3.5">
+              <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-3.5">
                 <button
                   type="button"
                   onClick={() => onOpenAuth?.()}
-                  className="px-7 py-3.5 rounded-full btn-curix-primary text-xs font-extrabold tracking-wide flex items-center gap-2 group cursor-pointer"
+                  className="w-full sm:w-auto px-7 py-3.5 rounded-full btn-curix-primary text-xs font-extrabold tracking-wide flex items-center justify-center gap-2 group cursor-pointer text-center"
                 >
                   <Calendar size={15} />
                   <span>Reserve Doctor Slot</span>
@@ -1306,7 +1306,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
 
                 <a
                   href="#specialties"
-                  className="px-6 py-3.5 rounded-full bg-white hover:bg-slate-50 border border-slate-200/90 text-slate-700 text-xs font-bold shadow-2xs hover:shadow-sm transition-all duration-200"
+                  className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-white hover:bg-slate-50 border border-slate-200/90 text-slate-700 text-xs font-bold shadow-2xs hover:shadow-sm transition-all duration-200 text-center flex items-center justify-center"
                 >
                   Explore Physicians
                 </a>
@@ -1343,7 +1343,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
               <div className="relative z-10 anim-doctor-float flex flex-col items-center">
                 
                 {/* Core Round Shape Frame Container (Unified Size) */}
-                <div className="relative w-[320px] h-[320px] sm:w-[410px] sm:h-[410px] lg:w-[430px] lg:h-[430px] flex items-center justify-center">
+                <div className="relative w-[270px] h-[270px] xs:w-[320px] xs:h-[320px] sm:w-[410px] sm:h-[410px] lg:w-[430px] lg:h-[430px] max-w-full flex items-center justify-center">
                   
                   {/* Pulsing Core Glow Behind the Round Shape */}
                   <div className="absolute -inset-4 sm:-inset-6 rounded-full bg-gradient-to-tr from-[#00A896]/30 via-[#0BC2A8]/20 to-cyan-400/20 blur-3xl pointer-events-none anim-pulse-glow" />
@@ -1391,7 +1391,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
                 </div>
 
                 {/* Synchronized Floor Shadow Breathing Under the Round Shape */}
-                <div className="w-[230px] sm:w-[300px] lg:w-[320px] h-6 rounded-full bg-slate-900/30 blur-md pointer-events-none anim-shadow-breath mt-4 z-0" />
+                <div className="w-[210px] sm:w-[300px] lg:w-[320px] max-w-[80vw] h-6 rounded-full bg-slate-900/30 blur-md pointer-events-none anim-shadow-breath mt-4 z-0" />
               </div>
 
             </div>
@@ -1457,7 +1457,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
             <div className="relative w-full max-w-[460px] sm:max-w-[500px] lg:max-w-[540px] flex flex-col items-center">
               
               {/* Outer Floating Animation Frame - Fluid Scaled Portal */}
-              <div className="relative w-[300px] h-[300px] sm:w-[380px] sm:h-[380px] md:w-[340px] md:h-[340px] lg:w-[450px] lg:h-[450px] xl:w-[500px] xl:h-[500px] 2xl:w-[520px] 2xl:h-[520px] anim-doctor-float flex items-center justify-center z-10">
+              <div className="relative w-[260px] h-[260px] xs:w-[300px] xs:h-[300px] sm:w-[380px] sm:h-[380px] md:w-[340px] md:h-[340px] lg:w-[450px] lg:h-[450px] xl:w-[500px] xl:h-[500px] 2xl:w-[520px] 2xl:h-[520px] max-w-[calc(100vw-36px)] anim-doctor-float flex items-center justify-center z-10">
                 
                 {/* Ambient Soft Glow Behind the Portal */}
                 <div className="absolute -inset-6 sm:-inset-8 rounded-full bg-gradient-to-tr from-[#00A896]/20 via-[#0BC2A8]/15 to-rose-400/15 blur-3xl pointer-events-none anim-pulse-glow" />
@@ -1499,7 +1499,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
                 </div>
 
                 {/* Floating Telemetry Status Chips Anchored Around the 3D Heart Portal */}
-                <div className="absolute -top-1 -right-2 sm:-right-4 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-2">
+                <div className="absolute -top-1 right-0 sm:-right-4 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 px-3 sm:px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-2">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
@@ -1518,7 +1518,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
                   </span>
                 </div>
 
-                <div className="absolute bottom-1 -left-2 sm:-left-4 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+                <div className="absolute bottom-1 left-0 sm:-left-4 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 px-3 sm:px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
                   <Award size={13} className="text-[#00A896]" />
                   <span className="text-[10px] sm:text-[11px] font-black text-[#0A1C35]">
                     NABH & JCI Accredited
@@ -1528,7 +1528,7 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
               </div>
 
               {/* Synchronized Floor Shadow Breathing Under 3D Heart Structure */}
-              <div className="w-[260px] sm:w-[320px] md:w-[300px] lg:w-[380px] xl:w-[420px] h-7 rounded-full bg-slate-900/25 blur-md pointer-events-none anim-shadow-breath mt-4 z-0" />
+              <div className="w-[240px] sm:w-[320px] md:w-[300px] lg:w-[380px] xl:w-[420px] max-w-[85vw] h-7 rounded-full bg-slate-900/25 blur-md pointer-events-none anim-shadow-breath mt-4 z-0" />
             </div>
           </div>
 
@@ -1612,17 +1612,17 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
             </div>
 
             {/* Interactive CTAs */}
-            <div className="flex flex-wrap items-center gap-4 pt-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 sm:gap-4 pt-2">
               <a
                 href="#centres-of-excellence"
-                className="px-7 py-3.5 rounded-full btn-curix-primary text-xs font-extrabold flex items-center gap-2 shadow-md hover:shadow-lg transition cursor-pointer"
+                className="w-full sm:w-auto px-7 py-3.5 rounded-full btn-curix-primary text-xs font-extrabold flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition cursor-pointer text-center"
               >
                 <span>Explore Centres of Excellence</span>
                 <ArrowRight size={14} />
               </a>
               <a
                 href="#specialties"
-                className="px-6 py-3.5 rounded-full bg-white border border-slate-200/90 hover:border-slate-300 text-xs font-bold text-slate-700 shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+                className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-white border border-slate-200/90 hover:border-slate-300 text-xs font-bold text-slate-700 shadow-2xs transition flex items-center justify-center gap-1.5 cursor-pointer text-center"
               >
                 <span>Meet Medical Faculty</span>
                 <ChevronRight size={14} className="text-[#00A896]" />
@@ -2190,17 +2190,17 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3.5 shrink-0 relative z-10">
+          <div className="flex flex-col sm:flex-row items-center gap-3.5 shrink-0 relative z-10 w-full sm:w-auto">
             <button
               type="button"
               onClick={() => onOpenAuth?.()}
-              className="px-7 py-3.5 rounded-full btn-curix-primary text-white font-extrabold text-xs tracking-wide shadow-lg cursor-pointer"
+              className="w-full sm:w-auto px-7 py-3.5 rounded-full btn-curix-primary text-white font-extrabold text-xs tracking-wide shadow-lg cursor-pointer text-center justify-center"
             >
               Book Consultation Now
             </button>
             <a
               href="tel:+18002874900"
-              className="px-6 py-3.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition-all flex items-center gap-2"
+              className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition-all flex items-center justify-center gap-2 text-center"
             >
               <PhoneCall size={14} className="text-[#0BC2A8]" />
               <span>Call Helpline</span>

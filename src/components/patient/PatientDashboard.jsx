@@ -1566,8 +1566,8 @@ export default function PatientDashboard() {
 
             <div>
               <span className="text-[11px] font-bold uppercase text-slate-400 block mb-2">℞ Prescribed Medications</span>
-              <div className="border border-slate-200 rounded-2xl overflow-hidden">
-                <table className="w-full text-left text-xs">
+              <div className="border border-slate-200 rounded-2xl overflow-x-auto">
+                <table className="w-full min-w-[550px] text-left text-xs">
                   <thead>
                     <tr className="bg-slate-50 border-b border-slate-200 text-[10px] uppercase font-bold text-slate-500">
                       <th className="p-3">#</th>

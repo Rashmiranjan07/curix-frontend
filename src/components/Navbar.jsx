@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import CurixLogo from './CurixLogo';
-import { LogIn, LogOut, Shield, Stethoscope, User, Menu, X, PhoneCall } from 'lucide-react';
+import { LogIn, LogOut, Shield, Stethoscope, User, Menu, X, PhoneCall, ChevronRight } from 'lucide-react';
 
 export default function Navbar({ onOpenAuth }) {
   const { user, logout } = useAuth();
@@ -42,7 +42,7 @@ export default function Navbar({ onOpenAuth }) {
         </a>
 
         {/* Center Navigation Links with Modern Pill Hover */}
-        <div className="hidden md:flex items-center gap-1.5 p-1.5 rounded-full bg-slate-50/80 border border-slate-200/60 shadow-2xs">
+        <div className="hidden lg:flex items-center gap-1.5 p-1.5 rounded-full bg-slate-50/80 border border-slate-200/60 shadow-2xs">
           <a
             href="#home"
             className="px-4 py-1.5 rounded-full text-xs font-bold text-slate-700 hover:text-[#00A896] hover:bg-white hover:shadow-2xs transition-all duration-200"
@@ -56,21 +56,27 @@ export default function Navbar({ onOpenAuth }) {
             About Us
           </a>
           <a
-            href="#services"
+            href="#centres-of-excellence"
             className="px-4 py-1.5 rounded-full text-xs font-bold text-slate-700 hover:text-[#00A896] hover:bg-white hover:shadow-2xs transition-all duration-200"
           >
-            Clinical Services
+            Centres of Excellence
+          </a>
+          <a
+            href="#specialties"
+            className="px-4 py-1.5 rounded-full text-xs font-bold text-slate-700 hover:text-[#00A896] hover:bg-white hover:shadow-2xs transition-all duration-200"
+          >
+            Doctors
           </a>
           <a
             href="#security"
             className="px-4 py-1.5 rounded-full text-xs font-bold text-slate-700 hover:text-[#00A896] hover:bg-white hover:shadow-2xs transition-all duration-200"
           >
-            Compliance & Security
+            Security & Compliance
           </a>
         </div>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* Quick Support Badge (Desktop) */}
           <a
             href="tel:18002874922"
@@ -82,15 +88,15 @@ export default function Navbar({ onOpenAuth }) {
           </a>
 
           {user ? (
-            <div className="flex items-center gap-2.5">
-              <div className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-full bg-white border border-slate-200/80 shadow-2xs">
-                <span className="w-7 h-7 rounded-full bg-[#E6F8F5] flex items-center justify-center text-xs">
+            <div className="flex items-center gap-1.5 sm:gap-2.5">
+              <div className="flex items-center gap-1.5 sm:gap-2.5 pl-1.5 sm:pl-2 pr-2 sm:pr-3 py-1 sm:py-1.5 rounded-full bg-white border border-slate-200/80 shadow-2xs">
+                <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#E6F8F5] flex items-center justify-center text-xs">
                   {roleMeta?.avatar}
                 </span>
-                <span className="text-[#0A1C35] font-extrabold text-xs max-w-[110px] truncate">
+                <span className="text-[#0A1C35] font-extrabold text-[11px] sm:text-xs max-w-[80px] sm:max-w-[110px] truncate">
                   {user.name}
                 </span>
-                <span className={`px-2 py-0.5 rounded-full text-[9px] border font-black uppercase tracking-wider ${roleMeta?.badge}`}>
+                <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[8.5px] sm:text-[9px] border font-black uppercase tracking-wider ${roleMeta?.badge}`}>
                   {user.role}
                 </span>
               </div>
@@ -106,7 +112,7 @@ export default function Navbar({ onOpenAuth }) {
                 type="button"
                 onClick={logout}
                 title="Sign out of Curix"
-                className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-slate-100 hover:bg-rose-50 border border-slate-200 text-slate-600 hover:text-rose-600 text-xs font-bold transition-all duration-200 cursor-pointer"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full bg-slate-100 hover:bg-rose-50 border border-slate-200 text-slate-600 hover:text-rose-600 text-xs font-bold transition-all duration-200 cursor-pointer"
               >
                 <LogOut size={13} />
                 <span className="hidden sm:inline">Logout</span>
@@ -117,10 +123,10 @@ export default function Navbar({ onOpenAuth }) {
               <button
                 type="button"
                 onClick={onOpenAuth}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-full btn-curix-primary text-xs font-black tracking-wide cursor-pointer shadow-md shadow-[#00A896]/20"
+                className="flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full btn-curix-primary text-[11px] sm:text-xs font-black tracking-wide cursor-pointer shadow-md shadow-[#00A896]/20 whitespace-nowrap"
               >
                 <LogIn size={13} />
-                <span>Portal Access / Login</span>
+                <span><span className="hidden sm:inline">Portal Access / </span>Login</span>
               </button>
             </div>
           )}
@@ -129,7 +135,7 @@ export default function Navbar({ onOpenAuth }) {
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-xl text-slate-600 hover:text-[#0A1C35] hover:bg-slate-100"
+            className="lg:hidden p-2 rounded-xl text-slate-600 hover:text-[#0A1C35] hover:bg-slate-100 focus:outline-none"
             aria-label="Toggle navigation"
           >
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -140,42 +146,86 @@ export default function Navbar({ onOpenAuth }) {
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-200/80 bg-white/95 backdrop-blur-xl px-4 py-4 space-y-2 shadow-lg">
-          <a
-            href="#home"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#00A896]"
-          >
-            Home
-          </a>
-          <a
-            href="#about"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#00A896]"
-          >
-            About Us
-          </a>
-          <a
-            href="#services"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#00A896]"
-          >
-            Clinical Services
-          </a>
-          <a
-            href="#security"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#00A896]"
-          >
-            Compliance & Security
-          </a>
-          <a
-            href="#security"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#00A896]"
-          >
-            Security & Compliance
-          </a>
+        <div className="lg:hidden border-t border-slate-200/90 bg-white/98 backdrop-blur-xl px-4 py-4 space-y-1.5 shadow-xl max-h-[calc(100vh-80px)] overflow-y-auto">
+          <div className="grid grid-cols-1 gap-1">
+            <a
+              href="#home"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-[#E6F8F5]/60 hover:text-[#00A896] transition"
+            >
+              <span>Home</span>
+              <ChevronRight size={14} className="text-slate-400" />
+            </a>
+            <a
+              href="#about"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-[#E6F8F5]/60 hover:text-[#00A896] transition"
+            >
+              <span>About Us</span>
+              <ChevronRight size={14} className="text-slate-400" />
+            </a>
+            <a
+              href="#centres-of-excellence"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-[#E6F8F5]/60 hover:text-[#00A896] transition"
+            >
+              <span>Centres of Excellence</span>
+              <ChevronRight size={14} className="text-slate-400" />
+            </a>
+            <a
+              href="#specialties"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-[#E6F8F5]/60 hover:text-[#00A896] transition"
+            >
+              <span>Doctors & Faculty</span>
+              <ChevronRight size={14} className="text-slate-400" />
+            </a>
+            <a
+              href="#security"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-[#E6F8F5]/60 hover:text-[#00A896] transition"
+            >
+              <span>Security & Compliance</span>
+              <ChevronRight size={14} className="text-slate-400" />
+            </a>
+          </div>
+
+          <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
+            <a
+              href="tel:18002874922"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200/80"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <PhoneCall size={13} className="text-[#00A896]" />
+              <span>Call 24/7 Medical Care</span>
+            </a>
+
+            {!user ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenAuth();
+                }}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl btn-curix-primary text-xs font-extrabold text-white shadow-md shadow-[#00A896]/20 cursor-pointer"
+              >
+                <LogIn size={14} />
+                <span>Portal Access / Login</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  logout();
+                }}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-bold transition cursor-pointer"
+              >
+                <LogOut size={14} />
+                <span>Logout ({user.name})</span>
+              </button>
+            )}
+          </div>
         </div>
       )}
     </nav>
