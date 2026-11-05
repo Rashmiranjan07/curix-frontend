@@ -7,6 +7,8 @@ export default function Navbar({ onOpenAuth }) {
   const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const userRole = user?.role ? user.role.replace('ROLE_', '').toUpperCase() : '';
+
   const getRoleStyle = (role) => {
     switch (role) {
       case 'ADMIN':
@@ -30,7 +32,7 @@ export default function Navbar({ onOpenAuth }) {
     }
   };
 
-  const roleMeta = user ? getRoleStyle(user.role) : null;
+  const roleMeta = user ? getRoleStyle(userRole) : null;
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass-nav transition-all duration-300">
@@ -65,7 +67,7 @@ export default function Navbar({ onOpenAuth }) {
             href="#specialties"
             className="px-4 py-1.5 rounded-full text-xs font-bold text-slate-700 hover:text-[#00A896] hover:bg-white hover:shadow-2xs transition-all duration-200"
           >
-            Doctors
+            Doctors & Faculty
           </a>
           <a
             href="#security"
@@ -75,12 +77,12 @@ export default function Navbar({ onOpenAuth }) {
           </a>
         </div>
 
-        {/* Right Actions */}
+        {/* Right CTA Actions: 24/7 Hotline + Authentication/Profile & Mobile Trigger */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Quick Support Badge (Desktop) */}
+          {/* 24/7 Hospital Care Hotline */}
           <a
             href="tel:18002874922"
-            className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold text-slate-600 hover:text-[#00A896] bg-slate-50 border border-slate-200/60 transition"
+            className="hidden xl:inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold text-slate-700 hover:text-[#00A896] bg-slate-50 border border-slate-200/80 transition shadow-2xs"
           >
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <PhoneCall size={12} className="text-[#00A896]" />
@@ -97,16 +99,9 @@ export default function Navbar({ onOpenAuth }) {
                   {user.name}
                 </span>
                 <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[8.5px] sm:text-[9px] border font-black uppercase tracking-wider ${roleMeta?.badge}`}>
-                  {user.role}
+                  {userRole}
                 </span>
               </div>
-
-              <a
-                href="#specialties"
-                className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full btn-curix-primary text-xs font-bold shadow-md shadow-[#00A896]/20 cursor-pointer"
-              >
-                <span>Book Slot</span>
-              </a>
 
               <button
                 type="button"

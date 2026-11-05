@@ -64,6 +64,23 @@ const getDoctor3dEmoji = (doc) => {
   return getDoctorGender(doc) === 'FEMALE' ? '👩‍⚕️' : '👨‍⚕️';
 };
 
+// Robust Doctor Name Resolver supporting all backend response formats
+const getDoctorName = (input) => {
+  if (!input) return 'Attending Physician';
+  const doc = input.doctor || input.physician || input;
+
+  if (typeof doc === 'string') return doc.startsWith('Dr.') ? doc : `Dr. ${doc}`;
+  if (doc.firstName && doc.lastName) return `Dr. ${doc.firstName} ${doc.lastName}`;
+  if (doc.fullName) return doc.fullName.startsWith('Dr.') ? doc.fullName : `Dr. ${doc.fullName}`;
+  if (doc.doctorName) return doc.doctorName.startsWith('Dr.') ? doc.doctorName : `Dr. ${doc.doctorName}`;
+  if (doc.name) return doc.name.startsWith('Dr.') ? doc.name : `Dr. ${doc.name}`;
+  if (doc.user && doc.user.firstName) return `Dr. ${doc.user.firstName} ${doc.user.lastName || ''}`;
+  if (doc.email) return `Dr. ${doc.email.split('@')[0]}`;
+  if (input.doctorName) return input.doctorName.startsWith('Dr.') ? input.doctorName : `Dr. ${input.doctorName}`;
+  
+  return `Doctor #${doc.id || input.doctorId || 'Specialist'}`;
+};
+
 export default function PatientDashboard() {
   const { user, logout } = useAuth();
 
@@ -102,6 +119,31 @@ export default function PatientDashboard() {
   const [selectedSlot, setSelectedSlot] = useState('');
   const [bookingReason, setBookingReason] = useState('');
   const [isBookingSubmitting, setIsBookingSubmitting] = useState(false);
+
+  // Quick Doctor Selector (Triggered from Navbar 'Book Slot' button)
+  const [isDoctorPickerOpen, setIsDoctorPickerOpen] = useState(false);
+  const [pickerSearch, setPickerSearch] = useState('');
+  const [pickerDept, setPickerDept] = useState('ALL');
+
+  const filteredPickerDoctors = React.useMemo(() => {
+    return allAvailableDoctors.filter((doc) => {
+      const name = getDoctorName(doc).toLowerCase();
+      const spec = (doc.specialty || doc.departmentName || '').toLowerCase();
+      const search = pickerSearch.toLowerCase().trim();
+      const matchesSearch = !search || name.includes(search) || spec.includes(search);
+      const matchesDept = pickerDept === 'ALL' || String(doc.departmentId || doc.department?.id) === String(pickerDept);
+      return matchesSearch && matchesDept;
+    });
+  }, [allAvailableDoctors, pickerSearch, pickerDept]);
+
+  useEffect(() => {
+    const handleOpenPickerEvent = () => {
+      setActiveTab('book');
+      setIsDoctorPickerOpen(true);
+    };
+    window.addEventListener('curix:open-doctor-picker', handleOpenPickerEvent);
+    return () => window.removeEventListener('curix:open-doctor-picker', handleOpenPickerEvent);
+  }, []);
 
   // 2. Appointments State
   const [myAppointments, setMyAppointments] = useState([]);
@@ -443,23 +485,6 @@ export default function PatientDashboard() {
     } finally {
       setProfileSaving(false);
     }
-  };
-
-  // Robust Doctor Name Resolver supporting all backend response formats
-  const getDoctorName = (input) => {
-    if (!input) return 'Attending Physician';
-    const doc = input.doctor || input.physician || input;
-
-    if (typeof doc === 'string') return doc.startsWith('Dr.') ? doc : `Dr. ${doc}`;
-    if (doc.firstName && doc.lastName) return `Dr. ${doc.firstName} ${doc.lastName}`;
-    if (doc.fullName) return doc.fullName.startsWith('Dr.') ? doc.fullName : `Dr. ${doc.fullName}`;
-    if (doc.doctorName) return doc.doctorName.startsWith('Dr.') ? doc.doctorName : `Dr. ${doc.doctorName}`;
-    if (doc.name) return doc.name.startsWith('Dr.') ? doc.name : `Dr. ${doc.name}`;
-    if (doc.user && doc.user.firstName) return `Dr. ${doc.user.firstName} ${doc.user.lastName || ''}`;
-    if (doc.email) return `Dr. ${doc.email.split('@')[0]}`;
-    if (input.doctorName) return input.doctorName.startsWith('Dr.') ? input.doctorName : `Dr. ${input.doctorName}`;
-    
-    return `Doctor #${doc.id || input.doctorId || 'Specialist'}`;
   };
 
   const filteredDoctors = allAvailableDoctors.filter((doc) => {
@@ -812,7 +837,7 @@ export default function PatientDashboard() {
       <div className="flex-1 flex flex-col min-w-0">
         
         {/* Top Header Bar */}
-        <header className="h-20 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-6 sm:px-8 flex items-center justify-between gap-4 sticky top-0 z-30 shadow-2xs">
+        <header className="h-20 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 flex items-center justify-between gap-3 sm:gap-4 sticky top-0 z-30 shadow-2xs">
           <div className="flex items-center gap-3 flex-1 max-w-lg">
             <div className="relative w-full">
               <Search size={16} className="absolute left-4 top-3.5 text-slate-400" />
@@ -824,15 +849,25 @@ export default function PatientDashboard() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={loadAllPatientData}
               disabled={isSyncing}
               title="Sync Data"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-[#E6F8F5] to-teal-100/60 hover:from-teal-100/80 hover:to-teal-200/60 text-[#00A896] text-xs font-extrabold transition shadow-2xs cursor-pointer"
+              className="hidden sm:flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-gradient-to-r from-[#E6F8F5] to-teal-100/60 hover:from-teal-100/80 hover:to-teal-200/60 text-[#00A896] text-xs font-extrabold transition shadow-2xs cursor-pointer"
             >
               <RefreshCw size={14} className={isSyncing ? 'animate-spin' : ''} />
               <span>Sync Node</span>
+            </button>
+
+            {/* Dedicated Patient Dashboard 'Book Appointment' Button */}
+            <button
+              type="button"
+              onClick={() => setIsDoctorPickerOpen(true)}
+              className="flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-full btn-curix-primary text-xs font-black shadow-md shadow-[#00A896]/20 transition-all duration-200 cursor-pointer active:scale-95 whitespace-nowrap"
+            >
+              <Calendar size={14} className="stroke-[2.5]" />
+              <span>Book Appointment</span>
             </button>
           </div>
         </header>
@@ -1108,10 +1143,18 @@ export default function PatientDashboard() {
                     })}
                   </div>
                 ) : (
-                  <div className="py-16 text-center bg-white rounded-3xl border border-slate-200/85 shadow-sm">
+                  <div className="py-16 text-center bg-white rounded-3xl border border-slate-200/85 shadow-sm p-6">
                     <Calendar size={36} className="mx-auto text-slate-300 mb-2" />
                     <p className="text-sm font-bold text-[#0A1C35]">No consultations booked</p>
-                    <p className="text-xs text-slate-400 mt-1">Switch to "Find & Book Doctor" to reserve your first slot.</p>
+                    <p className="text-xs text-slate-400 mt-1 mb-5">You have no upcoming or past doctor consultations.</p>
+                    <button
+                      type="button"
+                      onClick={() => setIsDoctorPickerOpen(true)}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full btn-curix-primary text-xs font-black shadow-md shadow-[#00A896]/20 cursor-pointer active:scale-95"
+                    >
+                      <Calendar size={14} />
+                      <span>Book Appointment</span>
+                    </button>
                   </div>
                 )}
               </div>
@@ -1406,6 +1449,168 @@ export default function PatientDashboard() {
         </div>
 
       </div>
+
+      {/* MODAL 0: QUICK DOCTOR PICKER (Triggered from Navbar 'Book Slot' button) */}
+      {isDoctorPickerOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0A1C35]/60 backdrop-blur-sm transition-all duration-200">
+          <div className="relative w-full max-w-4xl bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-8 shadow-2xl max-h-[92vh] flex flex-col">
+            
+            {/* Modal Header */}
+            <div className="flex items-start justify-between pb-4 border-b border-slate-100 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-[#E6F8F5] text-[#00A896] flex items-center justify-center shrink-0 shadow-xs">
+                  <Calendar size={22} className="stroke-[2.5]" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black text-[#00A896] tracking-widest uppercase bg-[#E6F8F5] px-2.5 py-0.5 rounded-full border border-[#00A896]/20">
+                      STEP 1 OF 2 · SELECT PHYSICIAN
+                    </span>
+                    <span className="hidden sm:inline-block text-[10px] font-bold text-slate-400">
+                      {allAvailableDoctors.length} Faculty Doctors
+                    </span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-black text-[#0A1C35] mt-1">
+                    Choose a Doctor to Appoint
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium">
+                    Select your attending physician from our hospital departments to reserve an appointment slot.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsDoctorPickerOpen(false)}
+                className="text-slate-400 hover:text-[#0A1C35] p-2 rounded-full hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Filter & Search Bar */}
+            <div className="pt-4 pb-2 flex flex-col sm:flex-row gap-2.5 shrink-0">
+              <div className="relative flex-1">
+                <Search size={15} className="absolute left-3.5 top-3 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search by doctor name or specialty..."
+                  value={pickerSearch}
+                  onChange={(e) => setPickerSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-semibold focus:outline-none focus:bg-white focus:border-[#00A896] focus:ring-4 focus:ring-[#00A896]/10 transition-all"
+                />
+                {pickerSearch && (
+                  <button
+                    type="button"
+                    onClick={() => setPickerSearch('')}
+                    className="absolute right-3 top-2.5 text-xs text-slate-400 hover:text-slate-600 cursor-pointer"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+
+              <div className="sm:w-56">
+                <select
+                  value={pickerDept}
+                  onChange={(e) => setPickerDept(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-bold text-[#0A1C35] focus:outline-none focus:bg-white focus:border-[#00A896] transition-all"
+                >
+                  <option value="ALL">All Departments ({departments.length || '14'})</option>
+                  {departments.map((d) => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Doctors Grid Container (Scrollable) */}
+            <div className="flex-1 overflow-y-auto pr-1 py-3">
+              {filteredPickerDoctors.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  {filteredPickerDoctors.map((doc) => {
+                    const name = getDoctorName(doc);
+                    return (
+                      <div
+                        key={doc.id}
+                        className="p-4 rounded-2xl bg-white border border-slate-200/90 hover:border-[#00A896]/50 hover:shadow-lg transition-all duration-200 flex flex-col justify-between group cursor-pointer"
+                        onClick={() => {
+                          setIsDoctorPickerOpen(false);
+                          handleOpenBooking(doc);
+                        }}
+                      >
+                        <div className="flex items-start gap-3.5">
+                          {/* 3D Doctor Avatar */}
+                          <div className="relative shrink-0">
+                            <div className="w-14 h-14 rounded-full p-0.5 bg-gradient-to-b from-slate-50 to-slate-100 border-2 border-slate-100 group-hover:border-[#00A896]/40 shadow-xs flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
+                              <img
+                                src={getDoctor3dImage(doc)}
+                                alt={name}
+                                onError={(e) => {
+                                  e.currentTarget.onerror = null;
+                                  e.currentTarget.src = getDoctorGender(doc) === 'FEMALE' ? femaleDoctor3d : maleDoctor3d;
+                                }}
+                                className="w-full h-full object-cover rounded-full"
+                              />
+                            </div>
+                            <span className="absolute -bottom-1 -right-1 text-[11px] bg-white rounded-full px-1 shadow-2xs border border-slate-100 flex items-center justify-center">
+                              {getDoctor3dEmoji(doc)}
+                            </span>
+                          </div>
+
+                          <div className="min-w-0 flex-1">
+                            <h4 className="text-sm font-extrabold text-[#0A1C35] group-hover:text-[#00A896] transition-colors truncate">
+                              {name}
+                            </h4>
+                            <span className="text-xs text-[#00A896] font-bold block truncate">
+                              {doc.specialty || doc.departmentName || 'Specialist'}
+                            </span>
+                            <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500 font-medium">
+                              <span>{doc.qualification || 'MBBS, MD'}</span>
+                              <span>·</span>
+                              <span>{doc.experienceYears || 5} yrs exp</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Card Footer: Fee and Select Button */}
+                        <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
+                          <div>
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block">Fee</span>
+                            <span className="text-sm font-black text-[#0A1C35] font-mono">
+                              {formatCurrency(doc.consultationFee, '50.00')}
+                            </span>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setIsDoctorPickerOpen(false);
+                              handleOpenBooking(doc);
+                            }}
+                            className="px-4 py-2 rounded-xl btn-curix-primary text-xs font-bold flex items-center gap-1.5 shadow-sm shadow-[#00A896]/20 transition-all group-hover:shadow-md cursor-pointer active:scale-95"
+                          >
+                            <Calendar size={13} />
+                            <span>Select & Book Slot</span>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="py-12 text-center text-slate-400">
+                  <Stethoscope size={32} className="mx-auto text-slate-300 mb-2" />
+                  <p className="text-xs font-bold text-slate-600">No physicians found matching your search</p>
+                  <p className="text-[11px] text-slate-400 mt-1">Try another department or clearing search query</p>
+                </div>
+              )}
+            </div>
+
+          </div>
+        </div>
+      )}
 
       {/* MODAL 1: BOOKING & SLOT SELECTION */}
       {selectedDoctor && (

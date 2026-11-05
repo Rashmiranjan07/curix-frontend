@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import LandingPage from './components/LandingPage';
 import AuthModal from './components/AuthModal';
 import DashboardShell from './components/DashboardShell';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function MainContent() {
   const { user } = useAuth();
@@ -15,11 +16,13 @@ function MainContent() {
       <Navbar onOpenAuth={() => setAuthModalOpen(true)} />
 
       {/* Conditional View: Dashboard if authenticated, Landing Page if visitor */}
-      {user ? (
-        <DashboardShell />
-      ) : (
-        <LandingPage onOpenAuth={() => setAuthModalOpen(true)} />
-      )}
+      <ErrorBoundary>
+        {user ? (
+          <DashboardShell />
+        ) : (
+          <LandingPage onOpenAuth={() => setAuthModalOpen(true)} />
+        )}
+      </ErrorBoundary>
 
       {/* Multi-Role Authentication Modal */}
       {authModalOpen && (
@@ -35,8 +38,10 @@ function MainContent() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <MainContent />
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <MainContent />
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }

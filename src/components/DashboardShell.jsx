@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import PatientDashboard from './patient/PatientDashboard';
 import DoctorDashboard from './doctor/DoctorDashboard';
 import AdminDashboard from './admin/AdminDashboard';
+import ErrorBoundary from './ErrorBoundary';
 
 export default function DashboardShell() {
   const { user } = useAuth();
@@ -14,9 +15,11 @@ export default function DashboardShell() {
 
   return (
     <div className="min-h-screen bg-[#F4F8FB]">
-      {role === 'ADMIN' && <AdminDashboard />}
-      {role === 'DOCTOR' && <DoctorDashboard />}
-      {role === 'PATIENT' && <PatientDashboard />}
+      <ErrorBoundary>
+        {role === 'ADMIN' && <AdminDashboard />}
+        {role === 'DOCTOR' && <DoctorDashboard />}
+        {role === 'PATIENT' && <PatientDashboard />}
+      </ErrorBoundary>
     </div>
   );
 }
