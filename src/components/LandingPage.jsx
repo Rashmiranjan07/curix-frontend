@@ -1337,55 +1337,178 @@ export default function LandingPage({ onOpenAuth = () => {} }) {
         </div>
       </section>
 
-      {/* 4. "QUALITY HEALTHCARE FOR A HEALTHIER TOMORROW" (Feature Story Banner) */}
-      <section className="w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 pb-16">
-        <div className="rounded-3xl bg-gradient-to-br from-[#F8FAFC] via-[#F1F9F6] to-[#E6F8F3] p-8 sm:p-12 lg:p-16 border border-slate-200/70 flex flex-col lg:flex-row items-center justify-between gap-10">
+      {/* 4. 3D CARDIAC CLINICAL EXCELLENCE & ABOUT US SECTION */}
+      <section id="about" className="scroll-mt-20 w-full max-w-[1536px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 pb-16">
+        <div className="rounded-3xl bg-gradient-to-br from-[#F8FAFC] via-[#F1F9F6] to-[#E6F8F3] p-8 sm:p-12 lg:p-16 border border-slate-200/70">
           
-          <div className="space-y-5 max-w-xl text-left">
-            <span className="text-[11px] font-mono text-[#00A884] font-black uppercase tracking-wider bg-[#E6F8F3] px-3 py-1 rounded-full border border-[#00A884]/30">
-              Our Clinical Promise
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-[#0C233C] tracking-tight leading-tight">
-              Quality Healthcare <br />
-              <span className="text-[#00A884]">for a Healthier Tomorrow</span>
-            </h2>
-            <p className="text-slate-600 text-sm leading-relaxed font-medium">
-              At Curix, we believe everyone deserves access to great healthcare. Our mission is to connect you with accredited physicians, high-precision diagnostics, and streamlined digital consultations whenever you need them.
-            </p>
-            <div className="pt-2 flex items-center gap-4">
-              <a
-                href="#doctors"
-                className="px-6 py-3 rounded-full btn-curix-primary text-xs font-bold shadow-md shadow-[#00A884]/20"
-              >
-                Meet Our Specialists
-              </a>
-              <a
-                href="#services"
-                className="px-6 py-3 rounded-full bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
-              >
-                Explore Services
-              </a>
+          <div className="max-w-3xl mb-12">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E6F8F3] border border-[#00A884]/30 text-[#00A884] text-xs font-extrabold uppercase tracking-wider mb-3">
+              <Activity size={14} />
+              <span>Tertiary Clinical Excellence</span>
             </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-[#0C233C] tracking-tight leading-tight">
+              Anatomical Precision & <br />
+              <span className="text-[#00A884]">World-Class Clinical Outcomes</span>
+            </h2>
+            <p className="text-slate-600 text-sm sm:text-base leading-relaxed font-medium mt-3">
+              Curix is an accredited multi-specialty tertiary healthcare institution engineered to harmonize high-precision clinical outcomes with compassionate, zero-friction patient care. By integrating specialized Centres of Excellence with an atomic digital health infrastructure, we eliminate waiting bottlenecks and booking collisions.
+            </p>
           </div>
 
-          <div className="relative">
-            <div className="w-[300px] sm:w-[380px] h-[280px] sm:h-[320px] rounded-3xl overflow-hidden shadow-xl border-4 border-white">
-              <img
-                src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=800&q=80"
-                alt="Doctor with patient digital tablet"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            {/* Stat Pill */}
-            <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl p-4 shadow-xl border border-slate-100 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
-                <CheckCircle size={20} />
+          {/* 2-Column Showcase: 3D Cardiac Anatomical Portal (Left) + Clinical Pillars (Right) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 xl:gap-16 items-center">
+            
+            {/* Left Column: High-Definition 3D Cardiac Medical Portal */}
+            <div className="lg:col-span-5 xl:col-span-5 flex flex-col items-center justify-center relative">
+              <div className="relative w-full max-w-[460px] sm:max-w-[500px] flex flex-col items-center">
+                
+                {/* Outer Floating Animation Frame */}
+                <div className="relative w-[340px] h-[340px] sm:w-[420px] sm:h-[420px] md:w-[450px] md:h-[450px] anim-doctor-float flex items-center justify-center z-10">
+                  
+                  {/* Ambient Soft Glow Behind the Portal */}
+                  <div className="absolute -inset-6 sm:-inset-8 rounded-full bg-gradient-to-tr from-[#00A896]/20 via-[#0BC2A8]/15 to-rose-400/15 blur-3xl pointer-events-none anim-pulse-glow" />
+
+                  {/* Concentric Dashed Orbit Ring with Orbiting Glowing Markers */}
+                  <div className="absolute -inset-4 sm:-inset-5 rounded-full border-2 border-dashed border-[#00A884]/40 pointer-events-none anim-orbit-spin flex items-center justify-between p-2">
+                    <span className="w-3.5 h-3.5 rounded-full bg-rose-500 shadow-[0_0_12px_#F43F5E]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#00A884] shadow-[0_0_10px_#00A896]" />
+                  </div>
+
+                  {/* The Round Shape: Clean Gradient Rim + Bevel Border + Mask */}
+                  <div className="w-full h-full rounded-full p-2.5 sm:p-3 bg-gradient-to-b from-[#00A884] via-[#0BC2A8] to-slate-200/60 shadow-[0_20px_50px_rgba(10,28,53,0.16)] ring-8 ring-[#00A884]/15 flex items-center justify-center relative group overflow-hidden">
+                    
+                    {/* Inner Circular Portal Framing 3D Anatomical Heart with Pure White Background */}
+                    <div className="w-full h-full rounded-full overflow-hidden border-[5px] sm:border-[6px] border-white shadow-inner bg-white relative flex items-center justify-center">
+                      
+                      {/* High-Definition 3D Human Heart Image with Realistic Heartbeat Pulse */}
+                      <img
+                        src={heart3dImage}
+                        alt="Curix 3D Clinical Cardiac Model"
+                        className="w-full h-full object-cover object-center select-none pointer-events-none anim-heart-pulse-3d transition-transform duration-700 group-hover:scale-105"
+                      />
+
+                      {/* Dynamic ECG Cardiac Waveform Across Lower Portal */}
+                      <svg className="absolute bottom-6 left-0 right-0 w-full h-10 px-8 z-10 pointer-events-none opacity-85" viewBox="0 0 300 40" fill="none">
+                        <path
+                          d="M0 20 L70 20 L80 10 L90 32 L100 6 L110 26 L120 20 L160 20 L170 10 L180 32 L190 6 L200 26 L210 20 L300 20"
+                          stroke="#00A884"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="anim-scan-wave drop-shadow-[0_0_8px_#00A884]"
+                        />
+                      </svg>
+
+                      {/* Subtle Top Specular Lighting Reflection for Depth */}
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/30 via-transparent to-slate-900/5 pointer-events-none" />
+                    </div>
+                  </div>
+
+                  {/* Floating Telemetry Status Chips Anchored Around the 3D Heart Portal */}
+                  <div className="absolute -top-1 -right-2 sm:-right-4 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-2">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                    </span>
+                    <Activity size={12} className="text-rose-500" />
+                    <span className="text-[10px] sm:text-[11px] font-black text-[#0C233C]">
+                      72 BPM · Sinus Rhythm
+                    </span>
+                  </div>
+
+                  <div className="absolute bottom-2 right-0 sm:-right-2 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <Heart size={12} className="text-[#00A884] fill-[#00A884]/20" />
+                    <span className="text-[10px] sm:text-[11px] font-black text-[#0C233C]">
+                      99.8% Cardiac Vitality
+                    </span>
+                  </div>
+
+                  <div className="absolute bottom-1 -left-2 sm:-left-4 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+                    <Award size={13} className="text-[#00A884]" />
+                    <span className="text-[10px] sm:text-[11px] font-black text-[#0C233C]">
+                      NABH & JCI Accredited
+                    </span>
+                  </div>
+
+                </div>
+
+                {/* Soft Dynamic Floor Breathing Shadow */}
+                <div className="w-[280px] sm:w-[360px] md:w-[380px] h-7 rounded-full bg-slate-900/20 blur-md pointer-events-none anim-shadow-breath mt-4 z-0" />
               </div>
-              <div>
-                <span className="text-lg font-black text-[#0C233C] font-mono block">98%</span>
-                <span className="text-[10px] text-slate-400 font-bold block uppercase">Patient Satisfaction</span>
+            </div>
+
+            {/* Right Column: 4 Clinical Pillars with Spacious Bento Cards & CTAs */}
+            <div className="lg:col-span-7 xl:col-span-7 space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/80 shadow-2xs hover:border-[#00A884]/50 hover:shadow-md transition-all flex flex-col justify-between">
+                  <div className="w-11 h-11 rounded-2xl bg-[#E6F8F3] text-[#00A884] flex items-center justify-center mb-4">
+                    <Award size={22} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-extrabold text-[#0C233C] mb-1.5">JCI & NABH Aligned</h4>
+                    <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                      International gold standard infection control, clinical safety protocols, and certified hospital care.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/80 shadow-2xs hover:border-[#00A884]/50 hover:shadow-md transition-all flex flex-col justify-between">
+                  <div className="w-11 h-11 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center mb-4">
+                    <Activity size={22} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-extrabold text-[#0C233C] mb-1.5">Robotic Surgical Suites</h4>
+                    <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                      Mako robotic articulated arm and LINAC 6MV radiation suites for 0.1mm sub-millimeter surgical precision.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/80 shadow-2xs hover:border-[#00A884]/50 hover:shadow-md transition-all flex flex-col justify-between">
+                  <div className="w-11 h-11 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-4">
+                    <ShieldCheck size={22} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-extrabold text-[#0C233C] mb-1.5">Atomic Slot Locking</h4>
+                    <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                      Direct calendar synchronization locks your consultation slot instantly across hospital systems.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/80 shadow-2xs hover:border-[#00A884]/50 hover:shadow-md transition-all flex flex-col justify-between">
+                  <div className="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mb-4">
+                    <PhoneCall size={22} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-extrabold text-[#0C233C] mb-1.5">24/7 Level-1 Trauma</h4>
+                    <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                      Golden-hour acute resuscitation, dedicated multi-bed surgical ICU, and mobile telemetry life-support fleet.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Interactive CTAs */}
+              <div className="flex flex-wrap items-center gap-4 pt-4">
+                <a
+                  href="#doctors"
+                  className="px-7 py-3.5 rounded-full btn-curix-primary text-xs font-extrabold flex items-center gap-2 shadow-md hover:shadow-lg transition cursor-pointer"
+                >
+                  <span>Meet Our Specialists</span>
+                  <ArrowRight size={14} />
+                </a>
+                <a
+                  href="#services"
+                  className="px-6 py-3.5 rounded-full bg-white border border-slate-200/90 hover:border-slate-300 text-xs font-bold text-slate-700 shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>Explore Services</span>
+                  <ChevronRight size={14} className="text-[#00A884]" />
+                </a>
               </div>
             </div>
+
           </div>
 
         </div>

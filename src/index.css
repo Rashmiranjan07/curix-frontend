@@ -161,3 +161,102 @@
     display: none !important;
   }
 }
+
+/* 3D Cardiac Anatomical Portal Animations */
+@keyframes heartPulse3d {
+  0%, 100% {
+    transform: scale(1.02);
+  }
+  14% {
+    transform: scale(1.09);
+  }
+  28% {
+    transform: scale(1.02);
+  }
+  42% {
+    transform: scale(1.15);
+  }
+  70% {
+    transform: scale(1.02);
+  }
+}
+
+.anim-heart-pulse-3d {
+  animation: heartPulse3d 2.2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  transform-origin: center center;
+}
+
+@keyframes doctorFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.anim-doctor-float {
+  animation: doctorFloat 6s ease-in-out infinite;
+}
+
+@keyframes orbitRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.anim-orbit-spin {
+  animation: orbitRotate 24s linear infinite;
+}
+
+@keyframes pulseGlowSlow {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.04);
+  }
+}
+
+.anim-pulse-glow {
+  animation: pulseGlowSlow 4s ease-in-out infinite;
+}
+
+@keyframes scanWave {
+  0% {
+    stroke-dashoffset: 80;
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0.3;
+  }
+}
+
+.anim-scan-wave {
+  stroke-dasharray: 40;
+  animation: scanWave 2.2s linear infinite;
+}
+
+@keyframes shadowBreath {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.25;
+  }
+  50% {
+    transform: scale(0.85);
+    opacity: 0.15;
+  }
+}
+
+.anim-shadow-breath {
+  animation: shadowBreath 6s ease-in-out infinite;
+}
