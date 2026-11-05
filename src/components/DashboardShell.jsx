@@ -14,7 +14,7 @@ export default function DashboardShell() {
   const role = user.role ? user.role.replace('ROLE_', '').toUpperCase() : 'PATIENT';
 
   return (
-    <div className="min-h-screen bg-[#F4F8FB]">
+    <div className="min-h-screen bg-[#F4F8FB] pt-20">
       <ErrorBoundary>
         {role === 'ADMIN' && <AdminDashboard />}
         {role === 'DOCTOR' && <DoctorDashboard />}
