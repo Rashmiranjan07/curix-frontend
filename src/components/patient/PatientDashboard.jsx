@@ -10,6 +10,7 @@ import {
   Sparkles, Check, MapPin, Phone, Loader2, LogOut, LayoutDashboard,
   Shield, ChevronLeft
 } from 'lucide-react';
+import { formatCurrency } from '../../utils/formatCurrency';
 
 
 // 14 Verified Hospital Faculty Doctors
@@ -978,7 +979,7 @@ export default function PatientDashboard() {
                             <div>
                               <span className="text-[10px] text-slate-400 uppercase font-bold block">Consultation Fee</span>
                               <span className="text-base font-black text-[#00A896] font-mono">
-                                ${doc.consultationFee !== undefined ? doc.consultationFee : '50.00'}
+                                {formatCurrency(doc.consultationFee, '50.00')}
                               </span>
                             </div>
 
@@ -1409,7 +1410,7 @@ export default function PatientDashboard() {
 
             <span className="text-[10px] font-black text-[#00A896] tracking-widest uppercase block mb-1">SLOT RESERVATION</span>
             <h3 className="text-xl font-black text-[#0A1C35] mb-1">Book with {getDoctorName(selectedDoctor)}</h3>
-            <p className="text-xs text-slate-500 mb-6">{selectedDoctor.specialty} · Fee: ${selectedDoctor.consultationFee || '50.00'}</p>
+            <p className="text-xs text-slate-500 mb-6">{selectedDoctor.specialty} · Fee: {formatCurrency(selectedDoctor.consultationFee, '50.00')}</p>
 
             <form onSubmit={handleConfirmBooking} className="space-y-4">
               <div>

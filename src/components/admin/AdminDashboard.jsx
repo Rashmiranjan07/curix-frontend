@@ -10,6 +10,7 @@ import {
   BarChart3, PieChart, Award, Mail, Phone, FileText, Printer,
   Download, Eye, AlertTriangle
 } from 'lucide-react';
+import { formatCurrency } from '../../utils/formatCurrency';
 import api from '../../services/api';
 import maleDoctor3d from '../../assets/male_doctor_3d.jpg';
 import femaleDoctor3d from '../../assets/female_doctor_3d.jpg';
@@ -1309,7 +1310,7 @@ export default function AdminDashboard() {
 
                                   <td className="p-4 text-right">
                                     <span className="font-mono font-bold text-slate-700 block mb-1">
-                                      ${appt.consultationFee !== undefined ? appt.consultationFee : '50.00'}
+                                      {formatCurrency(appt.consultationFee, '50.00')}
                                     </span>
                                     <button
                                       type="button"
@@ -1767,7 +1768,7 @@ export default function AdminDashboard() {
 
               <div className="text-right">
                 <span className="text-[10px] font-bold uppercase text-slate-400 block">Consultation Fee</span>
-                <span className="text-base font-black text-[#0A1C35] font-mono">${selectedDoctorForModal.consultationFee || '50.00'}</span>
+                <span className="text-base font-black text-[#0A1C35] font-mono">{formatCurrency(selectedDoctorForModal.consultationFee, '50.00')}</span>
               </div>
             </div>
 
@@ -1946,7 +1947,7 @@ export default function AdminDashboard() {
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">Consultation Fee:</span>
-                <span className="font-bold text-emerald-700 font-mono">${selectedApptDetail.consultationFee || '50.00'}</span>
+                <span className="font-bold text-emerald-700 font-mono">{formatCurrency(selectedApptDetail.consultationFee, '50.00')}</span>
               </div>
               <div className="pt-2 border-t border-slate-200/80">
                 <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Reason for Visit</span>

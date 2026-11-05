@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { formatCurrency } from '../../utils/formatCurrency';
 import { doctorApi } from '../../services/api';
 import api from '../../services/api';
 import maleDoctor3d from '../../assets/male_doctor_3d.jpg';
@@ -1024,7 +1025,7 @@ export default function DoctorDashboard() {
                       </div>
                       <div className="flex justify-between py-2.5">
                         <span className="text-slate-400 font-semibold">Consultation Fee</span>
-                        <span className="font-black text-emerald-700 text-sm font-mono">${profile?.consultationFee || '50.00'}</span>
+                        <span className="font-black text-emerald-700 text-sm font-mono">{formatCurrency(profile?.consultationFee, '50.00')}</span>
                       </div>
                     </div>
                   </div>

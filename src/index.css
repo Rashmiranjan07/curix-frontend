@@ -9,13 +9,13 @@
     --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-display: 'Outfit', 'Plus Jakarta Sans', sans-serif;
     
-    /* Curix Medical Design Tokens */
-    --color-navy: #0A1C35;
-    --color-navy-dark: #071524;
-    --color-teal: #00A896;
-    --color-teal-light: #0BC2A8;
-    --color-teal-bg: #E6F8F5;
-    --color-bg-tint: #F4F8FB;
+    /* Curix Medical Design Tokens (Emerald-Teal & Deep Oceanic Navy) */
+    --color-navy: #0C233C;
+    --color-navy-dark: #071A2E;
+    --color-teal: #00A884;
+    --color-teal-light: #0E9F6E;
+    --color-teal-bg: #E6F8F3;
+    --color-bg-tint: #F8FAFC;
   }
 
   html {
@@ -109,17 +109,17 @@
 
 /* Button & Badge Utility Classes */
 .btn-curix-primary {
-  background: linear-gradient(135deg, #00A896 0%, #079181 100%);
+  background: linear-gradient(135deg, #00A884 0%, #009373 100%);
   color: #FFFFFF;
   font-weight: 700;
   border-radius: 9999px;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 18px rgba(0, 168, 150, 0.28);
+  box-shadow: 0 4px 18px rgba(0, 168, 132, 0.28);
 }
 
 .btn-curix-primary:hover {
-  background: linear-gradient(135deg, #079181 0%, #057a6c 100%);
-  box-shadow: 0 6px 24px rgba(0, 168, 150, 0.42);
+  background: linear-gradient(135deg, #009373 0%, #007D62 100%);
+  box-shadow: 0 6px 24px rgba(0, 168, 132, 0.42);
   transform: translateY(-1.5px);
 }
 
