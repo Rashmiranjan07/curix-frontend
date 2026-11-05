@@ -51,7 +51,12 @@ const getDoctorGender = (doc) => {
 };
 
 const getDoctor3dImage = (doc) => {
-  if (doc?.image || doc?.profileImage) return doc.image || doc.profileImage;
+  if (doc?.image && typeof doc.image === 'string' && (doc.image.startsWith('http') || doc.image.startsWith('data:') || doc.image.startsWith('/src/'))) {
+    return doc.image;
+  }
+  if (doc?.profileImage && typeof doc.profileImage === 'string' && (doc.profileImage.startsWith('http') || doc.profileImage.startsWith('data:') || doc.profileImage.startsWith('/src/'))) {
+    return doc.profileImage;
+  }
   return getDoctorGender(doc) === 'FEMALE' ? femaleDoctor3d : maleDoctor3d;
 };
 
