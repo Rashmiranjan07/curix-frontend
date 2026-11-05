@@ -42,42 +42,30 @@ export default function Navbar({ onOpenAuth }) {
         </a>
 
         {/* Center Navigation Links with Modern Pill Hover */}
-        <div className="hidden lg:flex items-center gap-1 p-1 rounded-full bg-slate-50/90 border border-slate-200/70 shadow-2xs">
+        <div className="hidden md:flex items-center gap-1.5 p-1.5 rounded-full bg-slate-50/80 border border-slate-200/60 shadow-2xs">
           <a
             href="#home"
-            className="px-4 py-1.5 rounded-full text-xs font-bold text-slate-700 hover:text-[#00A884] hover:bg-white hover:shadow-2xs transition-all duration-200"
+            className="px-4 py-1.5 rounded-full text-xs font-bold text-slate-700 hover:text-[#00A896] hover:bg-white hover:shadow-2xs transition-all duration-200"
           >
             Home
           </a>
           <a
-            href="#doctors"
-            className="px-4 py-1.5 rounded-full text-xs font-bold text-slate-700 hover:text-[#00A884] hover:bg-white hover:shadow-2xs transition-all duration-200"
+            href="#about"
+            className="px-4 py-1.5 rounded-full text-xs font-bold text-slate-700 hover:text-[#00A896] hover:bg-white hover:shadow-2xs transition-all duration-200"
           >
-            Doctors
+            About Us
           </a>
           <a
             href="#services"
-            className="px-4 py-1.5 rounded-full text-xs font-bold text-slate-700 hover:text-[#00A884] hover:bg-white hover:shadow-2xs transition-all duration-200"
+            className="px-4 py-1.5 rounded-full text-xs font-bold text-slate-700 hover:text-[#00A896] hover:bg-white hover:shadow-2xs transition-all duration-200"
           >
-            Services
+            Clinical Services
           </a>
           <a
-            href="#why-us"
-            className="px-4 py-1.5 rounded-full text-xs font-bold text-slate-700 hover:text-[#00A884] hover:bg-white hover:shadow-2xs transition-all duration-200"
+            href="#security"
+            className="px-4 py-1.5 rounded-full text-xs font-bold text-slate-700 hover:text-[#00A896] hover:bg-white hover:shadow-2xs transition-all duration-200"
           >
-            Why Choose Us
-          </a>
-          <a
-            href="#reviews"
-            className="px-4 py-1.5 rounded-full text-xs font-bold text-slate-700 hover:text-[#00A884] hover:bg-white hover:shadow-2xs transition-all duration-200"
-          >
-            Reviews
-          </a>
-          <a
-            href="#articles"
-            className="px-4 py-1.5 rounded-full text-xs font-bold text-slate-700 hover:text-[#00A884] hover:bg-white hover:shadow-2xs transition-all duration-200"
-          >
-            Articles
+            Compliance & Security
           </a>
         </div>
 
@@ -96,10 +84,10 @@ export default function Navbar({ onOpenAuth }) {
           {user ? (
             <div className="flex items-center gap-2.5">
               <div className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-full bg-white border border-slate-200/80 shadow-2xs">
-                <span className="w-7 h-7 rounded-full bg-[#E6F8F3] flex items-center justify-center text-xs">
+                <span className="w-7 h-7 rounded-full bg-[#E6F8F5] flex items-center justify-center text-xs">
                   {roleMeta?.avatar}
                 </span>
-                <span className="text-[#0C233C] font-extrabold text-xs max-w-[110px] truncate">
+                <span className="text-[#0A1C35] font-extrabold text-xs max-w-[110px] truncate">
                   {user.name}
                 </span>
                 <span className={`px-2 py-0.5 rounded-full text-[9px] border font-black uppercase tracking-wider ${roleMeta?.badge}`}>
@@ -108,8 +96,8 @@ export default function Navbar({ onOpenAuth }) {
               </div>
 
               <a
-                href="#doctors"
-                className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full btn-curix-primary text-xs font-bold shadow-md shadow-[#00A884]/20 cursor-pointer"
+                href="#specialties"
+                className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full btn-curix-primary text-xs font-bold shadow-md shadow-[#00A896]/20 cursor-pointer"
               >
                 <span>Book Slot</span>
               </a>
@@ -129,18 +117,10 @@ export default function Navbar({ onOpenAuth }) {
               <button
                 type="button"
                 onClick={onOpenAuth}
-                className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold text-slate-700 hover:text-[#00A884] hover:bg-slate-100 transition cursor-pointer"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full btn-curix-primary text-xs font-black tracking-wide cursor-pointer shadow-md shadow-[#00A896]/20"
               >
                 <LogIn size={13} />
-                <span>Sign In</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={onOpenAuth}
-                className="flex items-center gap-1.5 px-5 sm:px-6 py-2.5 rounded-full btn-curix-primary text-xs font-black tracking-wide cursor-pointer shadow-md shadow-[#00A884]/20"
-              >
-                <span>Book Appointment</span>
+                <span>Portal Access / Login</span>
               </button>
             </div>
           )}
@@ -164,44 +144,30 @@ export default function Navbar({ onOpenAuth }) {
           <a
             href="#home"
             onClick={() => setMobileMenuOpen(false)}
-            className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#00A884]"
+            className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#00A896]"
           >
             Home
           </a>
           <a
-            href="#doctors"
+            href="#about"
             onClick={() => setMobileMenuOpen(false)}
-            className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#00A884]"
+            className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#00A896]"
           >
-            Doctors
+            About Us
           </a>
           <a
             href="#services"
             onClick={() => setMobileMenuOpen(false)}
-            className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#00A884]"
+            className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#00A896]"
           >
-            Services
+            Clinical Services
           </a>
           <a
-            href="#why-us"
+            href="#security"
             onClick={() => setMobileMenuOpen(false)}
-            className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#00A884]"
+            className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#00A896]"
           >
-            Why Choose Us
-          </a>
-          <a
-            href="#reviews"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#00A884]"
-          >
-            Reviews
-          </a>
-          <a
-            href="#articles"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#00A884]"
-          >
-            Health Articles
+            Compliance & Security
           </a>
           <a
             href="#security"

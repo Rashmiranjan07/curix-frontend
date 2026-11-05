@@ -9,13 +9,13 @@
     --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-display: 'Outfit', 'Plus Jakarta Sans', sans-serif;
     
-    /* Curix Medical Design Tokens (Emerald-Teal & Deep Oceanic Navy) */
-    --color-navy: #0C233C;
-    --color-navy-dark: #071A2E;
-    --color-teal: #00A884;
-    --color-teal-light: #0E9F6E;
-    --color-teal-bg: #E6F8F3;
-    --color-bg-tint: #F8FAFC;
+    /* Curix Medical Design Tokens */
+    --color-navy: #0A1C35;
+    --color-navy-dark: #071524;
+    --color-teal: #00A896;
+    --color-teal-light: #0BC2A8;
+    --color-teal-bg: #E6F8F5;
+    --color-bg-tint: #F4F8FB;
   }
 
   html {
@@ -109,17 +109,17 @@
 
 /* Button & Badge Utility Classes */
 .btn-curix-primary {
-  background: linear-gradient(135deg, #00A884 0%, #009373 100%);
+  background: linear-gradient(135deg, #00A896 0%, #079181 100%);
   color: #FFFFFF;
   font-weight: 700;
   border-radius: 9999px;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 18px rgba(0, 168, 132, 0.28);
+  box-shadow: 0 4px 18px rgba(0, 168, 150, 0.28);
 }
 
 .btn-curix-primary:hover {
-  background: linear-gradient(135deg, #009373 0%, #007D62 100%);
-  box-shadow: 0 6px 24px rgba(0, 168, 132, 0.42);
+  background: linear-gradient(135deg, #079181 0%, #057a6c 100%);
+  box-shadow: 0 6px 24px rgba(0, 168, 150, 0.42);
   transform: translateY(-1.5px);
 }
 
@@ -162,28 +162,34 @@
   }
 }
 
-/* 3D Cardiac Anatomical Portal Animations */
+/* 3D Cardiac Anatomical Portal Animations - Dynamic, High-Energy & Smooth */
 @keyframes heartPulse3d {
   0%, 100% {
-    transform: scale(1.02);
+    transform: scale(1);
+    filter: drop-shadow(0 4px 12px rgba(225, 29, 72, 0.15));
   }
   14% {
-    transform: scale(1.09);
+    transform: scale(1.14);
+    filter: drop-shadow(0 8px 24px rgba(225, 29, 72, 0.45));
   }
-  28% {
+  26% {
     transform: scale(1.02);
+    filter: drop-shadow(0 4px 14px rgba(225, 29, 72, 0.2));
   }
-  42% {
-    transform: scale(1.15);
+  40% {
+    transform: scale(1.22);
+    filter: drop-shadow(0 12px 32px rgba(225, 29, 72, 0.55));
   }
-  70% {
-    transform: scale(1.02);
+  56% {
+    transform: scale(1);
+    filter: drop-shadow(0 4px 12px rgba(225, 29, 72, 0.15));
   }
 }
 
 .anim-heart-pulse-3d {
-  animation: heartPulse3d 2.2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  animation: heartPulse3d 1.35s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
   transform-origin: center center;
+  will-change: transform, filter;
 }
 
 @keyframes doctorFloat {
@@ -191,12 +197,12 @@
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-14px);
   }
 }
 
 .anim-doctor-float {
-  animation: doctorFloat 6s ease-in-out infinite;
+  animation: doctorFloat 3.4s ease-in-out infinite;
 }
 
 @keyframes orbitRotate {
@@ -209,27 +215,40 @@
 }
 
 .anim-orbit-spin {
-  animation: orbitRotate 24s linear infinite;
+  animation: orbitRotate 8s linear infinite;
+}
+
+@keyframes orbitRotateReverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+.anim-orbit-reverse {
+  animation: orbitRotateReverse 11s linear infinite;
 }
 
 @keyframes pulseGlowSlow {
   0%, 100% {
     opacity: 0.35;
-    transform: scale(0.98);
+    transform: scale(0.96);
   }
   50% {
-    opacity: 0.75;
-    transform: scale(1.04);
+    opacity: 0.85;
+    transform: scale(1.06);
   }
 }
 
 .anim-pulse-glow {
-  animation: pulseGlowSlow 4s ease-in-out infinite;
+  animation: pulseGlowSlow 2.6s ease-in-out infinite;
 }
 
 @keyframes scanWave {
   0% {
-    stroke-dashoffset: 80;
+    stroke-dashoffset: 120;
     opacity: 0.3;
   }
   50% {
@@ -242,21 +261,42 @@
 }
 
 .anim-scan-wave {
-  stroke-dasharray: 40;
-  animation: scanWave 2.2s linear infinite;
+  stroke-dasharray: 60;
+  animation: scanWave 1.6s linear infinite;
 }
 
 @keyframes shadowBreath {
   0%, 100% {
     transform: scale(1);
-    opacity: 0.25;
+    opacity: 0.3;
   }
   50% {
-    transform: scale(0.85);
-    opacity: 0.15;
+    transform: scale(0.82);
+    opacity: 0.14;
   }
 }
 
 .anim-shadow-breath {
-  animation: shadowBreath 6s ease-in-out infinite;
+  animation: shadowBreath 3.4s ease-in-out infinite;
+}
+
+/* Live Equalizer Activity Wave */
+@keyframes eqBounce {
+  0%, 100% { height: 5px; }
+  50% { height: 18px; }
+}
+
+.anim-eq-1 { animation: eqBounce 0.75s ease-in-out infinite; }
+.anim-eq-2 { animation: eqBounce 1.05s ease-in-out 0.12s infinite; }
+.anim-eq-3 { animation: eqBounce 0.65s ease-in-out 0.28s infinite; }
+.anim-eq-4 { animation: eqBounce 0.95s ease-in-out 0.18s infinite; }
+.anim-eq-5 { animation: eqBounce 0.85s ease-in-out 0.35s infinite; }
+
+@keyframes liveShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+.anim-live-shimmer {
+  animation: liveShimmer 2.4s ease-in-out infinite;
 }
