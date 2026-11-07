@@ -71,7 +71,6 @@ export default function DoctorDashboard() {
   const [rxForm, setRxForm] = useState({
     diagnosis: '',
     notes: '',
-    patientEmail: '',
     medicines: [
       { name: '', dosage: '500mg', frequency: '1-0-1', duration: '5 days', instructions: 'After meals' }
     ]
@@ -224,11 +223,9 @@ export default function DoctorDashboard() {
   const handleOpenRxModal = (appt) => {
     setSelectedAppointment(appt);
     setRxModalError('');
-    const resolvedEmail = appt.patientEmail || appt.patient?.user?.email || appt.patient?.email || '';
     setRxForm({
       diagnosis: '',
       notes: '',
-      patientEmail: resolvedEmail,
       medicines: [
         { name: '', dosage: '500mg', frequency: '1-0-1', duration: '5 days', instructions: 'After meals' }
       ]
@@ -245,12 +242,6 @@ export default function DoctorDashboard() {
 
     if (!rxForm.diagnosis || !rxForm.diagnosis.trim()) {
       setRxModalError('Please specify a clinical diagnosis.');
-      return;
-    }
-
-    const emailToSend = (rxForm.patientEmail || selectedAppointment.patientEmail || '').trim();
-    if (!emailToSend) {
-      setRxModalError('Please enter the patient email to deliver the digital prescription.');
       return;
     }
 
@@ -288,7 +279,6 @@ export default function DoctorDashboard() {
       const payload = {
         appointmentId: selectedAppointment.id,
         patientId: selectedAppointment.patient?.id || selectedAppointment.patientId,
-        patientEmail: emailToSend,
         diagnosis: rxForm.diagnosis.trim(),
         notes: (rxForm.notes || '').trim(),
         medicines: formattedItems,
@@ -297,7 +287,7 @@ export default function DoctorDashboard() {
       };
 
       await doctorApi.createPrescription(payload);
-      setSuccessNotice(`Official Prescription issued! Email notification ("Your Prescription is Ready") dispatched to ${emailToSend}.`);
+      setSuccessNotice(`Official Prescription issued! Notification email ("Your Prescription is Ready") dispatched to the patient's registered email.`);
       setIsRxModalOpen(false);
       setSelectedAppointment(null);
       await fetchSchedule();
@@ -1176,8 +1166,7 @@ export default function DoctorDashboard() {
             <span className="text-[10px] font-black text-[#00A896] tracking-widest uppercase block mb-1">CURIX CLINICAL DESK</span>
             <h3 className="text-xl font-black text-[#0A1C35] mb-1">Issue Electronic Prescription</h3>
             <p className="text-xs text-slate-500 mb-6">
-              Generating clinical Rx for Appointment #{selectedAppointment.id}
-              {(selectedAppointment.patientEmail || selectedAppointment.patient?.user?.email) ? ` · An automated "Your Prescription is Ready" email will be sent to ${selectedAppointment.patientEmail || selectedAppointment.patient?.user?.email}` : ''}.
+              Generating clinical Rx for Appointment #{selectedAppointment.id}. An automated "Your Prescription is Ready" email will be dispatched to the patient's registered email address upon completion.
             </p>
 
             {rxModalError && (
@@ -1207,21 +1196,6 @@ export default function DoctorDashboard() {
                   onChange={(e) => setRxForm({ ...rxForm, diagnosis: e.target.value })}
                   className="w-full p-3 border border-slate-200 rounded-2xl text-xs font-bold text-[#0A1C35]"
                 />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[#0A1C35] mb-1">Patient Email (Digital Dispatch Destination) *</label>
-                <input
-                  type="email"
-                  required
-                  placeholder="patient@gmail.com"
-                  value={rxForm.patientEmail}
-                  onChange={(e) => setRxForm({ ...rxForm, patientEmail: e.target.value })}
-                  className="w-full p-3 border border-slate-200 rounded-2xl text-xs font-bold text-[#0A1C35] bg-[#F8FAFC]"
-                />
-                <span className="text-[10px] text-slate-400 font-medium block mt-1">
-                  The digital prescription & medication regimen will be dispatched to this email immediately.
-                </span>
               </div>
 
               {/* Medicine Multi-Line Builder */}
