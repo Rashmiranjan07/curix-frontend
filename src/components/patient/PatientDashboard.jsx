@@ -453,7 +453,7 @@ export default function PatientDashboard() {
     try {
       const finalReason = cancelReason === 'Other' ? customCancelText : cancelReason;
       await patientApi.cancelAppointment(cancellingAppt.id, finalReason);
-      setSuccessNotice(`Consultation #${cancellingAppt.id} has been cancelled.`);
+      setSuccessNotice(`Consultation #${cancellingAppt.id} has been cancelled. A cancellation notice has been dispatched to your registered email.`);
       setCancellingAppt(null);
       await fetchMyAppointments();
     } catch (err) {

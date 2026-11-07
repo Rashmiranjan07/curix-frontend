@@ -23,11 +23,16 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      if (localStorage.getItem('token')) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.reload();
+    // Only clear session on 401 (Unauthorized / Expired Token)
+    // NEVER clear credentials or reload on 403 (Forbidden) so the UI can show the error message!
+    if (error.response && error.response.status === 401) {
+      const reqUrl = error.config?.url || '';
+      if (!reqUrl.includes('/auth/login') && !reqUrl.includes('/auth/register')) {
+        if (localStorage.getItem('token')) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.reload();
+        }
       }
     }
     return Promise.reject(error);

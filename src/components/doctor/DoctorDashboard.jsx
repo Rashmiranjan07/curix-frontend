@@ -67,11 +67,13 @@ export default function DoctorDashboard() {
   const [isRxModalOpen, setIsRxModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [rxSaving, setRxSaving] = useState(false);
+  const [rxModalError, setRxModalError] = useState('');
   const [rxForm, setRxForm] = useState({
     diagnosis: '',
     notes: '',
+    patientEmail: '',
     medicines: [
-      { name: '', dosage: '', frequency: '1-0-1', duration: '5 days', instructions: 'After meals' }
+      { name: '', dosage: '500mg', frequency: '1-0-1', duration: '5 days', instructions: 'After meals' }
     ]
   });
 
@@ -221,11 +223,14 @@ export default function DoctorDashboard() {
 
   const handleOpenRxModal = (appt) => {
     setSelectedAppointment(appt);
+    setRxModalError('');
+    const resolvedEmail = appt.patientEmail || appt.patient?.user?.email || appt.patient?.email || '';
     setRxForm({
       diagnosis: '',
       notes: '',
+      patientEmail: resolvedEmail,
       medicines: [
-        { name: '', dosage: '', frequency: '1-0-1', duration: '5 days', instructions: 'After meals' }
+        { name: '', dosage: '500mg', frequency: '1-0-1', duration: '5 days', instructions: 'After meals' }
       ]
     });
     setIsRxModalOpen(true);
@@ -235,42 +240,72 @@ export default function DoctorDashboard() {
     e.preventDefault();
     if (!selectedAppointment) return;
 
-    setRxSaving(true);
+    setRxModalError('');
     setErrorNotice('');
 
+    if (!rxForm.diagnosis || !rxForm.diagnosis.trim()) {
+      setRxModalError('Please specify a clinical diagnosis.');
+      return;
+    }
+
+    const emailToSend = (rxForm.patientEmail || selectedAppointment.patientEmail || '').trim();
+    if (!emailToSend) {
+      setRxModalError('Please enter the patient email to deliver the digital prescription.');
+      return;
+    }
+
+    const validMeds = rxForm.medicines.filter((m) => m.name && m.name.trim().length > 0);
+    if (validMeds.length === 0) {
+      setRxModalError('Please enter at least one medication name.');
+      return;
+    }
+
+    setRxSaving(true);
+
     try {
-      const formattedItems = rxForm.medicines.map((m) => ({
-        name: m.name.trim(),
-        medicineName: m.name.trim(),
-        medicationName: m.name.trim(),
-        dosage: m.dosage.trim(),
-        dose: m.dosage.trim(),
-        frequency: m.frequency.trim(),
-        timing: m.frequency.trim(),
-        duration: m.duration.trim(),
-        days: m.duration.trim(),
-        instructions: m.instructions.trim(),
-        instruction: m.instructions.trim()
-      }));
+      const formattedItems = validMeds.map((m) => {
+        const cleanName = m.name.trim();
+        const cleanDosage = (m.dosage && m.dosage.trim()) || 'As directed';
+        const cleanFreq = (m.frequency && m.frequency.trim()) || '1-0-1';
+        const cleanDur = (m.duration && m.duration.trim()) || '5 days';
+        const cleanInst = (m.instructions && m.instructions.trim()) || 'After meals';
+
+        return {
+          name: cleanName,
+          medicineName: cleanName,
+          medicationName: cleanName,
+          dosage: cleanDosage,
+          dose: cleanDosage,
+          frequency: cleanFreq,
+          timing: cleanFreq,
+          duration: cleanDur,
+          days: cleanDur,
+          instructions: cleanInst,
+          instruction: cleanInst
+        };
+      });
 
       const payload = {
         appointmentId: selectedAppointment.id,
         patientId: selectedAppointment.patient?.id || selectedAppointment.patientId,
+        patientEmail: emailToSend,
         diagnosis: rxForm.diagnosis.trim(),
-        notes: rxForm.notes.trim(),
+        notes: (rxForm.notes || '').trim(),
         medicines: formattedItems,
         items: formattedItems,
         prescriptionItems: formattedItems
       };
 
       await doctorApi.createPrescription(payload);
-      setSuccessNotice(`Official Prescription issued for Patient #${payload.patientId}.`);
+      setSuccessNotice(`Official Prescription issued! Email notification ("Your Prescription is Ready") dispatched to ${emailToSend}.`);
       setIsRxModalOpen(false);
       setSelectedAppointment(null);
       await fetchSchedule();
       await fetchPrescriptionHistory();
     } catch (err) {
-      setErrorNotice(err.response?.data?.message || 'Failed to generate digital prescription.');
+      const errorMsg = err.response?.data?.message || err.message || 'Failed to generate digital prescription.';
+      setRxModalError(errorMsg);
+      setErrorNotice(errorMsg);
     } finally {
       setRxSaving(false);
     }
@@ -825,6 +860,7 @@ export default function DoctorDashboard() {
 
                               <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-1 font-medium">
                                 <span>ID: #{appt.patientId || pat.id || 'N/A'}</span>
+                                {(appt.patientEmail || pat.user?.email || pat.email) && <span>· Email: <strong className="font-mono text-slate-700">{appt.patientEmail || pat.user?.email || pat.email}</strong></span>}
                                 {pat.bloodGroup && <span>· Blood: <strong className="text-[#0A1C35] font-mono">{pat.bloodGroup}</strong></span>}
                                 {pat.age && <span>· Age: {pat.age} yrs</span>}
                                 {pat.gender && <span>· {pat.gender}</span>}
@@ -1140,8 +1176,25 @@ export default function DoctorDashboard() {
             <span className="text-[10px] font-black text-[#00A896] tracking-widest uppercase block mb-1">CURIX CLINICAL DESK</span>
             <h3 className="text-xl font-black text-[#0A1C35] mb-1">Issue Electronic Prescription</h3>
             <p className="text-xs text-slate-500 mb-6">
-              Generating clinical Rx for Appointment #{selectedAppointment.id}.
+              Generating clinical Rx for Appointment #{selectedAppointment.id}
+              {(selectedAppointment.patientEmail || selectedAppointment.patient?.user?.email) ? ` · An automated "Your Prescription is Ready" email will be sent to ${selectedAppointment.patientEmail || selectedAppointment.patient?.user?.email}` : ''}.
             </p>
+
+            {rxModalError && (
+              <div className="mb-4 flex items-center justify-between p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold shadow-xs">
+                <div className="flex items-center gap-2">
+                  <AlertCircle size={15} className="text-rose-600 shrink-0" />
+                  <span>{rxModalError}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setRxModalError('')}
+                  className="text-rose-700 hover:text-rose-900 cursor-pointer"
+                >
+                  <X size={13} />
+                </button>
+              </div>
+            )}
 
             <form onSubmit={handleSavePrescription} className="space-y-4">
               <div>
@@ -1154,6 +1207,21 @@ export default function DoctorDashboard() {
                   onChange={(e) => setRxForm({ ...rxForm, diagnosis: e.target.value })}
                   className="w-full p-3 border border-slate-200 rounded-2xl text-xs font-bold text-[#0A1C35]"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#0A1C35] mb-1">Patient Email (Digital Dispatch Destination) *</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="patient@gmail.com"
+                  value={rxForm.patientEmail}
+                  onChange={(e) => setRxForm({ ...rxForm, patientEmail: e.target.value })}
+                  className="w-full p-3 border border-slate-200 rounded-2xl text-xs font-bold text-[#0A1C35] bg-[#F8FAFC]"
+                />
+                <span className="text-[10px] text-slate-400 font-medium block mt-1">
+                  The digital prescription & medication regimen will be dispatched to this email immediately.
+                </span>
               </div>
 
               {/* Medicine Multi-Line Builder */}
