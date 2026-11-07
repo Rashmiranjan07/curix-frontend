@@ -276,9 +276,15 @@ export default function DoctorDashboard() {
         };
       });
 
+      const resolvedEmail = selectedAppointment.patientEmail 
+        || selectedAppointment.patient?.user?.email 
+        || selectedAppointment.patient?.email 
+        || (selectedAppointment.patientUser && selectedAppointment.patientUser.email);
+
       const payload = {
         appointmentId: selectedAppointment.id,
         patientId: selectedAppointment.patient?.id || selectedAppointment.patientId,
+        patientEmail: resolvedEmail || undefined,
         diagnosis: rxForm.diagnosis.trim(),
         notes: (rxForm.notes || '').trim(),
         medicines: formattedItems,
