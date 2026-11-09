@@ -433,7 +433,7 @@ export default function PatientDashboard() {
       };
 
       await patientApi.bookAppointment(payload);
-      setSuccessNotice(`Consultation booked with ${getDoctorName(selectedDoctor)} on ${bookingDate} at ${selectedSlot}. A confirmation email has been sent to your registered email address.`);
+      setSuccessNotice(`Consultation booked with ${getDoctorName(selectedDoctor)} on ${bookingDate} at ${selectedSlot}.`);
       setSelectedDoctor(null);
       await fetchMyAppointments();
       setActiveTab('appointments');
@@ -453,7 +453,7 @@ export default function PatientDashboard() {
     try {
       const finalReason = cancelReason === 'Other' ? customCancelText : cancelReason;
       await patientApi.cancelAppointment(cancellingAppt.id, finalReason);
-      setSuccessNotice(`Consultation #${cancellingAppt.id} has been cancelled. A cancellation notice has been dispatched to your registered email.`);
+      setSuccessNotice(`Consultation #${cancellingAppt.id} has been cancelled.`);
       setCancellingAppt(null);
       await fetchMyAppointments();
     } catch (err) {

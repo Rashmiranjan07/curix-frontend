@@ -276,15 +276,9 @@ export default function DoctorDashboard() {
         };
       });
 
-      const resolvedEmail = selectedAppointment.patientEmail 
-        || selectedAppointment.patient?.user?.email 
-        || selectedAppointment.patient?.email 
-        || (selectedAppointment.patientUser && selectedAppointment.patientUser.email);
-
       const payload = {
         appointmentId: selectedAppointment.id,
         patientId: selectedAppointment.patient?.id || selectedAppointment.patientId,
-        patientEmail: resolvedEmail || undefined,
         diagnosis: rxForm.diagnosis.trim(),
         notes: (rxForm.notes || '').trim(),
         medicines: formattedItems,
@@ -293,7 +287,7 @@ export default function DoctorDashboard() {
       };
 
       await doctorApi.createPrescription(payload);
-      setSuccessNotice(`Official Prescription issued! Notification email ("Your Prescription is Ready") dispatched to the patient's registered email.`);
+      setSuccessNotice(`Official Prescription issued and saved to the patient's Digital Rx Vault.`);
       setIsRxModalOpen(false);
       setSelectedAppointment(null);
       await fetchSchedule();
@@ -1172,7 +1166,7 @@ export default function DoctorDashboard() {
             <span className="text-[10px] font-black text-[#00A896] tracking-widest uppercase block mb-1">CURIX CLINICAL DESK</span>
             <h3 className="text-xl font-black text-[#0A1C35] mb-1">Issue Electronic Prescription</h3>
             <p className="text-xs text-slate-500 mb-6">
-              Generating clinical Rx for Appointment #{selectedAppointment.id}. An automated "Your Prescription is Ready" email will be dispatched to the patient's registered email address upon completion.
+              Generating clinical Rx for Appointment #{selectedAppointment.id}. It will be stored in the patient's Digital Rx Vault upon completion.
             </p>
 
             {rxModalError && (
